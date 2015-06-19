@@ -10,13 +10,17 @@ GLUON_SITE_PACKAGES := \
 	gluon-config-mode-contact-info \
 	gluon-ebtables-filter-multicast \
 	gluon-ebtables-filter-ra-dhcp \
+	gluon-config-mode-core \
 	gluon-luci-admin \
 	gluon-luci-autoupdater \
 	gluon-luci-portconfig \
 	gluon-luci-private-wifi \
+	gluon-luci-wifi-config \
 	gluon-next-node \
 	gluon-mesh-vpn-fastd \
 	gluon-radvd \
+	gluon-legacy \
+	gluon-setup-mode \
 	gluon-status-page \
 	iwinfo \
 	iptables \
@@ -24,9 +28,11 @@ GLUON_SITE_PACKAGES := \
 	ffnw-configurator \
 	ffnw-nodewatcher
 
-DEFAULT_GLUON_RELEASE := 0.5.6+0$(shell date '+%Y%m%d')
+DEFAULT_GLUON_RELEASE := 0.6+exp$(shell date '+%Y%m%d')
 
 # Allow overriding the release number from the command line
 GLUON_RELEASE ?= $(DEFAULT_GLUON_RELEASE)
 
 GLUON_PRIORITY ?= 0
+
+GLUON_LANGS ?= en de
