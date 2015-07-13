@@ -29,7 +29,9 @@ GLUON_SITE_PACKAGES := \
 	ffnw-banner \
 	libwlocate \
 	lwtrace \
-	ffnw-opkgconfig
+	ffnw-opkgconfig \
+	ffnw-node-info \
+	ffnw-config-mode-geo-location
 
 DEFAULT_GLUON_RELEASE := 0.6+exp$(shell date '+%Y%m%d')
 
