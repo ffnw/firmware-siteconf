@@ -30,7 +30,8 @@ GLUON_SITE_PACKAGES := \
 	lwtrace \
 	ffnw-opkgconfig \
 	ffnw-node-info \
-	ffnw-config-mode-geo-location
+	ffnw-config-mode-geo-location \
+	ffnw-config-mode-contact-info
 
 DEFAULT_GLUON_RELEASE := 0.6+exp$(shell date '+%Y%m%d')
 
