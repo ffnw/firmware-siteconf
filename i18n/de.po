@@ -21,7 +21,7 @@ msgstr ""
 "Dies ist der öffentliche Schlüssel deines Freifunkknotens. Erst nachdem "
 "er auf den Servern des Nordwest Freifunk-Projektes eingetragen wurde, "
 "kann sich dein Knoten mit dem Nordwest Mesh-VPN verbinden. Der schlüssel wird "
-"automatisch an die Freifunk Nordwest Server geschickt"
+"automatisch an die Freifunk Nordwest Server geschickt. "
 "Bei Fragen oder Problemen kannst du uns gerne eine Mail an "
 "<a href=\"mailto:info@nordwest.freifunk.net\">info@nordwest.freifunk.net</a>."
 
