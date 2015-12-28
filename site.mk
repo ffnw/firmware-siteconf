@@ -23,15 +23,14 @@ GLUON_SITE_PACKAGES := \
 	iwinfo \
 	iptables \
 	haveged \
-	ffnw-configurator \
-	ffnw-nodewatcher \
 	ffnw-banner \
 	libwlocate \
 	lwtrace \
 	ffnw-opkgconfig \
 	ffnw-node-info \
 	ffnw-config-mode-geo-location \
-	ffnw-config-mode-contact-info
+	ffnw-config-mode-contact-info \
+	lua-dkjson
 
 DEFAULT_GLUON_RELEASE := 0.6+exp$(shell date '+%Y%m%d')
 
