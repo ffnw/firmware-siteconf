@@ -30,7 +30,7 @@ GLUON_SITE_PACKAGES := \
 	ffnw-node-info \
 	ffnw-config-mode-geo-location \
 	ffnw-config-mode-contact-info \
-	lua-dkjson
+	ffnw-autoupdater-mod
 
 DEFAULT_GLUON_RELEASE := 0.6+exp$(shell date '+%Y%m%d')
 
