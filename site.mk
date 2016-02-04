@@ -28,7 +28,6 @@ GLUON_SITE_PACKAGES := \
 	ffnw-banner \
 	libwlocate \
 	lwtrace \
-	ffnw-opkgconfig \
 	ffnw-node-info \
 	ffnw-config-mode-geo-location \
 	ffnw-config-mode-contact-info
