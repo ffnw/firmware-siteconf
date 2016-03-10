@@ -1,2 +1,11 @@
 before_script:
   - bash build/before.sh
+
+stages:
+  - build
+  - deploy
+
+job1:
+  stage: build
+  script:
+      - bash build/build.sh
