@@ -11,4 +11,5 @@ mv site.mk site/
 mv .git site/
 
 # Clone Gluon repo
-git clone https://github.com/freifunk-gluon/gluon.git . -b v2016.1.2
+git clone https://github.com/freifunk-gluon/gluon.git ./gluon -b v2016.1.2
+mv gluon/* ./
