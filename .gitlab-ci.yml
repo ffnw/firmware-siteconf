@@ -1,2 +1,2 @@
 before_script:
-  - bash buld/before.sh
+  - bash build/before.sh
