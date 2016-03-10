@@ -2,6 +2,8 @@
 
 ip a
 
+cat /etc/hostname
+
 cpus=`nproc`
 
 echo $cpus
