@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ifconfig
+ip a
 
 cpus=`nproc`
 
