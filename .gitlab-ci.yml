@@ -7,5 +7,6 @@ stages:
 
 job1:
   stage: build
+  runner: "firmware"
   script:
       - bash build/build.sh
