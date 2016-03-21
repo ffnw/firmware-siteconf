@@ -9,4 +9,10 @@ cpus=`nproc`
 echo $cpus
 
 make update
-make -dkj $cpus GLUON_BRANCH=stable
+
+cd packages/ffnw
+git checkout -B "master" "origin/master"
+cd ..
+cd ..
+
+#make -dkj $cpus GLUON_BRANCH=stable
