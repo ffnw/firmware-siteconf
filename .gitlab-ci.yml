@@ -1,12 +1,14 @@
 before_script:
   - bash build/before.sh
 
+
 stages:
   - build
   - deploy
 
 job1:
   stage: build
-  runner: "firmware"
+  tags:
+    - firmware
   script:
-      - bash build/build.sh
+    - bash build/build.sh
