@@ -3,6 +3,7 @@ before_script:
 
 stages:
   - build
+  - sign
   - deploy
 
 ar71xx-generic:
@@ -18,6 +19,13 @@ ar71xx-nand:
     - firmware
   script:
     - bash build/build-ar71xx-generic.sh
+    
+sign:
+  stage: deploy
+  tags:
+    - firmware
+  script:
+    - bash build/sign.sh
     
 deploy:
   stage: deploy
