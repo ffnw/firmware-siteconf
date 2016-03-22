@@ -1,3 +1,6 @@
+variables:
+  GLUON_BRANCH: "nightly"
+
 before_script:
   - bash build/before.sh
 
