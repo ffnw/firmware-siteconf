@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 cpus=`nproc`
 
 make update

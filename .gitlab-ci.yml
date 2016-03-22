@@ -21,7 +21,7 @@ ar71xx-nand:
   tags:
     - firmware
   script:
-    - bash build/build-ar71xx-generic.sh
+    - bash build/build-ar71xx-nand.sh
     
 sign:
   stage: deploy

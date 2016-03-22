@@ -1,7 +1,5 @@
 #!/bin/sh
 
-echo $GLUON_BRANCH
-
 # Make Folder site
 mkdir site
 
