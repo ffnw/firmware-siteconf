@@ -3,17 +3,25 @@ before_script:
 
 stages:
   - build
+  - deploy
 
-nightly-ar71xx-generic:
+ar71xx-generic:
   stage: build
   tags:
     - firmware
   script:
     - bash build/build-ar71xx-generic.sh
     
-nightly-ar71xx-nand:
+ar71xx-nand:
   stage: build
   tags:
     - firmware
   script:
     - bash build/build-ar71xx-generic.sh
+    
+deploy:
+  stage: deploy
+  tags:
+    - firmware
+  script:
+    - bash build/deploy.sh
