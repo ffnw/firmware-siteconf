@@ -6,7 +6,7 @@ stages:
   - build
   - deploy
 
-job1:
+nightly:
   stage: build
   tags:
     - firmware
