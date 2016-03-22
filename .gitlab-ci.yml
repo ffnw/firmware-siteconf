@@ -1,14 +1,19 @@
 before_script:
   - bash build/before.sh
 
-
 stages:
   - build
-  - deploy
 
-nightly:
+nightly-ar71xx-generic:
   stage: build
   tags:
     - firmware
   script:
-    - bash build/build.sh
+    - bash build/build-ar71xx-generic.sh
+    
+nightly-ar71xx-generic:
+  stage: build
+  tags:
+    - firmware
+  script:
+    - bash build/build-ar71xx-generic.sh
