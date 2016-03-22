@@ -11,7 +11,7 @@ nightly-ar71xx-generic:
   script:
     - bash build/build-ar71xx-generic.sh
     
-nightly-ar71xx-generic:
+nightly-ar71xx-nand:
   stage: build
   tags:
     - firmware
