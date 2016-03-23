@@ -4,4 +4,4 @@ cpus=`nproc`
 
 make update
 
-make -dkj $cpus GLUON_TARGET=ar71xx-generic
+make -j $cpus GLUON_TARGET=ar71xx-generic
