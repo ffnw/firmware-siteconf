@@ -15,6 +15,9 @@ GLUON_VERSION=`cat GLUON_VERSION`
 git clone https://github.com/freifunk-gluon/gluon.git ./gluon -b $GLUON_VERSION
 mv gluon/* ./
 
+
+make update
+
 #nightly
 rm -rf ./packages/ffnw
 git clone https://git.nordwest.freifunk.net/ffnw-firmware/packages.git ./packages/ffnw
