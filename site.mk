@@ -28,7 +28,8 @@ GLUON_SITE_PACKAGES := \
 	lwtrace \
 	ffnw-node-info \
 	ffnw-config-mode-geo-location \
-	ffnw-config-mode-contact-info
+	ffnw-config-mode-contact-info \
+	ffnw-hoodselector
 
 ifeq ($(GLUON_TARGET),x86-generic)
 	# support the usb stack on x86 devices
