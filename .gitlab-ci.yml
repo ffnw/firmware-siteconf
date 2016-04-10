@@ -16,12 +16,12 @@ ar71xx-generic:
   script:
     - bash build/build-ar71xx-generic.sh
     
-ar71xx-nand:
-  stage: build
-  tags:
-    - firmware
-  script:
-    - bash build/build-ar71xx-nand.sh
+#ar71xx-nand:
+#  stage: build
+#  tags:
+#    - firmware
+#  script:
+#    - bash build/build-ar71xx-nand.sh
     
 sign:
   stage: deploy
