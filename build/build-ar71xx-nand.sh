@@ -2,4 +2,4 @@
 
 cpus=`nproc`
 
-make -j $cpus GLUON_TARGET=ar71xx-nand
+make GLUON_TARGET=ar71xx-nand
