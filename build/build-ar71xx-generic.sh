@@ -22,5 +22,7 @@ make update
 mkdir -p output/images/factory
 mkdir -p output/images/sysupgrade
 touch output/images/factory/test.txt
-echo "Test1" >> output/images/factory/test.txt
-echo "Test2" >> output/images/sysupgrade/test.txt
+echo "blaa" >> output/images/factory/manifest
+echo "---" >> output/images/factory/manifest
+echo "blaa" >> output/images/sysupgrade/manifest
+echo "---" >> output/images/sysupgrade/manifest
