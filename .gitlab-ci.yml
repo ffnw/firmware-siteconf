@@ -2,26 +2,21 @@ variables:
   GLUON_BRANCH: "nightly"
 
 stages:
-  - prepare
   - build
   - sign
   - deploy
 
-prepare-job:
-  stage: prepare
-  tags:
-    - firmware
-  script:
-  - bash build/before.sh
-
-ar71xx-generic:
+build:ar71xx-generic:
   stage: build
   tags:
     - firmware
   script:
     - bash build/build-ar71xx-generic.sh
+  artifacts:
+    paths:
+      - build/output/images/
 
-#ar71xx-nand:
+#build:ar71xx-nand:
 #  stage: build
 #  tags:
 #    - firmware
@@ -34,6 +29,12 @@ sign:
     - firmware
   script:
     - bash build/sign.sh
+  dependencies:
+    - build:ar71xx-generic
+#    - build:ar71xx-nand
+  artifacts:
+    paths:
+      - build/output/images/
 
 deploy:
   stage: deploy
@@ -41,3 +42,5 @@ deploy:
     - firmware
   script:
     - bash build/deploy.sh
+  dependencies:
+    - sign
