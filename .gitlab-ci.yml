@@ -14,7 +14,8 @@ build:ar71xx-generic:
     - bash build/build-ar71xx-generic.sh
   artifacts:
     paths:
-      - output/images/
+      - output/images/factory/*anifes*
+      - output/images/sysupgrade/*anifes*
       - contrib/
 
 #build:ar71xx-nand:
