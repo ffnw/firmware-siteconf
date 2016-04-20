@@ -17,3 +17,4 @@ mv gluon/* ./
 
 make update
 make GLUON_TARGET=ar71xx-generic
+make manifest GLUON_BRANCH=nightly
