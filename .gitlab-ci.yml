@@ -14,7 +14,7 @@ build:ar71xx-generic:
     - bash build/build-ar71xx-generic.sh
   artifacts:
     paths:
-      - build/output/images/
+      - output/images/
 
 #build:ar71xx-nand:
 #  stage: build
@@ -34,7 +34,7 @@ sign:
 #    - build:ar71xx-nand
   artifacts:
     paths:
-      - build/output/images/
+      - output/images/
 
 deploy:
   stage: deploy
