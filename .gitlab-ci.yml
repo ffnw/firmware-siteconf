@@ -15,6 +15,7 @@ build:ar71xx-generic:
   artifacts:
     paths:
       - output/images/
+      - contrib/
 
 #build:ar71xx-nand:
 #  stage: build
