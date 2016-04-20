@@ -17,3 +17,10 @@ mv gluon/* ./
 
 make update
 #make GLUON_TARGET=ar71xx-generic
+
+# only for testing purposes
+mkdir -p output/images/factory
+mkdir -p output/images/sysupgrade
+touch output/images/factory/test.txt
+echo "Test1" >> output/images/factory/test.txt
+echo "Test2" >> output/images/sysupgrade/test.txt
