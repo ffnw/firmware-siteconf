@@ -16,9 +16,8 @@ build:ar71xx-generic:
     - bash build/build-ar71xx-generic.sh
   artifacts:
     paths:
-      - output/images/factory/*manifest
       - output/images/factory/*wr841*
-      - output/images/sysupgrade/*manifest
+      - output/images/sysupgrade/nightly.manifest
       - output/images/sysupgrade/*wr841*
       - contrib/
 
