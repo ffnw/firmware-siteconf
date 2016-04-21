@@ -9,6 +9,7 @@ stages:
 build:ar71xx-generic:
   stage: build
   only:
+    - master
     - citest
   tags:
     - firmware
@@ -31,6 +32,7 @@ build:ar71xx-generic:
 sign:
   stage: sign
   only:
+    - master
     - citest
   tags:
     - firmware
@@ -46,6 +48,7 @@ sign:
 deploy:
   stage: deploy
   only:
+    - master
     - citest
   tags:
     - firmware
