@@ -15,6 +15,6 @@ GLUON_VERSION=`cat GLUON_VERSION`
 git clone https://github.com/freifunk-gluon/gluon.git ./gluon -b $GLUON_VERSION
 mv gluon/* ./
 
-make update
-make GLUON_TARGET=ar71xx-generic
-make manifest GLUON_BRANCH=nightly
+make update || exit 1
+make GLUON_TARGET=ar71xx-generic  || exit 1
+make manifest GLUON_BRANCH=nightly  || exit 1
