@@ -1,0 +1,55 @@
+variables:
+  GLUON_BRANCH: "nightly"
+
+stages:
+  - build
+  - sign
+  - deploy
+
+build:ar71xx-generic:
+  stage: build
+  only:
+    - citest
+  tags:
+    - firmware
+  script:
+    - bash build/build-ar71xx-generic.sh
+  artifacts:
+    paths:
+      - output/images/factory/*wr841*
+      - output/images/sysupgrade/nightly.manifest
+      - output/images/sysupgrade/*wr841*
+      - contrib/
+
+#build:ar71xx-nand:
+#  stage: build
+#  tags:
+#    - firmware
+#  script:
+#    - bash build/build-ar71xx-nand.sh
+
+sign:
+  stage: sign
+  only:
+    - citest
+  tags:
+    - firmware
+  script:
+    - bash build/sign.sh
+  dependencies:
+    - build:ar71xx-generic
+#    - build:ar71xx-nand
+  artifacts:
+    paths:
+      - output/images/
+
+deploy:
+  stage: deploy
+  only:
+    - citest
+  tags:
+    - firmware
+  script:
+    - bash build/deploy.sh
+  dependencies:
+    - sign
