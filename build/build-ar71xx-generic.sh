@@ -1,5 +1,8 @@
 #!/bin/sh
 
+GLUON_BRANCH="$1"
+GLUON_VERSION="$2"
+
 # Make Folder site
 mkdir site
 
@@ -11,10 +14,9 @@ mv site.mk site/
 mv .git site/
 
 # Clone Gluon repo
-GLUON_VERSION=`cat GLUON_VERSION`
 git clone https://github.com/freifunk-gluon/gluon.git ./gluon -b $GLUON_VERSION
 mv gluon/* ./
 
 make update || exit 1
 make GLUON_TARGET=ar71xx-generic  || exit 1
-make manifest GLUON_BRANCH=nightly  || exit 1
+make manifest GLUON_BRANCH=$GLUON_BRANCH  || exit 1
