@@ -20,6 +20,6 @@ mv .git site/
 git clone https://github.com/freifunk-gluon/gluon.git ./gluon -b $GLUON_VERSION
 mv gluon/* ./
 
-make update
-make GLUON_TARGET=ar71xx-generic V=s 2>&1 | grep -i "error"
+make update || exit 1
+make GLUON_TARGET=ar71xx-generic || exit 1
 make manifest GLUON_BRANCH=$GLUON_BRANCH
