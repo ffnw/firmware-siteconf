@@ -2,4 +2,4 @@ GLUON_SITE_FEEDS='ffnw'
 
 PACKAGES_FFNW_REPO=https://git.nordwest.freifunk.net/ffnw-firmware/packages.git
 PACKAGES_FFNW_BRANCH=master
-PACKAGES_FFNW_COMMIT=63ffab41f1840ea7aebed7980d59725f7a12c43d
+PACKAGES_FFNW_COMMIT=4b6d0553774db7b90862fd22bd5e2b5e39454d96
