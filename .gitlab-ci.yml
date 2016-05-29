@@ -16,7 +16,7 @@ build:gluon:
   tags:
     - firmware
   script:
-    - bash build/target.sh $GLUON_BRANCH $GLUON_VERSION
+    - bash build/build.sh $GLUON_BRANCH $GLUON_VERSION
   artifacts:
     paths:
       - output/images/factory/*wr841*
