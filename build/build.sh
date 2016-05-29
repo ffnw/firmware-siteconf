@@ -77,7 +77,7 @@ git clone https://github.com/freifunk-gluon/gluon.git ./gluon -b $GLUON_VERSION
 mv gluon/* ./
 
 make update || exit 1
-#CPUS=$(grep -c processor /proc/cpuinfo)
+CPUS=$(grep -c processor /proc/cpuinfo)
 while read line; do
   if [[ $line == *GluonTarget* ]]; then
     targ=$(echo $line | sed -e 's/^.*GluonTarget//' -e 's/^,//' -e 's/)).*//' -e 's/[,]/-/')
