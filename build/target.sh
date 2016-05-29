@@ -35,7 +35,7 @@ else
   echo "build-essential is not installed"
   exit 1
 fi
-if dpkg -s gawks > /dev/null; then
+if dpkg -s gawk > /dev/null; then
   echo "Detected gawk..."
 else
   echo "gawk is not installed"
