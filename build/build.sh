@@ -38,7 +38,7 @@ if ! dpkg -s gawk > /dev/null; then
 fi
 echo "Detected gawk..."
 echo "Checking for unzip..."
-if dpkg -s unzip > /dev/null; then
+if ! dpkg -s unzip > /dev/null; then
   echo "unzip is not installed"
   exit 1
 fi
