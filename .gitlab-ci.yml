@@ -16,12 +16,12 @@ build:gluon:
   tags:
     - firmware
   script:
-    - bash build/build.sh $GLUON_BRANCH $GLUON_VERSION
+    - bash .build/build.sh $GLUON_BRANCH $GLUON_VERSION
   artifacts:
     paths:
-      - output/images/factory/*wr841*
-      - output/images/sysupgrade/*manifest
-      - output/images/sysupgrade/*wr841*
+      - output/images/factory/gluon-ffnw-*
+      - output/images/sysupgrade/$GLUON_BRANCH.manifest
+      - output/images/sysupgrade/gluon-ffnw-*
       - contrib/
 
 sign:
@@ -32,7 +32,7 @@ sign:
   tags:
     - firmware
   script:
-    - bash build/sign.sh $GLUON_BRANCH $ECDSA_PRIVAT_KEY
+    - bash .build/sign.sh $GLUON_BRANCH $ECDSA_PRIVAT_KEY
   dependencies:
     - build:gluon
   artifacts:
@@ -47,6 +47,6 @@ deploy:
   tags:
     - firmware
   script:
-    - bash build/deploy.sh $GLUON_BRANCH $CI_BUILD_REF_NAME
+    - bash .build/deploy.sh $GLUON_BRANCH $CI_BUILD_REF_NAME
   dependencies:
     - sign
