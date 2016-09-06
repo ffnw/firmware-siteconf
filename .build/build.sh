@@ -63,26 +63,35 @@ if [ -f /etc/debian_version ]; then
   fi
   echo "Detected libssl-dev..."
 fi
+
 # Make Folder site
 mkdir site
 
 # Move Files into site folder
-mv i18n/ site/
-mv modules site/
-mv site.conf site/
-mv site.mk site/
-mv .git site/
+mv * .[^.]* site/
 
 # Clone Gluon repo
-git clone https://github.com/freifunk-gluon/gluon.git ./gluon -b $GLUON_VERSION
-mv gluon/* ./
+git clone https://github.com/freifunk-gluon/gluon.git . -b $GLUON_VERSION
 
+# fetch packages repos and apply patches
 make update || exit 1
+
+# detect core count
 CPUS=$(grep -c processor /proc/cpuinfo)
+
 while read line; do
   if [[ $line == *GluonTarget* ]]; then
+
+    # extract arcitecture parameter value
     targ=$(echo $line | sed -e 's/^.*GluonTarget//' -e 's/^,//' -e 's/)).*//' -e 's/[,]/-/')
-    make -j $((CPUS*2)) GLUON_TARGET=$targ BROKEN=1 GLUON_RELEASE=$(git -C gluon/ log | grep -m 1 commit | tail -c41 | head -c7) GLUON_BRANCH=$GLUON_BRANCH || exit 1
+
+    # detect last gluon commit ID for release flag
+    rev=$(git log | grep -m 1 commit | tail -c41 | head -c7)
+
+    #Build arcitecture images
+    make -j $((CPUS*2)) GLUON_TARGET=$targ BROKEN=1 GLUON_RELEASE=$rev GLUON_BRANCH=$GLUON_BRANCH || exit 1
   fi;
 done < "targets/targets.mk"
+
+# create manifest file for autoupdater
 make manifest GLUON_BRANCH=$GLUON_BRANCH
