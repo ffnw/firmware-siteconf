@@ -71,7 +71,9 @@ mkdir site
 ls -A | grep -v -E '(^|\s)site($|\s)' | xargs -I{} mv {} site/
 
 # Clone Gluon repo
-git clone https://github.com/freifunk-gluon/gluon.git ./ -b $GLUON_VERSION
+git init .
+git remote add origin https://github.com/freifunk-gluon/gluon.git
+git pull origin $GLUON_VERSION
 
 # fetch packages repos and apply patches
 make update || exit 1
