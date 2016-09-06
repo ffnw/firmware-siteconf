@@ -67,8 +67,8 @@ fi
 # Make Folder site
 mkdir site
 
-# Move Files into site folder
-mv * .[^.]* site/
+# Move all into site folder
+ls -A | grep -v -E '(^|\s)site($|\s)' | xargs -I{} mv {} site/
 
 # Clone Gluon repo
 git clone https://github.com/freifunk-gluon/gluon.git . -b $GLUON_VERSION
