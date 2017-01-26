@@ -87,11 +87,8 @@ while read line; do
     # extract arcitecture parameter value
     targ=$(echo $line | sed -e 's/^.*GluonTarget//' -e 's/^,//' -e 's/)).*//' -e 's/[,]/-/')
 
-    # detect last gluon commit ID for release flag
-    rev=$(git log | grep -m 1 commit | tail -c41 | head -c7)
-
     #Build arcitecture images
-    make -j $((CPUS*2)) GLUON_TARGET=$targ BROKEN=1 GLUON_RELEASE=$rev GLUON_BRANCH=$GLUON_BRANCH || exit 1
+    make -j $((CPUS*2)) GLUON_TARGET=$targ BROKEN=1 GLUON_BRANCH=$GLUON_BRANCH || exit 1
   fi;
 done < "targets/targets.mk"
 
