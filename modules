@@ -1,5 +1,9 @@
-GLUON_SITE_FEEDS='ffnw'
+GLUON_SITE_FEEDS='ffnw netmon-node-client'
 
 PACKAGES_FFNW_REPO=https://git.nordwest.freifunk.net/ffnw-firmware/packages.git
 PACKAGES_FFNW_BRANCH=master
 PACKAGES_FFNW_COMMIT=2ba5bd8ad591f19c05e50875eb1198e543459e0d
+
+PACKAGES_NETMON-NODE-CLIENT_REPO=https://git.ffnw.de/netmon-sc/node-client.git
+PACKAGES_NETMON-NODE-CLIENT_BRANCH=master
+PACKAGES_NETMON-NODE-CLIENT_COMMIT=6bf3c93283557d55b57439805e35492621b691f5
