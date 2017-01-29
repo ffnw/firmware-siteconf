@@ -27,7 +27,8 @@ GLUON_SITE_PACKAGES := \
 	ffnw-config-mode-geo-location \
 	ffnw-config-mode-contact-info \
 	ffnw-hoodselector \
-	ffnw-multiple-v6-watchdoog
+	ffnw-multiple-v6-watchdoog \
+	netmon-node-client
 
 USB_BASIC := \
 	kmod-usb-core \
