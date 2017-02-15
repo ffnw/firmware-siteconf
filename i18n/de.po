@@ -30,7 +30,7 @@ msgstr ""
 " <br/>"
 "Bei Fragen oder Problemen helfen wir dir gerne unter "
 "<a href=\"https://ffnw.de\">https://ffnw.de</a>"
-"weiter."
+" weiter."
 "</p>"
 
 msgid "gluon-config-mode:reboot"

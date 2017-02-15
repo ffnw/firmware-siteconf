@@ -18,7 +18,6 @@ GLUON_SITE_PACKAGES := \
 	gluon-radvd \
 	gluon-setup-mode \
 	gluon-status-page \
-	gluon-legacy \
 	haveged \
 	iwinfo \
 	ffnw-banner \
@@ -56,7 +55,7 @@ ifeq ($(GLUON_TARGET),x86-64)
 		kmod-igb
 endif
 
-DEFAULT_GLUON_RELEASE := 0.8+exp$(shell date '+%Y%m%d')
+DEFAULT_GLUON_RELEASE := $(shell date '+%Y%m%d')-$(shell git log -1 --pretty=format:%h)
 DEFAULT_GLUON_PRIORITY := 0
 DEFAULT_GLUON_REGION := eu
 
