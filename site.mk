@@ -28,6 +28,7 @@ GLUON_SITE_PACKAGES := \
 	ffnw-config-mode-contact-info \
 	ffnw-hoodselector \
 	ffnw-cooplocator \
+	ffnw-offlinessid \
 	ffnw-multiple-v6-watchdoog
 
 USB_BASIC := \
