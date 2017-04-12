@@ -75,7 +75,7 @@ git init .
 git remote add origin https://github.com/freifunk-gluon/gluon.git
 git pull origin $GLUON_VERSION
 
-sh site/prepare.sh
+cd site && sh prepare.sh && cd ..
 
 # fetch packages repos and apply patches
 make update || exit 1

@@ -8,7 +8,4 @@ patch_target() {
   fi
 }
 
-MYGIT="git -C ../"
-if $MYGIT branch | grep "* v2016.2.x" ; then
-  patch_target
-fi
+patch_target
