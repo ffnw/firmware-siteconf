@@ -13,6 +13,7 @@ build:gluon:
   only:
     - master
     - citest
+    - hoodselector_IEEE802.11s
   tags:
     - firmware
   script:
@@ -29,6 +30,7 @@ sign:
   only:
     - master
     - citest
+    - hoodselector_IEEE802.11s
   tags:
     - firmware
   script:
@@ -44,6 +46,7 @@ deploy:
   only:
     - master
     - citest
+    - hoodselector_IEEE802.11s
   tags:
     - firmware
   script:
