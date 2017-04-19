@@ -8,4 +8,10 @@ patch_target() {
   fi
 }
 
-patch_target
+cd ..
+if git status  | head -n1 | grep "v2016.2.x"; then
+  patch_target
+else
+  echo "no gluon repo founden or wrong branch"
+  exit 1
+fi
