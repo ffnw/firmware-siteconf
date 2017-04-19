@@ -9,7 +9,7 @@ GLUON_VERSION="$2"
 #check installed debendenciece
 if [ -f /etc/debian_version ]; then
   echo "Checking for git..."
-  if ! command -v git 2&> /dev/null; then
+  if ! command -v git > /dev/null 2>&1; then
     echo "git is not installed"
     exit 1
   fi
@@ -73,9 +73,11 @@ ls -A | grep -v -E '(^|\s)site($|\s)' | xargs -I{} mv {} site/
 # Clone Gluon repo
 git init .
 git remote add origin https://github.com/freifunk-gluon/gluon.git
-git pull origin $GLUON_VERSION
+git pull origin "$GLUON_VERSION"
 
-cd site && sh prepare.sh && cd ..
+cd site || exit 1
+sh prepare.sh || exit 1
+cd ..
 
 # fetch packages repos and apply patches
 make update || exit 1
@@ -90,9 +92,9 @@ while read line; do
     targ=$(echo $line | sed -e 's/^.*GluonTarget//' -e 's/^,//' -e 's/)).*//' -e 's/[,]/-/')
 
     #Build arcitecture images
-    make -j $((CPUS*2)) GLUON_TARGET=$targ BROKEN=1 GLUON_BRANCH=$GLUON_BRANCH || exit 1
+    make -j $((CPUS*2)) GLUON_TARGET="$targ" BROKEN=1 GLUON_BRANCH="$GLUON_BRANCH" || exit 1
   fi;
 done < "targets/targets.mk"
 
 # create manifest file for autoupdater
-make manifest GLUON_BRANCH=$GLUON_BRANCH
+make manifest GLUON_BRANCH="$GLUON_BRANCH"
