@@ -77,7 +77,7 @@ git pull origin "$GLUON_VERSION"
 git checkout "$GLUON_VERSION"
 
 cd site || exit 1
-sh prepare.sh || exit 1
+sh prepare.sh patch || exit 1
 cd ..
 
 # fetch packages repos and apply patches
