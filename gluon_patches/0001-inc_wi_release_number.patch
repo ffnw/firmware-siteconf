@@ -1,0 +1,21 @@
++++ patches/openwrt/0099-iw-inc-release-number.patch
+@@ -0,0 +1,17 @@
++From: Jan-Tarek Butt <tarek@ring0.de>
++Date: Mon, 17 Apr 2017 16:05:05 +0200
++Subject: iw: inc release number
++
++Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
++
++diff --git a/package/network/utils/iw/Makefile b/package/network/utils/iw/Makefile
++index d17cbca0df391a287fb9d80a3d9c1ca1355c1774..1c3d3783db11cdc427129ce235be32a3c27f72fa 100644
++--- a/package/network/utils/iw/Makefile
+++++ b/package/network/utils/iw/Makefile
++@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
++ 
++ PKG_NAME:=iw
++ PKG_VERSION:=4.3
++-PKG_RELEASE:=1
+++PKG_RELEASE:=2
++ 
++ PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
++ PKG_SOURCE_URL:=@KERNEL/software/network/iw
