@@ -74,6 +74,7 @@ ls -A | grep -v -E '(^|\s)site($|\s)' | xargs -I{} mv {} site/
 git init .
 git remote add origin https://github.com/freifunk-gluon/gluon.git
 git pull origin "$GLUON_VERSION"
+git checkout "$GLUON_VERSION"
 
 cd site || exit 1
 sh prepare.sh || exit 1
