@@ -62,6 +62,12 @@ if [ -f /etc/debian_version ]; then
     exit 1
   fi
   echo "Detected libssl-dev..."
+  echo "Checking for ecdsasign..."
+  if ! command -v ecdsasign > /dev/null 2>&1; then
+    echo "ecdsasign is not installed"
+    exit 1
+  fi
+  echo "Detected ecdsasign..."
 fi
 
 # Make Folder site
