@@ -21,8 +21,6 @@ GLUON_SITE_PACKAGES := \
 	haveged \
 	iwinfo \
 	ffnw-banner \
-	libwlocate \
-	lwtrace \
 	ffnw-node-info \
 	ffnw-config-mode-geo-location \
 	ffnw-config-mode-contact-info \
