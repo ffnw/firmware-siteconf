@@ -8,11 +8,11 @@ GLUON_SITE_PACKAGES := \
 	gluon-config-mode-mesh-vpn \
 	gluon-ebtables-filter-multicast \
 	gluon-ebtables-filter-ra-dhcp \
-	gluon-luci-admin \
-	gluon-luci-autoupdater \
-	gluon-luci-portconfig \
-	gluon-luci-private-wifi \
-	gluon-luci-wifi-config \
+	gluon-web-admin \
+	gluon-web-autoupdater \
+	gluon-web-network \
+	gluon-web-wifi-config \
+	gluon-web-private-wifi \
 	gluon-mesh-vpn-fastd \
 	gluon-next-node \
 	gluon-radvd \
@@ -26,7 +26,6 @@ GLUON_SITE_PACKAGES := \
 	ffnw-config-mode-contact-info \
 	ffnw-hoodselector \
 	ffnw-multiple-v6-watchdoog \
-	ffnw-hoodselector-ctl \
 	netmon-node-client
 
 USB_BASIC := \
@@ -54,6 +53,7 @@ ifeq ($(GLUON_TARGET),x86-64)
 	GLUON_SITE_PACKAGES += \
 		$(USB_BASIC) \
 		$(USB_NIC) \
+		kmod-phylib-broadcom \
 		kmod-igb
 endif
 
