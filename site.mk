@@ -1,23 +1,105 @@
 GLUON_SITE_PACKAGES := \
 	gluon-mesh-batman-adv-15 \
-	gluon-respondd \
-	gluon-autoupdater \
-	gluon-config-mode-core \
+	  # gluon-core
+	    # gluon-site
+	  # libgluonutil
+	  # gluon-client-bridge
+	    # gluon-core
+	      # gluon-site
+	  # gluon-ebtables
+	    # gluon-core
+	      # gluon-site
 	gluon-config-mode-autoupdater \
+	# gluon-config-mode-core-virtual (gluon-config-mode-core)
+	  # gluon-setup-mode-virtual (gluon-setup-mod)
+	    # gluon-web
+	  # gluon-web-theme
+	  # gluon-lock-password
+	    # gluon-core
+	      # gluon-site
+	# gluon-autoupdater
+	  # gluon-core
+	    # gluon-site
+	  # libgluonutil
 	gluon-config-mode-hostname \
+	  # gluon-config-mode-core-virtual (gluon-config-mode-core)
+	    # ...
 	gluon-config-mode-mesh-vpn \
+	  # gluon-config-mode-core-virtual (gluon-config-mode-core)
+	    # ...
+	  # gluon-mesh-vpn-core
+	    # gluon-core
+	      # gluon-site
+	    # gluon-wan-dnsmasq
+	      # gluon-core
+	        # gluon-site
 	gluon-ebtables-filter-multicast \
+	  # gluon-core
+	    # gluon-site
+	  # gluon-ebtables
+	    # gluon-core
+	      # gluon-site
 	gluon-ebtables-filter-ra-dhcp \
-	gluon-web-admin \
+	  # gluon-core
+	    # gluon-site
+	  # gluon-ebtables
+	    # gluon-core
+	      # gluon-site
+	gluon-ebtables-segment-mld \
+	  # gluon-core
+	    # gluon-site
+	  # gluon-ebtables
+	    # gluon-core
+	      # gluon-site
+	gluon-ebtables-source-filter \
+	  # gluon-core
+	    # gluon-site
+	  # gluon-ebtables
+	    # gluon-core
+	      # gluon-site
 	gluon-web-autoupdater \
+	    # gluon-web-admin
+	      # gluon-config-mode-core-virtual (gluon-config-mode-core)
+	        # ...
+	  # gluon-autoupdater
+	    # gluon-core
+	      # gluon-site
+	    # libgluonutil
 	gluon-web-network \
+	  # gluon-web-admin
+	    # ...
+	  # gluon-client-bridge
+	    # ...
 	gluon-web-wifi-config \
+	  # gluon-web-admin
+	    # ...
 	gluon-web-private-wifi \
-	gluon-mesh-vpn-fastd \
-	gluon-next-node \
+	  # gluon-web-admin
+	    # ...
 	gluon-radvd \
-	gluon-setup-mode \
+	  # gluon-core
+	    # gluon-site
 	gluon-status-page \
+	  # gluon-status-page-api
+	    # gluon-core
+	      # gluon-site
+	    # gluon-neighbour-info
+	    # gluon-respondd
+	      # gluon-core
+	        # gluon-site
+	      # libgluonutil
+	gluon-web-mesh-vpn-fastd \
+	  # gluon-web-admin
+	  # gluon-mesh-vpn-fastd
+	    # gluon-core
+	      # gluon-site
+	    # libgluonutil
+	    # gluon-mesh-vpn-core
+	      # gluon-core
+	        # gluon-site
+	      # gluon-wan-dnsmasq
+	        # gluon-core
+		  # gluon-site
 	haveged \
 	iwinfo \
 	ffnw-banner \
