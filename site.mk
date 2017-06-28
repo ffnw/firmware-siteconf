@@ -39,12 +39,14 @@ USB_NIC := \
 	kmod-usb-net-asix \
 	kmod-usb-net-rtl8150 \
 	kmod-usb-net-rtl8152 \
-	kmod-usb-net-dm9601-ether
+	kmod-usb-net-dm9601-ether \
+	kmod-usb-net-mcs7830
 
 ifeq ($(GLUON_TARGET),x86-generic)
 	GLUON_SITE_PACKAGES += \
 		$(USB_BASIC) \
 		kmod-usb-ohci-pci \
+		kmod-phylib-broadcom \
 		$(USB_NIC)
 endif
 
@@ -56,7 +58,7 @@ ifeq ($(GLUON_TARGET),x86-64)
 endif
 
 DEFAULT_GLUON_RELEASE := $(shell date '+%Y%m%d')-$(shell git log -1 --pretty=format:%h)
-DEFAULT_GLUON_PRIORITY := 0
+DEFAULT_GLUON_PRIORITY := 7
 DEFAULT_GLUON_REGION := eu
 
 GLUON_ATH10K_MESH := ibss
