@@ -39,12 +39,14 @@ USB_NIC := \
 	kmod-usb-net-asix \
 	kmod-usb-net-rtl8150 \
 	kmod-usb-net-rtl8152 \
-	kmod-usb-net-dm9601-ether
+	kmod-usb-net-dm9601-ether \
+	kmod-usb-net-mcs7830
 
 ifeq ($(GLUON_TARGET),x86-generic)
 	GLUON_SITE_PACKAGES += \
 		$(USB_BASIC) \
 		kmod-usb-ohci-pci \
+		kmod-phylib-broadcom \
 		$(USB_NIC)
 endif
 
@@ -52,6 +54,7 @@ ifeq ($(GLUON_TARGET),x86-64)
 	GLUON_SITE_PACKAGES += \
 		$(USB_BASIC) \
 		$(USB_NIC) \
+		kmod-phylib-broadcom \
 		kmod-igb
 endif
 
