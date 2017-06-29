@@ -2,7 +2,7 @@ GLUON_SITE_FEEDS='ffnw netmon'
 
 PACKAGES_FFNW_REPO=https://git.nordwest.freifunk.net/ffnw-firmware/packages.git
 PACKAGES_FFNW_BRANCH=201706
-PACKAGES_FFNW_COMMIT=27de30dd96536a0ca63f515da8ede5d853769a94
+PACKAGES_FFNW_COMMIT=85714623aae95c513ca34ba98b94318da4001663
 
 PACKAGES_NETMON_REPO=https://git.ffnw.de/netmon-sc/openwrt-feed.git
 PACKAGES_NETMON_BRANCH=master
