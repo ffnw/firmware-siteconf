@@ -1,4 +1,6 @@
 GLUON_SITE_PACKAGES := \
+	gluon-config-mode-core \
+	gluon-setup-mode \
 	gluon-mesh-batman-adv-15 \
 	gluon-config-mode-autoupdater \
 	gluon-config-mode-hostname \
@@ -20,9 +22,9 @@ GLUON_SITE_PACKAGES := \
 	ffnw-node-info \
 	ffnw-config-mode-geo-location \
 	ffnw-config-mode-contact-info \
+	ffnw-hoods \
 	ffnw-hoodselector \
-	ffnw-multiple-v6-watchdoog \
-	netmon-node-client
+	ffnw-multiple-v6-watchdoog
 
 USB_BASIC := \
 	kmod-usb-core \
@@ -41,7 +43,6 @@ ifeq ($(GLUON_TARGET),x86-generic)
 	GLUON_SITE_PACKAGES += \
 		$(USB_BASIC) \
 		kmod-usb-ohci-pci \
-		kmod-phylib-broadcom \
 		$(USB_NIC)
 endif
 
