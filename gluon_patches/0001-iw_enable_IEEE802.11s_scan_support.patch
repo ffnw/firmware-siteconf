@@ -3,7 +3,7 @@
 @@ -0,0 +1,25 @@
 +From: Jan-Tarek Butt <tarek@ring0.de>
 +Date: Tue, 11 Apr 2017 16:38:39 +0200
-+Subject: wi enable IEEE802.11s scan support
++Subject: iw enable IEEE802.11s scan support
 +
 +Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
 +
