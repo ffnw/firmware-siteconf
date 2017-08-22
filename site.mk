@@ -27,7 +27,8 @@ GLUON_SITE_PACKAGES := \
 	ffnw-hoodselector \
 	ffnw-multiple-v6-watchdoog \
 	ffnw-hoodselector-ctl \
-	netmon-node-client
+	netmon-node-client \
+	ffnw-disable-11s \
 
 USB_BASIC := \
 	kmod-usb-core \
