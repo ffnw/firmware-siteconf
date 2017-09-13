@@ -54,14 +54,11 @@ ifeq ($(GLUON_TARGET),x86-64)
 		kmod-igb
 endif
 
-DEFAULT_GLUON_RELEASE := $(shell date '+%Y%m%d')-$(shell git log -1 --pretty=format:%h)
-DEFAULT_GLUON_PRIORITY := 7
-DEFAULT_GLUON_REGION := eu
 
 GLUON_ATH10K_MESH := ibss
 
 # Allow overriding from the command line
-GLUON_RELEASE ?= $(DEFAULT_GLUON_RELEASE)
-GLUON_PRIORITY ?= $(DEFAULT_GLUON_PRIORITY)
-GLUON_REGION ?= $(DEFAULT_GLUON_REGION)
+GLUON_RELEASE ?= $(shell date '+%Y%m%d')-$(shell git log -1 --pretty=format:%h)
+GLUON_PRIORITY ?= 7
+GLUON_REGION ?= eu
 GLUON_LANGS ?= de en
