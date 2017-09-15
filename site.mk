@@ -1,34 +1,28 @@
 GLUON_SITE_PACKAGES := \
-	gluon-mesh-batman-adv-15 \
-	gluon-respondd \
-	gluon-autoupdater \
 	gluon-config-mode-core \
+	gluon-setup-mode \
+	gluon-mesh-batman-adv-15 \
 	gluon-config-mode-autoupdater \
 	gluon-config-mode-hostname \
 	gluon-config-mode-mesh-vpn \
 	gluon-ebtables-filter-multicast \
 	gluon-ebtables-filter-ra-dhcp \
-	gluon-luci-admin \
-	gluon-luci-autoupdater \
-	gluon-luci-portconfig \
-	gluon-luci-private-wifi \
-	gluon-luci-wifi-config \
-	gluon-mesh-vpn-fastd \
-	gluon-next-node \
+	gluon-web-autoupdater \
+	gluon-web-network \
+	gluon-web-wifi-config \
+	gluon-web-private-wifi \
 	gluon-radvd \
-	gluon-setup-mode \
 	gluon-status-page \
+	gluon-web-mesh-vpn-fastd \
 	haveged \
 	iwinfo \
 	ffnw-banner \
 	ffnw-node-info \
 	ffnw-config-mode-geo-location \
 	ffnw-config-mode-contact-info \
+	ffnw-hoods \
 	ffnw-hoodselector \
-	ffnw-multiple-v6-watchdoog \
-	ffnw-hoodselector-ctl \
-	netmon-node-client \
-	ffnw-disable-11s
+	ffnw-multiple-v6-watchdoog
 
 USB_BASIC := \
 	kmod-usb-core \
@@ -54,17 +48,15 @@ ifeq ($(GLUON_TARGET),x86-64)
 	GLUON_SITE_PACKAGES += \
 		$(USB_BASIC) \
 		$(USB_NIC) \
+		kmod-phylib-broadcom \
 		kmod-igb
 endif
 
-DEFAULT_GLUON_RELEASE := $(shell date '+%Y%m%d')-$(shell git log -1 --pretty=format:%h)
-DEFAULT_GLUON_PRIORITY := 0
-DEFAULT_GLUON_REGION := eu
 
 GLUON_ATH10K_MESH := ibss
 
 # Allow overriding from the command line
-GLUON_RELEASE ?= $(DEFAULT_GLUON_RELEASE)
-GLUON_PRIORITY ?= $(DEFAULT_GLUON_PRIORITY)
-GLUON_REGION ?= $(DEFAULT_GLUON_REGION)
+GLUON_RELEASE ?= $(shell date '+%Y%m%d')-$(shell git log -1 --pretty=format:%h)
+GLUON_PRIORITY ?= 2
+GLUON_REGION ?= eu
 GLUON_LANGS ?= de en
