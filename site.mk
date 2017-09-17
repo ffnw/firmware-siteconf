@@ -48,7 +48,7 @@ ifeq ($(GLUON_TARGET),x86-64)
 	GLUON_SITE_PACKAGES += \
 		$(USB_BASIC) \
 		$(USB_NIC) \
-		kmod-phylib-broadcom \
+		kmod-phy-broadcom \
 		kmod-igb
 endif
 
