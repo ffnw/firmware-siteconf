@@ -22,8 +22,7 @@ GLUON_SITE_PACKAGES := \
 	ffnw-config-mode-contact-info \
 	ffnw-hoods \
 	ffnw-hoodselector \
-	ffnw-multiple-v6-watchdoog \
-	ffnw-11s-switch
+	ffnw-multiple-v6-watchdoog
 
 USB_BASIC := \
 	kmod-usb-core \
