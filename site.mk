@@ -52,11 +52,10 @@ ifeq ($(GLUON_TARGET),x86-64)
 		kmod-igb
 endif
 
-
 GLUON_ATH10K_MESH := ibss
 
 # Allow overriding from the command line
 GLUON_RELEASE ?= $(shell date '+%Y%m%d')-$(shell git log -1 --pretty=format:%h)
-GLUON_PRIORITY ?= 2
+GLUON_PRIORITY ?= 0
 GLUON_REGION ?= eu
 GLUON_LANGS ?= de en
