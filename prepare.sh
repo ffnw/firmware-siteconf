@@ -23,7 +23,7 @@ patch_gluon() {
 
 update_patches() {
   if ! git -C "$EXECDIR"/.. rev-parse --abbrev-ref HEAD | grep "v2017.1.x"; then
-    echo "no gluon repo founden or wrong branch"
+    echo "no gluon repo found or wrong branch"
     exit 1
   fi
   make -C "$EXECDIR"/.. update-patches
