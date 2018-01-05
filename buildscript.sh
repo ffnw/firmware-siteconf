@@ -1,50 +1,294 @@
 #!/bin/bash
 
+# get location of executed file.
 EXECDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-patch_target() {
-  if [ "$(find "$EXECDIR"/gluon_patches/*.patch 2> /dev/null | wc -l)" -ge 1 ]; then
-    local base="$EXECDIR"
-    cd "$EXECDIR"/.. || exit 1
-    for patch in "$EXECDIR"/gluon_patches/*.patch; do
-      git am --ignore-space-change --ignore-whitespace "$patch"
-    done
-    cd "$base" || exit 1
-  fi
+# global list of gluon targets
+TARGET_LIST=()
+
+help_print(){
+  echo "Usage: $0 <command>"
+  echo "command:"
+  echo "  patch                 Apply patches on gluon build ENV"
+  echo "  clean_patches         Remove applied patches from gluon repo"
+  echo "  update-patches        Create patches from local gluon commits"
+  echo "  prepare <command>"
+  echo "    GLUON_BRANCH <str>  Set ENV variable"
+  echo "    GLUON_RELEASE <str> Set ENV variable"
+  echo "    fastd               Prepare site repo for fastd build"
+  echo "    l2tp                prepare site repo for l2tp build"
+  echo "  build <command>       <command> can be replace with targets"
+  echo "    target_list         build all gluon targets"
+  echo "    all                 build all gluon targes for each VPN"
+  echo "  create_manifest       create manifest"
+  echo
 }
 
 patch_gluon() {
-  if ! git -C "$EXECDIR"/.. rev-parse --abbrev-ref HEAD | grep "v2017.1.x"; then
-    echo "no gluon repo found or wrong branch"
-    exit 1
+  if ! [ -f "$EXECDIR/.patched" ]; then
+    if [ "$(find "$EXECDIR"/gluon_patches/*.patch 2> /dev/null | wc -l)" -ge 1 ]; then
+      local base="$EXECDIR"
+      cd "$EXECDIR"/.. || exit 1
+      for patch in "$EXECDIR"/gluon_patches/*.patch; do
+        git am --ignore-space-change --ignore-whitespace "$patch"
+      done
+      cd "$base" || exit 1
+    else
+      echo "No patches found"
+    fi
+    touch "$EXECDIR/.patched"
+  else
+    echo "gluon is already patched!"
+    echo "Please run clean_patches first to reset gluon git repo"
   fi
-  patch_target
+}
+
+clean_patches(){
+  if [ -f "$EXECDIR/.patched" ]; then
+    local base="$EXECDIR"
+    cd "$EXECDIR"/.. || exit 1
+    git reset --hard "origin/v2017.1.x"
+    cd "$EXECDIR" || exit 1
+    rm "$EXECDIR/.patched"
+  else
+    echo "gluon is not patched"
+  fi
 }
 
 update_patches() {
-  if ! git -C "$EXECDIR"/.. rev-parse --abbrev-ref HEAD | grep "v2017.1.x"; then
-    echo "no gluon repo found or wrong branch"
-    exit 1
-  fi
-  make -C "$EXECDIR"/.. update-patches
   local base="$EXECDIR"
   cd "$EXECDIR"/.. || exit 1
   git format-patch "origin/v2017.1.x" -o "$EXECDIR/gluon_patches"
   cd "$base" || exit 1
 }
 
+
+init_prepare(){
+  local vpn="$1"
+  local file="$2"
+  if ! [ -w "$EXECDIR/$file" ]; then
+    echo "$EXECDIR/$file not exsis or writeable"
+    exit 1
+  fi
+  echo "prepare $file for $vpn build ..."
+  # ensure reset possible local file changes
+  git checkout "$EXECDIR/$file"
+}
+
+prepare_siteconf(){
+  local vpn="$1"
+  init_prepare "$vpn" "site.conf"
+  # Start prepare site.conf for build
+  if grep -q "%A" < "$EXECDIR"/site.conf; then
+    sed -i "/^%A$/c\\modules = \\'http://mirror.ffnw.de/modules/$vpn/gluon-%GS-%GR/%S\\'," "$EXECDIR"/site.conf
+    echo "Set opkg modules URL ..."
+  else
+    echo "Placeholder %A not found"
+  fi
+  if grep -q "%B" < "$EXECDIR"/site.conf; then
+    sed -i "/^%B$/c\\\\'http://autoupdate-lede.ffnw/$vpn/stable\\'," "$EXECDIR"/site.conf
+    echo "Set autoupdater stable URL ..."
+  else
+    echo "Placeholder %B not found"
+  fi
+  if grep -q "%C" < "$EXECDIR"/site.conf; then
+    sed -i "/^%C$/c\\\\'http://autoupdate-lede.ffnw/$vpn/testing\\'," "$EXECDIR"/site.conf
+    echo "Set autoupdater testing URL ..."
+  else
+    echo "Placeholder %C not found"
+  fi
+  if grep -q "%D" < "$EXECDIR"/site.conf; then
+    sed -i "/^%D$/c\\\\'http://autoupdate-lede.ffnw/$vpn/nigthly_master\\'," "$EXECDIR"/site.conf
+    echo "Set autoupdater nigthly_master URL ..."
+  else
+    echo "Placeholder %D not found"
+  fi
+}
+
+prepare_sitemk(){
+  local  vpn="$1"
+  init_prepare "$vpn" "site.mk"
+  # Start prepare site.mk for build
+  if grep -q "%A" < "$EXECDIR"/site.mk; then
+    if [ "$vpn" == "l2tp" ]; then
+      sed -i "/^%A$/c\\\\tgluon-mesh-vpn-tunneldigger \\\\" "$EXECDIR"/site.mk
+      echo "Set gluon-mesh-vpn-tunneldigger package ..."
+    fi
+    if [ "$vpn" == "fastd" ]; then
+      sed -i "/^%A$/c\\\\tgluon-web-mesh-vpn-fastd \\\\" "$EXECDIR"/site.mk
+      echo "Set gluon-web-mesh-vpn-fastd package ..."
+    fi
+  else
+    echo "Placeholder %A not found"
+  fi
+
+  if grep -q "%B" < "$EXECDIR"/site.mk; then
+    sed -i "/^%B$/c\\GLUON_RELEASE ?= \"$(cat "$EXECDIR/.GLUON_RELEASE")\"" "$EXECDIR"/site.mk
+    echo "Set GLUON_RELEASE ..."
+  else
+    echo "Placeholder %B not found"
+  fi
+  if grep -q "%C" < "$EXECDIR"/site.mk; then
+    sed -i "/^%C$/c\\GLUON_BRANCH ?= \"$(cat "$EXECDIR/.GLUON_BRANCH")\"" "$EXECDIR"/site.mk
+    echo "Set GLUON_BRANCH ..."
+  else
+    echo "Placeholder %C not found"
+  fi
+
+  local base="$EXECDIR"
+  cd "$EXECDIR"/.. || exit 1
+  if grep -q "%D" < "$base"/site.mk; then
+    sed -i "/^%D$/c\\GLUON_IMAGEDIR ?= \"$EXECDIR/output/images/$vpn/\$(GLUON_RELEASE)\"" "$base"/site.mk
+    echo "Set GLUON_IMAGEDIR ..."
+  else
+    echo "Placeholder %D not found"
+  fi
+  if grep -q "%E" < "$base"/site.mk; then
+    sed -i "/^%E$/c\\GLUON_PACKAGEDIR ?= \"$EXECDIR/output/packages/$vpn\"" "$base"/site.mk
+    echo "Set GLUON_PACKAGEDIR ..."
+  else
+    echo "Placeholder %E not found"
+  fi
+  cd "$base" || exit 1
+}
+
+gluon_build(){
+  if [ "$2" == "fast" ] && [ -a "/proc/cpuinfo" ]; then
+    make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_TARGET="$1"
+  else
+    make -C "$EXECDIR/.." GLUON_TARGET="$1"
+  fi
+}
+
+prepare_precondition(){
+  if ! [ -s "$EXECDIR/.GLUON_BRANCH" ]; then
+    echo "please run '$0 prepare GLUON_BRANCH' first"
+    exit 1
+  fi
+  if ! [ -s "$EXECDIR/.GLUON_RELEASE" ]; then
+    echo "please run '$0 prepare GLUON_RELEASE' first"
+    exit 1
+  fi
+}
+
+get_target_list(){
+  while read -r line; do
+    if [[ $line == *GluonTarget* ]]; then
+      # extract arcitecture parameter value
+      local targ="$(echo "$line" | sed -e 's/^.*GluonTarget,//' -e 's/)).*//' -r -e 's/([^,]+,[^,]*).*/\1/' -e 's/[,]/-/')"
+      if [ -n "$targ" ]; then
+        TARGET_LIST[${#TARGET_LIST[@]}]="$targ"
+      fi
+    fi
+  done < "$EXECDIR/../targets/targets.mk"
+}
+
+
+if ! git -C "$EXECDIR"/.. rev-parse --abbrev-ref HEAD | grep -q "v2017.1.x"; then
+  echo "no gluon repo found or wrong branch (should be v2017.1.x). Please clone this git reposetory into the gluon git reposetory"
+  exit 1
+fi
+
 case "$1" in
   "patch")
     patch_gluon
   ;;
+  "clean_patches")
+    clean_patches
+  ;;
   "update-patches")
     update_patches
   ;;
+  "prepare")
+    case "$2" in
+      "fastd")
+        prepare_precondition
+        if ! [ -f "$EXECDIR/.patched" ]; then
+          patch_gluon
+        fi
+        prepare_siteconf "$2"
+        prepare_sitemk "$2"
+        make -C "$EXECDIR"/.. update
+        touch "$EXECDIR"/.prepare
+      ;;
+      "l2tp")
+        prepare_precondition
+        if ! [ -f "$EXECDIR/.patched" ]; then
+          patch_gluon
+        fi
+        prepare_siteconf "$2"
+        prepare_sitemk "$2"
+        make -C "$EXECDIR/.." update
+        touch "$EXECDIR/.prepare"
+      ;;
+      "GLUON_BRANCH")
+        if [ -n "$3" ]; then
+          echo "$3" > "$EXECDIR/.GLUON_BRANCH"
+        else
+          echo "$2 needs a parameter e.g. testing"
+        fi
+      ;;
+      "GLUON_RELEASE")
+        if [ -n "$3" ]; then
+          echo "$3" > "$EXECDIR/.GLUON_RELEASE"
+        else
+          echo "$2 needs a parameter e.g. 20170104"
+        fi
+      ;;
+      *)
+        help_print
+      ;;
+    esac
+  ;;
+  "build")
+    if ! [ -r "$EXECDIR"/.prepare ]; then
+      echo "please run the prepare mode first"
+      exit 1
+    fi
+    get_target_list
+    case "$2" in
+      "target_list")
+        for targ in "${TARGET_LIST[@]}"; do
+          if [ "$3" == "fast" ]; then
+            gluon_build "$targ" "fast"
+          else
+            gluon_build "$targ"
+          fi
+        done
+      ;;
+      "all")
+        "$EXECDIR/$0" prepare fastd
+        "$EXECDIR/$0" build target_list "fast"
+        "$EXECDIR/$0" create_manifest
+        "$EXECDIR/$0" prepare l2tp
+        "$EXECDIR/$0" build target_list "fast"
+        "$EXECDIR/$0" create_manifest
+      ;;
+      *)
+        err="yes"
+        for targ in "${TARGET_LIST[@]}"; do
+          if [ "$targ" == "$2" ]; then
+            err="no"
+            if [ "$3" == "fast" ]; then
+              gluon_build "$targ" "fast"
+            else
+              gluon_build "$targ"
+            fi
+          fi
+        done
+        if [ "$err" == "yes" ]; then
+          echo "Please use targes from the following list as parameter:"
+          for targ in "${TARGET_LIST[@]}"; do
+            echo "$targ"
+          done
+        fi
+      ;;
+    esac
+  ;;
+  "create_manifest")
+    make -C "$EXECDIR/.." manifest
+  ;;
   *)
-    echo "Usage: $0 command"
-    echo "command:"
-    echo "  patch"
-    echo "  update-patches"
-    echo
+    help_print
   ;;
 esac
