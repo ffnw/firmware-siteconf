@@ -17,6 +17,7 @@ help_print(){
   echo "    GLUON_RELEASE <str> Set ENV variable"
   echo "    fastd               Prepare site repo for fastd build"
   echo "    l2tp                prepare site repo for l2tp build"
+  echo "    BROKEN              y or n (default n)"
   echo "  build <command>       <command> can be replace with targets"
   echo "    target_list         build all gluon targets"
   echo "    all                 build all gluon targes for each VPN"
@@ -154,9 +155,17 @@ prepare_sitemk(){
 
 gluon_build(){
   if [ "$2" == "fast" ] && [ -a "/proc/cpuinfo" ]; then
-    make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_TARGET="$1"
+    if [ -a "$EXECDIR/.BROKEN" ]; then
+      make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) BROKEN=1 GLUON_TARGET="$1"
+    else
+      make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_TARGET="$1"
+    fi
   else
-    make -C "$EXECDIR/.." GLUON_TARGET="$1"
+    if [ -a "$EXECDIR/.BROKEN" ]; then
+      make -C "$EXECDIR/.." BROKEN=1 GLUON_TARGET="$1"
+    else
+      make -C "$EXECDIR/.." GLUON_TARGET="$1"
+    fi
   fi
 }
 
@@ -178,6 +187,10 @@ get_target_list(){
       local targ="$(echo "$line" | sed -e 's/^.*GluonTarget,//' -e 's/)).*//' -r -e 's/([^,]+,[^,]*).*/\1/' -e 's/[,]/-/')"
       if [ -n "$targ" ]; then
         TARGET_LIST[${#TARGET_LIST[@]}]="$targ"
+      fi
+    else
+      if [[ $line == *BROKEN* ]] && ! [ -a "$EXECDIR/.BROKEN" ]; then
+        break
       fi
     fi
   done < "$EXECDIR/../targets/targets.mk"
@@ -233,6 +246,17 @@ case "$1" in
           echo "$3" > "$EXECDIR/.GLUON_RELEASE"
         else
           echo "$2 needs a parameter e.g. 20170104"
+        fi
+      ;;
+      "BROKEN")
+        if [ "$3" == "y" ]; then
+          touch "$EXECDIR/.BROKEN"
+        elif [ "$3" == "n" ]; then
+          if [ -a "$EXECDIR/.BROKEN" ]; then
+            rm "$EXECDIR/.BROKEN"
+          fi
+        else
+          echo "$2 needs the parameter: y or n"
         fi
       ;;
       *)
