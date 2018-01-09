@@ -57,8 +57,6 @@ GLUON_ATH10K_MESH := ibss
 # Allow overriding from the command line
 %B
 %C
-%D
-%E
 GLUON_PRIORITY ?= 0
 GLUON_REGION ?= eu
 GLUON_LANGS ?= de en
