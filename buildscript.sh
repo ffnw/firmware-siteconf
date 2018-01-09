@@ -124,47 +124,31 @@ prepare_sitemk(){
   fi
 
   if grep -q "%B" < "$EXECDIR"/site.mk; then
-    sed -i "/^%B$/c\\GLUON_RELEASE ?= \"$(cat "$EXECDIR/.GLUON_RELEASE")\"" "$EXECDIR"/site.mk
+    sed -i "/^%B$/c\\GLUON_RELEASE ?= $(cat "$EXECDIR/.GLUON_RELEASE")" "$EXECDIR"/site.mk
     echo "Set GLUON_RELEASE ..."
   else
     echo "Placeholder %B not found"
   fi
   if grep -q "%C" < "$EXECDIR"/site.mk; then
-    sed -i "/^%C$/c\\GLUON_BRANCH ?= \"$(cat "$EXECDIR/.GLUON_BRANCH")\"" "$EXECDIR"/site.mk
+    sed -i "/^%C$/c\\GLUON_BRANCH ?= $(cat "$EXECDIR/.GLUON_BRANCH")" "$EXECDIR"/site.mk
     echo "Set GLUON_BRANCH ..."
   else
     echo "Placeholder %C not found"
   fi
-
-  local base="$EXECDIR"
-  cd "$EXECDIR"/.. || exit 1
-  if grep -q "%D" < "$base"/site.mk; then
-    sed -i "/^%D$/c\\GLUON_IMAGEDIR ?= \"$EXECDIR/output/images/$vpn/\$(GLUON_RELEASE)\"" "$base"/site.mk
-    echo "Set GLUON_IMAGEDIR ..."
-  else
-    echo "Placeholder %D not found"
-  fi
-  if grep -q "%E" < "$base"/site.mk; then
-    sed -i "/^%E$/c\\GLUON_PACKAGEDIR ?= \"$EXECDIR/output/packages/$vpn\"" "$base"/site.mk
-    echo "Set GLUON_PACKAGEDIR ..."
-  else
-    echo "Placeholder %E not found"
-  fi
-  cd "$base" || exit 1
 }
 
 gluon_build(){
   if [ "$2" == "fast" ] && [ -a "/proc/cpuinfo" ]; then
     if [ -a "$EXECDIR/.BROKEN" ]; then
-      make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) BROKEN=1 GLUON_TARGET="$1"
+      make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
     else
-      make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_TARGET="$1"
+      make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
     fi
   else
     if [ -a "$EXECDIR/.BROKEN" ]; then
-      make -C "$EXECDIR/.." BROKEN=1 GLUON_TARGET="$1"
+      make -C "$EXECDIR/.." BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
     else
-      make -C "$EXECDIR/.." GLUON_TARGET="$1"
+      make -C "$EXECDIR/.." GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
     fi
   fi
 }
@@ -222,7 +206,7 @@ case "$1" in
         prepare_siteconf "$2"
         prepare_sitemk "$2"
         make -C "$EXECDIR"/.. update
-        touch "$EXECDIR"/.prepare
+        echo "$2" > "$EXECDIR/.prepare"
       ;;
       "l2tp")
         prepare_precondition
@@ -232,7 +216,7 @@ case "$1" in
         prepare_siteconf "$2"
         prepare_sitemk "$2"
         make -C "$EXECDIR/.." update
-        touch "$EXECDIR/.prepare"
+        echo "$2" > "$EXECDIR/.prepare"
       ;;
       "GLUON_BRANCH")
         if [ -n "$3" ]; then
