@@ -1,0 +1,28 @@
+From daa86ab692ad86747f3d740d09349791914fec86 Mon Sep 17 00:00:00 2001
+From: Jan-Tarek Butt <tarek@ring0.de>
+Date: Thu, 11 Jan 2018 00:00:03 +0100
+Subject: [PATCH 3/3] modules: update Gluon packages new tunneldigger version
+
+    57c6796 tunneldigger: clean up version variables in Makefile
+    90ecf80 tunneldigger: Update to newest upstream commit: (#178)
+---
+ modules | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/modules b/modules
+index 03e3cc18..7e967787 100644
+--- a/modules
++++ b/modules
+@@ -9,8 +9,7 @@ PACKAGES_OPENWRT_BRANCH=lede-17.01
+ PACKAGES_OPENWRT_COMMIT=82ef2fd773987a72678a32b862f50085c3f57d56
+ 
+ PACKAGES_GLUON_REPO=https://github.com/freifunk-gluon/packages.git
+-PACKAGES_GLUON_BRANCH=v2017.1.x
+-PACKAGES_GLUON_COMMIT=906f5ef13ec91dd7433bd1a6bd4ffbd15614bbb3
++PACKAGES_GLUON_COMMIT=b969e70965ccda0e1833a245763714b85368d7e8
+ 
+ PACKAGES_ROUTING_REPO=https://github.com/openwrt-routing/packages.git
+ PACKAGES_ROUTING_COMMIT=e656a6e0e69dd45b7caa24775bc86b6eb5dcfe7f
+-- 
+2.15.1
+
