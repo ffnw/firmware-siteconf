@@ -1,0 +1,1911 @@
+From bfb90653c70a1f9c9573b4d0b4efc48702320f62 Mon Sep 17 00:00:00 2001
+From: Jan-Tarek Butt <tarek@ring0.de>
+Date: Mon, 18 Sep 2017 18:20:28 +0200
+Subject: [PATCH 5/5] add pkg gluon-hoodselector
+
+ * add pkg Makefile
+ * add respondd c file
+ * add respondd Makefile
+ * add etc config
+ * add micron.d file
+ * add upgrade script 540-hoodselector
+ * add hoodselector lua script
+ * rm gluon-hoods and gluon-mesh-vpn-fastd from DEPENDS
+ * config rm static option
+ * backport tested comunity version:
+   - Hoodselector: is now able to handle Polygon hoods. !60
+   - Hoodselector: does not use `scan dump` anymore which
+                   saved airtime
+   - Hoodselector: L2TP tunneldigger support #47
+   - Hoodselector: the upgrade script got a refactoring.
+                   Dead code is removed. desing failuer is
+                   fixed, the script use the hood BSSID
+                   instead the possible redundant hood name
+                   for hood identification. #107
+   - Hoodselector: New state, a router from hood A which is
+                   connected to an another router from hood B
+                   is now able to switch back in its own hood
+                   if a router from hood A viseble. #108
+   - Hoodselector: in state "radio less" is now ensured that
+                   mesh on LAN / WAN is enabled befor entering
+                   mode. #109
+   - Hoodselector: A bug in the function get_mesh_if() is
+                   fixed now. This function returns now a list
+                   of all mesh interfaces exzept the VPN
+                   interface #116
+   - Hoodselector: Old VPN configurations will be deleted now.
+                   If a hood without VPN peers got configured
+                   the old peers from the old hood was still
+                   presend. #117
+   - Hoodselector: many functions of the hoodselector are now
+                   placed in a lua libary. #118
+---
+ package/gluon-hoodselector/Makefile                |  43 +
+ .../files/etc/config/hoodselector                  |   3 +
+ .../files/usr/lib/micron.d/hoodselector            |   1 +
+ .../luasrc/lib/gluon/upgrade/540-hoodselector      |  88 ++
+ .../luasrc/usr/lib/lua/hoodselector/util.lua       | 898 +++++++++++++++++++++
+ .../luasrc/usr/sbin/hoodselector                   | 622 ++++++++++++++
+ package/gluon-hoodselector/src/Makefile            |   6 +
+ package/gluon-hoodselector/src/respondd.c          | 139 ++++
+ 8 files changed, 1800 insertions(+)
+ create mode 100644 package/gluon-hoodselector/Makefile
+ create mode 100644 package/gluon-hoodselector/files/etc/config/hoodselector
+ create mode 100644 package/gluon-hoodselector/files/usr/lib/micron.d/hoodselector
+ create mode 100755 package/gluon-hoodselector/luasrc/lib/gluon/upgrade/540-hoodselector
+ create mode 100644 package/gluon-hoodselector/luasrc/usr/lib/lua/hoodselector/util.lua
+ create mode 100755 package/gluon-hoodselector/luasrc/usr/sbin/hoodselector
+ create mode 100644 package/gluon-hoodselector/src/Makefile
+ create mode 100644 package/gluon-hoodselector/src/respondd.c
+
+diff --git a/package/gluon-hoodselector/Makefile b/package/gluon-hoodselector/Makefile
+new file mode 100644
+index 00000000..210e5200
+--- /dev/null
++++ b/package/gluon-hoodselector/Makefile
+@@ -0,0 +1,43 @@
++include $(TOPDIR)/rules.mk
++
++PKG_NAME:=gluon-hoodselector
++PKG_VERSION:=1
++PKG_RELEASE:=1
++
++PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)
++PKG_BUILD_DEPENDS := respondd
++
++include ../gluon.mk
++
++define Package/gluon-hoodselector
++  SECTION:=network
++  CATEGORY:=Gluon
++  TITLE:=Automatic layer2 networksecmentation depending on geo coordinates
++  DEPENDS:=+luci-lib-jsonc +gluon-mesh-batman-adv-15 +respondd +iwinfo
++endef
++
++define Package/gluon-hoodselector/description
++	Automatic layer2 networksecmentation depending on geo coordinates
++endef
++
++define Build/Prepare
++	mkdir -p $(PKG_BUILD_DIR)
++	$(CP) ./src/* $(PKG_BUILD_DIR)/
++endef
++
++define Build/Configure
++endef
++
++define Build/Compile
++	$(call Build/Compile/Default)
++	$(call GluonSrcDiet,./luasrc,$(PKG_BUILD_DIR)/luadest/)
++endef
++
++define Package/gluon-hoodselector/install
++	$(CP) ./files/* $(1)/
++	$(CP) $(PKG_BUILD_DIR)/luadest/* $(1)/
++	$(INSTALL_DIR) $(1)/lib/gluon/respondd
++	$(CP) $(PKG_BUILD_DIR)/respondd.so $(1)/lib/gluon/respondd/hoodselector.so
++endef
++
++$(eval $(call BuildPackage,gluon-hoodselector))
+diff --git a/package/gluon-hoodselector/files/etc/config/hoodselector b/package/gluon-hoodselector/files/etc/config/hoodselector
+new file mode 100644
+index 00000000..24b2800c
+--- /dev/null
++++ b/package/gluon-hoodselector/files/etc/config/hoodselector
+@@ -0,0 +1,3 @@
++config settings 'hoodselector'
++    option hoodfile '/lib/gluon/hoods.json'
++    option enabled '1'
+diff --git a/package/gluon-hoodselector/files/usr/lib/micron.d/hoodselector b/package/gluon-hoodselector/files/usr/lib/micron.d/hoodselector
+new file mode 100644
+index 00000000..a4c9916d
+--- /dev/null
++++ b/package/gluon-hoodselector/files/usr/lib/micron.d/hoodselector
+@@ -0,0 +1 @@
++*/2 * * * * /usr/sbin/hoodselector 2>> /tmp/hoodselector_error
+diff --git a/package/gluon-hoodselector/luasrc/lib/gluon/upgrade/540-hoodselector b/package/gluon-hoodselector/luasrc/lib/gluon/upgrade/540-hoodselector
+new file mode 100755
+index 00000000..a0fe8d65
+--- /dev/null
++++ b/package/gluon-hoodselector/luasrc/lib/gluon/upgrade/540-hoodselector
+@@ -0,0 +1,88 @@
++#!/usr/bin/lua
++
++local uci = require('simple-uci').cursor()
++local hoodutil = require("hoodselector.util")
++
++-- Retun a table of current peers from /etc/config/fastd
++local function getCurrentPeers()
++  local configPeers = {}
++  local err = uci:foreach('fastd', 'peer',
++    function(s)
++      hoodutil.extrac_fastd_peer(s,configPeers)
++    end
++  )
++  if not err then
++    os.exit(1)
++  end
++  return configPeers
++end
++
++-- START HERE
++local hoodfile = uci:get('hoodselector', 'hoodselector', 'hoodfile')
++local hoodbssid = uci:get('hoodselector', 'hoodselector', 'hood')
++
++if hoodfile == nil then
++  os.exit(1)
++end
++
++local jhood = hoodutil.readHoodfile(hoodfile)
++if jhood == nil then
++  uci:set('hoodselector', 'hoodselector', 'enabled', false)
++  uci:save('hoodselector')
++  os.exit(1)
++end
++
++if hoodbssid == nil then
++  local defaulthood = hoodutil.getDefaultHood(jhood)
++  if defaulthood == nil then
++    os.exit(1)
++  end
++  if defaulthood.bssid == nil then
++    os.exit(1)
++  end
++  hoodbssid = defaulthood.bssid
++end
++
++local hood = hoodutil.gethoodByBssid(jhood,hoodbssid)
++if hood == nil then
++  os.exit(1)
++end
++
++uci:section('hoodselector', 'settings', 'hoodselector', {
++  hood = hoodbssid,
++  hoodfile = hoodfile,
++  enabled = true
++})
++uci:save('hoodselector')
++
++local radios = hoodutil.getWifiDevices()
++-- pre check if fastd conf exsist
++if uci:get('fastd', 'mesh_vpn_backbone', 'net') ~= nil then
++  hoodutil.fastd_reconfigure(hood["servers"],getCurrentPeers())
++end
++-- per check if tunneldigger conf exsist
++if uci:get('tunneldigger', 'mesh_vpn', 'interface') ~= nil then
++  hoodutil.tunneldigger_reconfigure(hood["servers"])
++end
++
++if next(radios) then
++  local ibss_exists = false
++  local mesh_exists = false
++  for _,radio in ipairs(radios) do
++    local ifname = uci:get('wireless', 'ibss_' .. radio, 'ifname')
++    if (ifname ~= nil) then
++      ibss_exists = true
++    end
++    ifname = uci:get('wireless', 'mesh_' .. radio, 'ifname')
++    if (ifname ~= nil) then
++      mesh_exists = true
++    end
++  end
++  if ibss_exists then
++    hoodutil.ibss_reconfigure(radios, hood["bssid"])
++  end
++  if mesh_exists then
++    local mesh_prefix = hoodutil.get_mesh_prefix(radios)
++    hoodutil.mesh_reconfigure(radios, mesh_prefix..hood["bssid"]:lower())
++  end
++end
+diff --git a/package/gluon-hoodselector/luasrc/usr/lib/lua/hoodselector/util.lua b/package/gluon-hoodselector/luasrc/usr/lib/lua/hoodselector/util.lua
+new file mode 100644
+index 00000000..05678809
+--- /dev/null
++++ b/package/gluon-hoodselector/luasrc/usr/lib/lua/hoodselector/util.lua
+@@ -0,0 +1,898 @@
++local json = require ("luci.jsonc")
++local uci = require('simple-uci').cursor()
++
++local M = {}
++
++function M.split(s, delimiter)
++  local result = {};
++  for match in (s..delimiter):gmatch("(.-)"..delimiter) do
++    table.insert(result, match);
++  end
++  return result;
++end
++
++local PID = M.split(io.open("/proc/self/stat", 'r'):read('*a'), " ")[1]
++
++function M.log(msg)
++  if msg then
++    io.stdout:write(msg.."\n")
++    os.execute("logger hoodselector["..PID.."]: "..msg)
++  end
++end
++
++-- Read the full hoodfile. Return nil for wrong format or no such file
++function M.readHoodfile(file)
++  local jhood = io.open(file, 'r')
++  if not jhood then return nil end
++  local obj, _, err = json.parse (jhood:read('*a'), 1, nil)
++  if err then
++    return nil
++  else
++    return obj
++  end
++end
++
++function M.mesh_on_wan_disable()
++  os.execute('ifdown mesh_wan')
++  io.stdout:write('Interface mesh_wan disabled.\n')
++end
++
++function M.mesh_on_wan_enable()
++  os.execute('ifup mesh_wan')
++  io.stdout:write('Interface mesh_wan enabled.\n')
++end
++
++function M.mesh_on_lan_disable()
++  os.execute('ifdown mesh_lan')
++  io.stdout:write('Interface mesh_lan disabled.\n')
++end
++
++function M.mesh_on_lan_enable()
++  os.execute('ifup mesh_lan')
++  io.stdout:write('Interface mesh_lan enabled.\n')
++end
++
++function M.fastd_installed()
++  if io.open("/usr/bin/fastd", 'r') ~= nil then
++    return true
++  end
++  return false
++end
++
++function M.tunneldigger_installed()
++  if io.open("/usr/bin/tunneldigger", 'r') ~= nil then
++    return true
++  end
++  return false
++end
++
++function M.filt_if(filt,str)
++  for _, c in ipairs(filt) do
++    -- check if - is contains because it is a magic character thus it musst be replace)
++    if c:gsub("%-", "0"):match(str:gsub("%-", "0")) then
++      return true
++    end
++  end
++  return false
++end
++
++function M.filter_redundancy(list)
++  local flag = {}
++  local ret = {}
++  for _,element in ipairs(list) do
++    if not flag[element] then
++      ret[#ret+1] = element
++      flag[element] = true
++    end
++  end
++  return ret
++end
++
++function M.trim(s)
++  -- from PiL2 19.4
++  return (s:gsub("^%s*(.-)%s*$", "%1"))
++end
++
++function M.sleep(n)
++  os.execute("sleep " .. tonumber(n))
++end
++
++function M.brclient_restart()
++  os.execute('ifconfig br-client down')
++  os.execute('ifconfig br-client up')
++  io.stdout:write('Interface br-client restarted.\n')
++end
++
++function M.vpn_stop()
++  -- check if fastd installed
++  if M.fastd_installed() then
++    if uci:get_bool('fastd','mesh_vpn','enabled') then
++      os.execute('/etc/init.d/fastd stop')
++      io.stdout:write('Fastd stoped.\n')
++    end
++  end
++  -- check if tunneldigger installed
++  if M.tunneldigger_installed() then
++    if uci:get_bool('tunneldigger','mesh_vpn','enabled') then
++      os.execute('/etc/init.d/tunneldigger stop')
++      io.stdout:write('Tunneldigger stoped.\n')
++    end
++  end
++end
++
++function M.vpn_start()
++  if M.fastd_installed() then
++    if uci:get_bool('fastd','mesh_vpn','enabled') then
++      os.execute('/etc/init.d/fastd start')
++      io.stdout:write('Fastd started.\n')
++    end
++  end
++  if M.tunneldigger_installed() then
++    if uci:get_bool('tunneldigger','mesh_vpn','enabled') then
++      os.execute('/etc/init.d/tunneldigger start')
++      io.stdout:write('Tunneldigger started.\n')
++    end
++  end
++  M.brclient_restart()
++end
++
++function M.vpn_disable()
++  if M.fastd_installed() then
++    if uci:get_bool('fastd','mesh_vpn','enabled') then
++      os.execute('/etc/init.d/fastd disable')
++      io.stdout:write('Fastd disabled.\n')
++    end
++  end
++  if M.tunneldigger_installed() then
++    if uci:get_bool('tunneldigger','mesh_vpn','enabled') then
++      os.execute('/etc/init.d/tunneldigger disable')
++      io.stdout:write('Tunneldigger disabled.\n')
++    end
++  end
++end
++
++function M.vpn_enable()
++  if M.fastd_installed() then
++    if not uci:get_bool('fastd','mesh_vpn','enabled') then
++      os.execute('/etc/init.d/fastd enable')
++      io.stdout:write('Fastd enabled.\n')
++    end
++  end
++  if M.tunneldigger_installed() then
++    if not uci:get_bool('tunneldigger','mesh_vpn','enabled') then
++      os.execute('/etc/init.d/tunneldigger enable')
++      io.stdout:write('Tunneldigger enabled.\n')
++    end
++  end
++end
++
++function M.wireless_restart()
++  os.execute('wifi')
++  io.stdout:write('Wireless restarted.\n')
++end
++
++-- Get a list of wifi devices return an emty table for no divices
++function M.getWifiDevices()
++  local radios = {}
++  uci:foreach('wireless', 'wifi-device',
++    function(s)
++      table.insert(radios, s['.name'])
++    end
++  )
++  return radios
++end
++
++-- get signal strength
++function M.scan_filter_quality(scan_str, redirect)
++  local tmp_quality = redirect
++  if scan_str:match("signal:") then
++    tmp_quality = M.split(scan_str, " ")
++    tmp_quality = M.split(tmp_quality[2], "%.")
++    if tmp_quality[1]:match("-") then
++      tmp_quality = M.split(tmp_quality[1], "-")
++    end
++    tmp_quality = tonumber(tmp_quality[2]:match("(%d%d)"))
++  end
++  return tmp_quality
++end
++
++-- get frequency
++function M.scan_filter_frequency(scan_str, redirect)
++  local tmp_frequency = redirect
++  if scan_str:match("freq") then
++    tmp_frequency = M.split(scan_str, ":")
++    tmp_frequency = tmp_frequency[2]
++    if tmp_frequency ~= nil then
++      tmp_frequency = M.trim(tmp_frequency)
++    end
++  end
++  return tmp_frequency
++end
++
++function M.ibss_scan(radio,ifname,ssid,networks)
++  local wireless_scan = string.format( "iw %s scan", ifname)
++  local row = {}
++  row["radio"] = radio
++  -- loop through each line in the output of iw
++  for wifiscan in io.popen(wireless_scan, 'r'):lines() do
++    -- the following line matches a new network in the output of iw
++    if(row["bssid"] ~= nil and row["quality"] ~= nil and row["ssid"] == ssid) then
++      table.insert(networks, row)
++      row = {}
++      row["radio"] = radio
++    end
++
++    -- get ssid
++    if wifiscan:match("SSID:") then
++      row["ssid"] = M.split(wifiscan, ":")
++      row["ssid"] = row["ssid"][2]
++      if(row["ssid"] ~= nil) then
++        row["ssid"] = M.trim(row["ssid"])
++      end
++    end
++    row["frequency"] = M.scan_filter_frequency(wifiscan, row["frequency"])
++
++    -- get bssid
++    if wifiscan:match("(%w+:%w+:%w+:%w+:%w+:%w+)") then
++      row["bssid"] = wifiscan:match("(%w+:%w+:%w+:%w+:%w+:%w+)")
++    end
++    row["quality"] = M.scan_filter_quality(wifiscan, row["quality"])
++  end
++  return networks
++end
++
++function M.mesh_scan(radio,ifname,meshid,networks)
++  local wireless_scan = string.format( "iw %s scan", ifname)
++  local row = {}
++  row["radio"] = radio
++  -- loop through each line in the output of iw
++  for wifiscan in io.popen(wireless_scan, 'r'):lines() do
++    -- the following line matches a new network in the output of iw
++    if(row["bssid"] ~= nil and row["quality"] ~= nil and row["ssid"] == meshid) then
++      table.insert(networks, row)
++      row = {}
++      row["radio"] = radio
++    end
++    row["frequency"] = M.scan_filter_frequency(wifiscan, row["frequency"])
++    row["quality"] = M.scan_filter_quality(wifiscan, row["quality"])
++
++    -- get mesh-ID(ssid) and hoodbssid
++    if wifiscan:match("MESH ID:") then
++      local meshID = M.split(wifiscan, " ")[3]
++      if meshID ~= nil then
++        meshID = M.split(meshID, "_")
++        if meshID[1] ~= nil then
++          row["ssid"] = meshID[1].."_"
++        end
++        if meshID[2] ~= nil then
++          if meshID[2]:match("(%w+:%w+:%w+:%w+:%w+:%w+)") then
++            row["bssid"] = meshID[2]:match("(%w+:%w+:%w+:%w+:%w+:%w+)")
++          end
++        end
++      end
++    end
++  end
++  return networks
++end
++
++-- Scans for wireless networks and returns a two dimensional array containing
++-- wireless mesh neighbour networks and their properties.
++-- The array is sorted descending by signal strength (strongest signal
++-- first, usually the local signal of the wireless chip of the router)
++function M.wlan_list_sorted(radios, mesh_prefix)
++  local networks = {}
++  for _, radio in ipairs(radios) do
++    local ifname = uci:get('wireless', 'ibss_' .. radio, 'ifname')
++    local ssid = uci:get('wireless', 'ibss_' .. radio, 'ssid')
++    if (ifname ~= nil and ssid ~= nil) then
++      --do ibss scan
++      networks = M.ibss_scan(radio,ifname,ssid,networks)
++    end
++    ifname = uci:get('wireless', 'mesh_' .. radio, 'ifname')
++    if (ifname ~= nil and mesh_prefix ~= nil) then
++      --do mesh scan
++      networks = M.mesh_scan(radio,ifname,mesh_prefix,networks)
++    end
++  end
++  table.sort(networks, function(a,b) return a["quality"] < b["quality"] end)
++  return networks
++end
++
++-- this method removes the wireless network of the router itself
++-- from the wlan_list
++function M.filter_my_wlan_network(wlan_list)
++  for i=#wlan_list,1,-1 do
++    local bssid = uci:get('wireless', 'ibss_' .. wlan_list[i].radio, 'bssid')
++    if bssid ~= nil then
++      if string.lower(wlan_list[i].bssid) == string.lower(bssid) then
++        table.remove(wlan_list, i)
++      end
++    else
++      local mesh = uci:get('wireless', 'mesh_' .. wlan_list[i].radio, 'mesh_id')
++      if mesh ~= nil then
++        if string.lower(wlan_list[i].ssid..wlan_list[i].bssid) == string.lower(mesh) then
++          table.remove(wlan_list, i)
++        end
++      end
++    end
++  end
++  return wlan_list
++end
++
++function M.filter_default_hood_wlan_networks(default_hood, wlan_list)
++  for i=#wlan_list,1,-1 do
++    if(string.lower(default_hood.bssid) == string.lower(wlan_list[i].bssid)) then
++      table.remove(wlan_list, i)
++    end
++  end
++  return wlan_list
++end
++
++-- Get Geoposition. Return nil for no position
++function M.getGeolocation()
++  return {["lat"] = tonumber(uci:get('gluon-node-info', uci:get_first('gluon-node-info', 'location'), 'latitude')),
++  ["lon"] =  tonumber(uci:get('gluon-node-info', uci:get_first('gluon-node-info', 'location'), 'longitude')) }
++end
++
++-- Source with pseudocode: https://de.wikipedia.org/wiki/Punkt-in-Polygon-Test_nach_Jordan
++-- see also https://en.wikipedia.org/wiki/Point_in_polygon
++-- parameters: points A = (x_A,y_A), B = (x_B,y_B), C = (x_C,y_C)
++-- return value: −1 if the ray from A to the right bisects the edge [BC] (the lower vortex of [BC]
++-- is not seen as part of [BC]);
++--                0 if A is on [BC];
++--               +1 else
++function M.crossProdTest(x_A,y_A,x_B,y_B,x_C,y_C)
++  if y_A == y_B and y_B == y_C then
++    if (x_B <= x_A and x_A <= x_C) or (x_C <= x_A and x_A <= x_B) then
++      return 0
++    end
++    return 1
++  end
++  if not ((y_A == y_B) and (x_A == x_B)) then
++    if y_B > y_C then
++      -- swap B and C
++      local h = x_B
++      x_B = x_C
++      x_C = h
++      h = y_B
++      y_B = y_C
++      y_C = h
++    end
++    if (y_A <= y_B) or (y_A > y_C) then
++      return 1
++    end
++    local Delta = (x_B-x_A) * (y_C-y_A) - (y_B-y_A) * (x_C-x_A)
++    if Delta > 0 then
++      return 1
++    elseif Delta < 0 then
++      return -1
++    end
++  end
++  return 0
++end
++
++-- Source with pseudocode: https://de.wikipedia.org/wiki/Punkt-in-Polygon-Test_nach_Jordan
++-- see also: https://en.wikipedia.org/wiki/Point_in_polygon
++-- let P be a 2D Polygon and Q a 2D Point
++-- return value:  +1 if Q within P;
++--               −1 if Q outside of P;
++--                0 if Q on an edge of P
++function M.pointInPolygon(poly, point)
++  local t = -1
++  for i=1,#poly-1 do
++    t = t * M.crossProdTest(point.lon,point.lat,poly[i][2],poly[i][1],poly[i+1][2],poly[i+1][1])
++    if t == 0 then break end
++  end
++  return t
++end
++
++-- Return hood from the hood file based on geo position or nil if no real hood could be determined
++-- First check if an area has > 2 points and is hence a polygon. Else assume it is a rectangular
++-- box defined by two points (south-west and north-east)
++function M.getHoodByGeo(jhood,geo)
++  for _, h in pairs(jhood) do
++    for _, area in pairs(h.boxes) do
++      if #area > 2 then
++        if (M.pointInPolygon(area,geo) == 1) then
++          return h
++        end
++      else
++        if ( geo.lat >= area[1][1] and geo.lat < area[2][1] and geo.lon >= area[1][2] and geo.lon < area[2][2] ) then
++          return h
++        end
++      end
++    end
++  end
++  return nil
++end
++
++-- This method checks if the fastd configuration needs to be rewritten from the
++-- hoodfile. Therefore the method performs 3 checks and returns false if all
++-- checks fail. If one of the checks results to true the method returns true:
++--   1. Check if the local fastd configuration has a server that does not exist
++--      in the hoodfile.
++--   2. Check if a server that does exist in the local fastd configuration AND
++--      in the hoodfile has a configuration change.
++--   3. Check if the hoodfile contains a server that does not exist in the
++--      local fastd configuration.
++function M.fastd_reconfiguration_needed(hood_serverlist,local_serverlist)
++
++  local tmp_hood_serverlist = {}
++  for _,hood_server in pairs(hood_serverlist) do
++    if (hood_server["type"] == "fastd") then
++      table.insert(tmp_hood_serverlist,hood_server)
++    end
++  end
++
++  -- Checks 1. and 2.
++  for local_server_config_name, local_server in pairs(local_serverlist) do
++    local local_server_exists_in_hoodfile = false
++    for _,hood_server in pairs(tmp_hood_serverlist) do
++      if (local_server_config_name == 'mesh_vpn_backbone_peer_'..
++        M.split(hood_server["host"], '.')[1]:gsub("%-", "%_") .. "_" .. hood_server['port']) then
++        local_server_exists_in_hoodfile = true
++        if ( local_server.key ~= hood_server['publickey'] ) then return true end
++        if ( local_server.remote.host ~= '\"'..hood_server["host"]..'\"' ) then return true end
++        if ( local_server.remote.port ~= hood_server['port'] ) then return true end
++      end
++    end
++    if not local_server_exists_in_hoodfile then return true end
++  end
++
++  -- Check 3.
++  for _,hood_server in pairs(tmp_hood_serverlist) do
++    local hood_server_exists_locally = false
++    for local_server_config_name, _ in pairs(local_serverlist) do
++      if (local_server_config_name == 'mesh_vpn_backbone_peer_'..
++        M.split(hood_server["host"], '.')[1]:gsub("%-", "%_") .. "_" .. hood_server['port']) then
++        hood_server_exists_locally = true
++      end
++    end
++    if not hood_server_exists_locally then return true end
++  end
++  return false
++end
++
++function M.tunneldigger_reconfiguration_needed(hood_serverlist,local_serverlist)
++
++  local tmp_hood_serverlist = {}
++  for _,hood_server in pairs(hood_serverlist) do
++    if (hood_server["type"] == "l2tp") then
++      table.insert(tmp_hood_serverlist,hood_server)
++    end
++  end
++
++  -- Checks 1. and 2.
++  for _,local_peer in pairs(local_serverlist) do
++    local local_server_exists_in_hoodfile = false
++    for _,hood_server in pairs(tmp_hood_serverlist) do
++      if (local_peer == hood_server["host"] .. ":" .. hood_server["port"]) then
++        local_server_exists_in_hoodfile = true
++      end
++    end
++    if not local_server_exists_in_hoodfile then return true end
++  end
++
++  -- Check 3.
++  for _,hood_server in pairs(tmp_hood_serverlist) do
++    local hood_server_exists_locally = false
++    for _,local_peer in pairs(local_serverlist) do
++      if (local_peer == hood_server["host"] .. ":" .. hood_server["port"]) then
++        hood_server_exists_locally = true
++      end
++    end
++    if not(hood_server_exists_locally) then return true end
++  end
++  return false
++end
++
++-- Reconfigure fastd
++function M.fastd_reconfigure(hood_serverlist,local_serverlist)
++  -- remove all servers
++  for config_index, _ in pairs(local_serverlist) do
++    uci:delete('fastd',config_index)
++  end
++
++  -- add servers from hoodfile
++  local group = 'mesh_vpn_backbone'
++  for _,hood_server in pairs(hood_serverlist) do
++    if (hood_server["type"] == "fastd") then
++      uci:section('fastd', 'peer', group .. '_peer_' ..
++      M.split(hood_server.host, '.')[1]:gsub("%-", "%_") .. "_" .. hood_server.port,
++        {
++          enabled = 1,
++          net = 'mesh_vpn',
++          group = group,
++          key = hood_server.publickey,
++          remote = {'\"'..hood_server.host..'\"'..' port '..hood_server.port}
++        }
++      )
++    end
++  end
++
++  uci:save('fastd')
++  uci:commit('fastd')
++  io.stdout:write('Fastd needed reconfiguration. Stopped and applied new settings.\n')
++end
++
++function M.tunneldigger_reconfigure(hood_serverlist)
++  -- remove all servers
++  uci:delete('tunneldigger', 'mesh_vpn', 'address')
++
++  -- add servers from hoodfile
++  local addresslist = {}
++  for _,hood_server in pairs(hood_serverlist) do
++    if (hood_server["type"] == "l2tp") then
++      local tmpAdrr =hood_server["host"] .. ":" .. hood_server["port"]
++      table.insert(addresslist, tmpAdrr)
++    end
++  end
++  if next(addresslist) then
++    uci:set('tunneldigger', 'mesh_vpn', 'address', addresslist)
++  end
++  uci:save('tunneldigger')
++  uci:commit('tunneldigger')
++  io.stdout:write('tunneldigger needed reconfiguration. Stopped and applied new settings.\n')
++end
++
++-- Checks if wireless needs a reconfiguration. Returns true if any of the checks
++-- passes. Otherwise the method returns false.
++function M.wireless_reconfiguration_needed(radios, prefix, hood_bssid)
++  local configure_ibss = false
++  local configure_mesh = false
++  for _, radio in ipairs(radios) do
++    if uci:get('wireless', 'ibss_' .. radio, 'ifname') ~= nil then
++      if ( uci:get('wireless', 'ibss_' .. radio, 'bssid') ~= hood_bssid ) then
++        configure_ibss = true
++      end
++    end
++    if uci:get('wireless', 'mesh_' .. radio, 'ifname') ~= nil then
++      if ( uci:get('wireless', 'mesh_' .. radio, 'mesh_id') ~= prefix..hood_bssid:lower() ) then
++        configure_mesh = true
++      end
++    end
++  end
++  if not configure_ibss and not configure_mesh then return 0 end --no changes
++  if configure_ibss and not configure_mesh then return 1 end --ibss changes
++  if not configure_ibss and configure_mesh then return 2 end --mesh changes
++  return 3 --bouth changes
++end
++
++-- Reconfigure wireless
++function M.ibss_reconfigure(radios, hood_bssid)
++  for _, radio in ipairs(radios) do
++    if not ( uci:get('wireless', 'ibss_' .. radio, 'bssid') == hood_bssid ) then
++      uci:section('wireless', 'wifi-iface', 'ibss_' .. radio, {bssid = hood_bssid})
++    end
++  end
++  uci:save('wireless')
++  uci:commit('wireless')
++end
++
++function M.mesh_reconfigure(radios, meshid)
++  for _, radio in ipairs(radios) do
++    if not ( uci:get('wireless', 'mesh_' .. radio, 'mesh_id') == meshid ) then
++      uci:section('wireless', 'wifi-iface', 'mesh_' .. radio, {mesh_id = meshid})
++    end
++  end
++  uci:save('wireless')
++  uci:commit('wireless')
++end
++
++-- Save selected hood to config to make a restore after a sysupgrade possible
++function M.saveHoodToConfig(hoodbssid)
++  uci:set('hoodselector', 'hoodselector', 'hood', hoodbssid)
++  uci:save('hoodselector')
++  uci:commit('hoodselector')
++end
++
++-- Return the default hood in the hood list.
++-- This method can return the following data:
++-- * default hood
++-- * nil if no default hood has been defined
++function M.getDefaultHood(jhood)
++  for _, h in pairs(jhood) do
++    if h.defaulthood then
++      return h
++    end
++  end
++  return nil
++end
++
++-- boolean check if batman-adv has gateways
++function M.batmanHasGateway()
++  local file = io.open("/sys/kernel/debug/batman_adv/bat0/gateways", 'r')
++  if file ~= nil then
++    for gw in file:lines() do
++      if gw:match("Bit") then
++        return true
++      end
++    end
++  end
++  return false
++end
++
++-- Return hood from the hood file based on a given BSSID. nil if no matching hood could be found
++function M.gethoodByBssid(jhood, scan_bssid)
++  for _, h in pairs(jhood) do
++    if scan_bssid:lower():match(h.bssid:lower()) then
++      return h
++    end
++  end
++  return nil
++end
++
++-- Return hood from hood file based on a bssid address. nil if no matching hood could be found
++function M.getCurrentHood(jhood)
++  local hoodbssid = uci:get('hoodselector', 'hoodselector', 'hood')
++  for _, h in pairs(jhood) do
++    if h.bssid == hoodbssid then
++      return h
++    end
++  end
++  return nil
++end
++
++function M.test_batman_mesh_networks(sorted_wlan_list, meshprefix)
++  -- remove the ap network because we cannot change
++  -- the settings of the adhoc network if the ap network is still operating
++  for iface in io.popen(string.format("iw dev"),'r'):lines() do
++    if iface:match("Interface") then
++      iface = M.trim(M.split(iface, "Interface")[2])
++      if not ( iface:match("ibss") or iface:match("mesh")) then
++        os.execute("iw dev "..iface.." del")
++      end
++    end
++  end
++  for _, wireless in pairs(sorted_wlan_list) do
++    local ibss = uci:get('wireless', 'ibss_' .. wireless["radio"], 'ifname')
++    local mesh = uci:get('wireless', 'mesh_' .. wireless["radio"], 'ifname')
++    if wireless["ssid"] == uci:get('wireless', 'ibss_' .. wireless["radio"], 'ssid') then
++      io.stdout:write("Testing IBSS "..wireless["bssid"].."...\n")
++      -- leave the current adhoc network
++      os.execute("iw dev "..ibss.." ibss leave 2> /dev/null")
++      if mesh ~= nil then
++        os.execute("iw dev "..mesh.." mesh leave 2> /dev/null")
++      end
++      -- setup the adhoc network we want to test
++      os.execute("iw dev "..ibss.." ibss join "..wireless["ssid"].." "..wireless["frequency"].." "..wireless["bssid"])
++    end
++    if wireless["ssid"] == meshprefix then
++      io.stdout:write("Testing MESH "..wireless["bssid"].."...\n")
++      -- leave the current mesh network
++      os.execute("iw dev "..mesh.." mesh leave 2> /dev/null")
++      if ibss ~= nil then
++        os.execute("iw dev "..ibss.." ibss leave 2> /dev/null")
++      end
++      -- setup the mesh network we want to test
++      os.execute("iw dev "..mesh.." mesh join "..meshprefix..wireless["bssid"].." freq "..wireless["frequency"])
++    end
++    -- sleep 30 seconds till the connection is fully setup
++    local c = 0;
++    while(not M.batmanHasGateway()) do
++      if(c >= 30) then break end
++      M.sleep(1)
++      c = c +1;
++    end
++    if c < 30 then
++      return wireless["bssid"]
++    end
++  end
++  return nil
++end
++
++function M.get_batman_mesh_network(sorted_wlan_list, defaultHood, meshprefix)
++  io.stdout:write('Testing neighbouring adhoc networks for batman advanced gw connection.\n')
++  io.stdout:write('The following wireless networks have been found:\n')
++  for _, network in pairs(sorted_wlan_list) do
++    print(network["quality"].."\t"..network["frequency"].."\t"..network["bssid"].."\t"..network["ssid"])
++  end
++
++  -- we dont want to test the default hood because if there is no other
++  -- hood present we will connect to the default hood anyway
++  sorted_wlan_list = M.filter_default_hood_wlan_networks(defaultHood, sorted_wlan_list)
++
++  -- we dont want to test duplicated networks
++  sorted_wlan_list = M.filter_redundancy(sorted_wlan_list)
++
++  -- we dont want to get tricked by our signal
++  sorted_wlan_list = M.filter_my_wlan_network(sorted_wlan_list)
++
++  io.stdout:write('After filtering we will test the following wireless networks:\n')
++  for _, network in pairs(sorted_wlan_list) do
++    print(network["quality"].."\t"..network["frequency"].."\t"..network["bssid"].."\t"..network["ssid"])
++  end
++
++  local bssid = nil
++  if(next(sorted_wlan_list)) then
++    io.stdout:write("Prepare configuration for testing wireless networks...\n")
++    -- Notice:
++    -- we will use iw for testing the wireless networks because using iw does
++    -- not need any changes inside the uci config. This approach allows the
++    -- router to automatically reset to previous configuration in case
++    -- someone disconnects the router from power during test.
++
++    -- stop vpn to prevent two hoods from beeing connected in case
++    -- the router gets internet unexpectedly during test.
++    M.vpn_stop()
++    bssid = M.test_batman_mesh_networks(sorted_wlan_list, meshprefix)
++    M.vpn_start()
++    M.wireless_restart()
++    io.stdout:write("Finished testing wireless networks, restored previous configuration\n")
++  end
++
++  return bssid
++end
++
++function M.get_batman_GW_interface()
++  for gw in io.open("/sys/kernel/debug/batman_adv/bat0/gateways", 'r'):lines() do
++    if gw:match("=>") then
++      return M.trim(gw:match("%[.-%]"):gsub("%[", ""):gsub("%]", ""))
++    end
++  end
++  return nil
++end
++
++function M.get_radio_to_bssid(radios,iface,jhood)
++  for _, radio in ipairs(radios) do
++    local ifname = uci:get('wireless', 'ibss_' .. radio, 'ifname')
++    if ifname == iface then
++      return M.gethoodByBssid(jhood, uci:get('wireless', 'ibss_' .. radio, 'bssid'))
++    end
++    ifname = uci:get('wireless', 'mesh_' .. radio, 'ifname')
++    if ifname == iface then
++      local meshid = uci:get('wireless', 'mesh_' .. radio, 'mesh_id')
++      meshid = M.split(meshid, '_')
++      if meshid[2] ~= nil then
++        if meshid[2]:match("(%w+:%w+:%w+:%w+:%w+:%w+)") then
++          return M.gethoodByBssid(jhood, meshid[2]:match("(%w+:%w+:%w+:%w+:%w+:%w+)"))
++        end
++      end
++    end
++  end
++  return nil
++end
++
++function M.mesh_lan_wan(iface)
++  if uci:get('network', 'mesh_wan') then
++    local if_wan = io.popen(string.format("ifstatus mesh_wan"), 'r'):read('*a')
++    if if_wan ~= nil then
++      local wan, _, _ = json.parse(if_wan, 1, nil)
++      if wan["device"] == iface then
++        io.stdout:write("gw source is wan\n")
++        return true
++      end
++    end
++  end
++  if uci:get('network', 'mesh_lan') then
++    local if_lan = io.popen(string.format("ifstatus mesh_lan"), 'r'):read('*a')
++    if if_lan ~= nil then
++      local lan, _, _ = json.parse(if_lan, 1, nil)
++      if lan["device"] == iface then
++        io.stdout:write("gw source is lan\n")
++        return true
++      end
++    end
++  end
++  return false
++end
++
++function M.conditional_increment(table,index)
++  if index["bssid"] ~= nil then
++    if not table[index["bssid"]] then
++      table[index["bssid"]] = 1
++    else
++      table[index["bssid"]] = table[index["bssid"]] + 1
++    end
++  end
++end
++
++-- Get BSSID from neighbour hoods over respondd
++function M.molw_get_bssid(iface)
++  -- differentiate between VPN and mesh only routers
++  local vpn_router_neighbour_bssids = {}
++  local mesh_router_neighbour_bssids = {}
++  local own_mac = uci:get('network', 'client', 'macaddr')
++  for _,respondd_if in ipairs(iface) do
++    local respondd = string.format("gluon-neighbour-info -i " ..
++    respondd_if .. " -p 1001 -d ff02::2 -r hoodselector -t 0.5")
++    print(respondd)
++    for line in io.popen(respondd, 'r'):lines() do
++      local obj, _, err = json.parse (line, 1, nil)
++      if err then
++        io.stdout:write("json parse error!\n")
++      else
++        if obj["mac"] ~= own_mac then
++          if obj["hoodinfo"] ~= nil then
++            if obj["hoodinfo"]["vpnrouter"] ~= nil then
++              if obj["hoodinfo"]["vpnrouter"]:match("true") then
++                if obj["mesh"] ~= nil then
++                  M.conditional_increment(vpn_router_neighbour_bssids, obj["mesh"])
++                end
++              else
++                if obj["mesh"] ~= nil then
++                  M.conditional_increment(mesh_router_neighbour_bssids, obj["mesh"])
++                end
++              end
++            end
++          end
++        end
++      end
++    end
++  end
++  local neighbour_bssids
++  if next(vpn_router_neighbour_bssids) then
++    -- molwm VPN router founds.
++    print("Found VPN routers over mesh on lan or wan")
++    neighbour_bssids = vpn_router_neighbour_bssids
++  else
++    -- molwm VPN router not founds. Get most presented bssid
++    print("No VPN routers over mesh on lan or wan")
++    neighbour_bssids = mesh_router_neighbour_bssids
++  end
++
++  local bssid = nil
++  local value = 0
++  for b,c in pairs(neighbour_bssids) do
++    io.stdout:write(b.."\t"..c.."\n")
++    if value < c then
++      bssid = b
++      value = c
++    end
++  end
++  local eq_cost_entrys = {}
++  for b,c in pairs(neighbour_bssids) do
++    if b == bssid then
++      table.insert(eq_cost_entrys,b)
++    end
++    if c == value and b ~= bssid then
++      table.insert(eq_cost_entrys,b)
++    end
++  end
++  if #eq_cost_entrys ~= 0 then
++    bssid = eq_cost_entrys[math.random(#eq_cost_entrys)]
++  end
++  return bssid
++end
++
++function M.get_mesh_prefix(radios)
++  local mesh_prefix = nil
++  for _,radio in ipairs(radios) do
++    local mesh_id = uci:get('wireless', 'mesh_' .. radio, 'mesh_id')
++    if mesh_id ~= nil then
++      mesh_id = M.split(mesh_id, '_')
++      if mesh_id[1] ~= "" then
++        mesh_prefix = mesh_id[1].."_"
++      else
++        if mesh_id[2] ~= "" then
++          mesh_prefix = mesh_id[2].."_"
++        end
++      end
++    end
++  end
++  return mesh_prefix
++end
++
++function M.extrac_fastd_peer(s,configPeers)
++  if s['.name'] then
++    for prefix,peer in pairs(s) do
++      local tmpPeer = {}
++      if prefix:match(".name") then
++        if peer:match("mesh_vpn_backbone_peer_") then
++          -- val tmpRemote does not need uci exception check because its already include by "uci:foreach"
++          local tmpRemote = uci:get('fastd', peer, 'remote')
++          tmpRemote = M.split(tmpRemote[1], " ")
++          local remote = {}
++          remote['host'] = tmpRemote[1]
++          remote[tmpRemote[2]] = tmpRemote[3]
++          -- uci:get does not need uci exception check because its already include by "uci:foreach"
++          tmpPeer['key'] = tostring(uci:get('fastd', peer, 'key'))
++          tmpPeer['remote'] = remote
++          configPeers[peer] = tmpPeer
++        end
++      end
++    end
++  end
++end
++
++return M
+diff --git a/package/gluon-hoodselector/luasrc/usr/sbin/hoodselector b/package/gluon-hoodselector/luasrc/usr/sbin/hoodselector
+new file mode 100755
+index 00000000..b74f0362
+--- /dev/null
++++ b/package/gluon-hoodselector/luasrc/usr/sbin/hoodselector
+@@ -0,0 +1,622 @@
++#!/usr/bin/lua
++
++-- This is the hoodselector. The hoodselector is one of the main components for
++-- splitting a layer 2 mesh network into seperated network segments (hoods).
++-- The job of the hoodselector is to automatically detect in which hood
++-- the router is located based on geo settings or by scanning its environment.
++-- Based on these informations the hoodselector should select a hood from a
++-- list of known hoods (hoodlist) and adjust vpn, wireless and mesh on lan
++-- configuration based on the settings given for the selected hood.
++--
++-- The hoodlist containing all hood settings is located in a seperate hoodfile
++-- in the hoods package.
++--
++-- The hoodselector works with the folowing additional software:
++--  * fastd (vpn configuration) see getCurrentFastdPeers()
++--  * tunneldigger (vpn configuration) see getCurrentTunneldiggerPeers()
++--  * iw (wireless network scanning) see get_batman_mesh_network()
++--  * batman-adv (mesh protocol) see directVPN(), get_batman_GW_interface()
++--  * respondd (mesh on LAN or WAN) see molwm()
++--
++--  To detect the current hood the hoodselector knows 5 modes containing
++--  * 1. VPN mode (VPN Router)
++--    - set hood dependent on geo position.
++--  * 2. Gateway mode
++--    - set hood dependent on gateway source
++--  * 3. Scan mode
++--    - Set wifi conf on scanned BSSID
++--    - Set vpn conf getting by BSSID (if no VPN conf exsist disable vpn)
++--  * 4. Radio less mode
++--    - Set hood via mesh on lan wan managemand
++--  * 5. Default mode
++--    - Set default hood if no other hood matchs
++
++-- When selecting a hood, the hoodselector has the following priorities:
++--   1. Selecting a hood by geo position depending on direct VPN connection.
++--   2. force creating one mesh cloud with neighbour mesh routers
++--   3. if routers had only mesh setting vpn config depends on the BSSID
++--
++-- Resources
++--  * https://wireless.wiki.kernel.org/en/users/documentation/iw
++
++-- MOLWM respondd file
++local molwmFile="/tmp/.hoodselector"
++
++local molwmtable = {}
++molwmtable["md5hash"] = ""
++molwmtable["vpnrouter"] = ""
++molwmtable["hoodname"] = ""
++molwmtable["bssid"] = ""
++
++-- PID file to ensure the hoodselector isn't running parallel
++local pidPath="/var/run/hoodselector.pid"
++
++local json = require ("luci.jsonc")
++local uci = require('simple-uci').cursor()
++local hash = require("hash")
++local hoodutil = require("hoodselector.util")
++
++if not uci:get_bool('hoodselector', 'hoodselector', 'enabled') then
++  io.stdout:write("Hoodselector is disabled by UCI\n")
++  os.exit(0)
++end
++
++if io.open(pidPath, "r") ~=nil then
++  hoodutil.log("The hoodselector is still running.")
++  os.exit(1)
++else
++  if io.open(pidPath, "w") ==nil then
++    hoodutil.log("Can`t create pid file on "..pidPath)
++    os.exit(1)
++  end
++end
++
++-- Program terminating function including removing of PID file
++local function exit(exc)
++  if io.open(pidPath, "r") ~=nil then
++    os.remove(pidPath)
++  end
++  os.exit(tonumber(exc))
++end
++
++local FILE = uci:get('hoodselector', 'hoodselector', 'hoodfile')
++if FILE == nil then
++  hoodutil.log("No hood file in config")
++  exit(1)
++end
++
++-- initialization done
++
++local function get_mesh_vpn_interface()
++  local ret = {}
++  if hoodutil.fastd_installed() then
++    local vpnifac = uci:get('fastd', 'mesh_vpn_backbone', 'net')
++    if vpnifac  ~= nil then
++      vpnifac = vpnifac:gsub("%_",'-')
++      table.insert(ret,vpnifac)
++    else
++      hoodutil.log("fastd uci config broken! abort...")
++      exit(1)
++    end
++  end
++  if hoodutil.tunneldigger_installed() then
++    local vpnifac = uci:get('tunneldigger', 'mesh_vpn', 'interface')
++    if vpnifac  ~= nil then
++      table.insert(ret,vpnifac)
++    else
++      hoodutil.log("tunneldigger uci config broken! abort...")
++      exit(1)
++    end
++  end
++  return ret
++end
++
++-- Give a list of interfaces where respondd is listening
++local function get_mesh_if(radios)
++  -- get VPN interfaces
++  local filtert_if = get_mesh_vpn_interface()
++
++  -- get Wifi interfaces
++  for _, radio in ipairs(radios) do
++    local ifname = uci:get('wireless', 'ibss_' .. radio, 'ifname')
++    if ifname ~= nil then
++      table.insert(filtert_if,ifname)
++    end
++    ifname = uci:get('wireless', 'mesh_' .. radio, 'ifname')
++    if ifname ~= nil then
++      table.insert(filtert_if,ifname)
++    end
++  end
++
++  local respondd_if = {}
++  for line in io.popen(string.format("ubus call network.interface dump | jsonfilter -e \"@.interface[@.proto='gluon_mesh' && @.up=true].device\" -e \"@.interface[@.interface='$(cat /lib/gluon/respondd/client.dev 2>/dev/null)' && @.up=true].device\""), "r"):lines() do
++    -- filter vpn and wifi interfaces
++    if not hoodutil.filt_if(filtert_if,line) then
++      table.insert(respondd_if,line)
++    end
++  end
++
++  return hoodutil.filter_redundancy(respondd_if)
++end
++
++local function molwm(radios)
++  if uci:get_bool("network", "mesh_lan", "auto") or uci:get_bool("network", "mesh_wan", "auto") then
++    local mesh_en = true
++    for _,respondd_if in ipairs(get_mesh_if(radios)) do
++      local respondd = string.format("gluon-neighbour-info -i " .. respondd_if .. " -p 1001 -d ff02::2 -r hoodselector -t 0.5")
++      for line in io.popen(respondd, 'r'):lines() do
++        local obj, _, err = json.parse (line, 1, nil)
++        if err then
++          io.stdout:write("json parse error!\n")
++          mesh_en = false
++          break
++        else
++          if obj["hoodinfo"] ~= nil then
++            if obj["mesh"] ~= nil then
++              if ( obj["mesh"]["lan"] or obj["mesh"]["wan"] ) then
++                if not ( obj["hoodinfo"]["md5hash"] == molwmtable["md5hash"]:gsub('\"', '') ) then
++                  io.stdout:write("hashes are not equal! Souce " .. respondd .. "\n")
++                  mesh_en = false
++                  break
++                end
++              end
++            end
++          end
++        end
++      end
++    end
++    if uci:get('network', 'mesh_wan') then
++      local ifstatus_wan = io.popen(string.format("ifstatus mesh_wan"), 'r'):read('*a')
++      if ifstatus_wan ~= nil then
++        local wan, _, _ = json.parse (ifstatus_wan, 1, nil)
++        if wan["up"] and not mesh_en then
++          hoodutil.mesh_on_wan_disable()
++        end
++        if not wan["up"] and mesh_en then
++          hoodutil.mesh_on_wan_enable()
++        end
++      end
++    end
++    if uci:get('network', 'mesh_lan') then
++      local ifstatus_lan = io.popen(string.format("ifstatus mesh_lan"), 'r'):read('*a')
++      if ifstatus_lan ~= nil then
++        local lan, _, _ = json.parse (ifstatus_lan, 1, nil)
++        if lan["up"] and not mesh_en then
++          hoodutil.mesh_on_lan_disable()
++        end
++        if not lan["up"] and mesh_en then
++          hoodutil.mesh_on_lan_enable()
++        end
++      end
++    end
++  end
++end
++
++function table.val_to_str ( v )
++  if "string" == type( v ) then
++    v = string.gsub( v, "\n", "\\n" )
++    if string.match( string.gsub(v,"[^'\"]",""), '^"+$' ) then
++      return "'" .. v .. "'"
++    end
++    return '"' .. string.gsub(v,'"', '\\"' ) .. '"'
++  else
++    return "table" == type( v ) and table.tostring( v ) or tostring( v )
++  end
++end
++
++function table.key_to_str ( k )
++  if "string" == type( k ) and string.match( k, "^[_%a][_%a%d]*$" ) then
++    return k
++  else
++    return "[" .. table.val_to_str( k ) .. "]"
++  end
++end
++
++function table.tostring( tbl )
++  local result, done = {}, {}
++  for k, v in ipairs( tbl ) do
++    table.insert( result, table.val_to_str( v ) )
++    done[ k ] = true
++  end
++  for k, v in pairs( tbl ) do
++    if not done[ k ] then
++      table.insert( result, table.key_to_str( k ) .. "=" .. table.val_to_str( v ) )
++    end
++  end
++  return "{" .. table.concat( result, "," ) .. "}"
++end
++
++local function molwm_to_file()
++  local file = io.open(molwmFile, "w")
++  if not file then
++    hoodutil.log(molwmFile ..' not found or not createble!')
++  else
++    file:write("\"md5hash\": " .. molwmtable["md5hash"] .. "\n")
++    file:write("\"vpnrouter\": " .. molwmtable["vpnrouter"] .. "\n")
++    file:write("\"hoodname\": " .. molwmtable["hoodname"] .. "\n")
++    file:write("\"bssid\": " .. molwmtable["bssid"] .. "\n")
++    file:close()
++  end
++end
++
++-- Write MOLWM content into file
++local function write_molwm(hood,radios)
++  if hood ~= nil then
++    molwmtable["md5hash"] = "\"" .. string.format(hash.md5(table.tostring(hood))) .. "\""
++    molwmtable["hoodname"] = "\"" .. hood["name"] .. "\""
++    molwmtable["bssid"] = "\"" .. hood["bssid"] .. "\""
++  end
++  molwm(radios)
++  molwm_to_file()
++end
++
++-- bool if direct VPN. The detection is realaise by searching the fastd network interface inside the originator table
++local function directVPN()
++  local vpnIfaceList = get_mesh_vpn_interface()
++  for _,vpnIface in ipairs(vpnIfaceList) do
++    local file = io.open("/sys/kernel/debug/batman_adv/bat0/originators", 'r')
++    if file ~= nil then
++      for outgoingIF in file:lines() do
++        -- escape special chars "[]-"
++        if outgoingIF:match(string.gsub("%[  " .. vpnIface .. "%]","%-", "%%-")) then
++          molwmtable["vpnrouter"] = "\"true\""
++          return true
++        end
++      end
++    end
++  end
++  molwmtable["vpnrouter"] = "\"false\""
++  return false
++end
++
++-- Retun a table of current peers from /etc/config/fastd
++local function getFastdCurrentPeers()
++  local configPeers = {}
++  local err = uci:foreach('fastd', 'peer',
++    function(s)
++      hoodutil.extrac_fastd_peer(s,configPeers)
++    end
++  )
++  if not err then
++    hoodutil.log("fastd uci config broken! abort...")
++    exit(1)
++  end
++  return configPeers
++end
++
++-- Retun a table of current peers from /etc/config/tunneldigger
++local function getTunneldiggerCurrentPeers()
++  local configPeers = {}
++  local err = uci:foreach('tunneldigger', 'broker',
++    function(s)
++      if s["address"] then
++        for _, peer in pairs(s["address"]) do
++          table.insert(configPeers, peer)
++        end
++      end
++    end
++  )
++  if not err then
++    hoodutil.log("tunneldigger uci config broken! abort...")
++    exit(1)
++  end
++  return configPeers
++end
++
++-- This method sets a new hoodconfig and takes care that services are only
++-- stopped or restarted if reconfiguration is needed.
++-- Process:
++--   * Check if wireless needs reconfiguration and prepare reconfiguration
++--   * Check if vpn needs reconfiguration and prepare reconfiguration
++--   * If vpn needs reconfiguration, stop vpn and apply new settings but
++--     dont restart it before wireless has been reconfigured
++--   * If wireless needs reconfiguration apply new settings and restart wireless
++--   * If vpn needed reconfiguration start fastd now
++local function set_hoodconfig(hood, prefix, radios)
++  local fastd_serverlist = {}
++  local fastd_reconf_needed = false
++  local tunneldigger_reconf_needed = false
++
++  -- pre check if fastd conf exsist
++  if uci:get('fastd', 'mesh_vpn_backbone', 'net') ~= nil then
++    fastd_serverlist = getFastdCurrentPeers()
++    -- Check if fastd needs reconfiguration because in case of reconfiguration we
++    -- need to stop fastd before we can reconfigure any other connection.
++    fastd_reconf_needed = hoodutil.fastd_reconfiguration_needed(hood["servers"], fastd_serverlist);
++  else
++    -- check if fastd uci conf broken
++    if hoodutil.fastd_installed() then
++      hoodutil.log("fastd uci config broken! abort...")
++      exit(1)
++    end
++  end
++
++  -- per check if tunneldigger conf exsist
++  if uci:get('tunneldigger', 'mesh_vpn', 'interface') ~= nil then
++    local tunneldigger_serverlist = getTunneldiggerCurrentPeers()
++    tunneldigger_reconf_needed = hoodutil.tunneldigger_reconfiguration_needed(hood["servers"], tunneldigger_serverlist)
++  else
++    -- check if tunneldigger uci conf broken
++    if hoodutil.tunneldigger_installed() then
++      hoodutil.log("tunneldigger uci config broken! abort...")
++      exit(1)
++    end
++  end
++
++  if fastd_reconf_needed or tunneldigger_reconf_needed then
++    hoodutil.vpn_stop()
++  end
++
++  -- reconfigure wireless
++  local wifi_reconf = hoodutil.wireless_reconfiguration_needed(radios, prefix, hood["bssid"])
++  if(wifi_reconf == 1 or wifi_reconf == 3) then
++    hoodutil.ibss_reconfigure(radios, hood["bssid"])
++    hoodutil.wireless_restart()
++    io.stdout:write('IBSS needed reconfiguration. Applied new settings and restarted.\n')
++  end
++  if(wifi_reconf == 2 or wifi_reconf == 3) then
++    hoodutil.mesh_reconfigure(radios, prefix..hood["bssid"]:lower())
++    hoodutil.wireless_restart()
++    io.stdout:write('MESH needed reconfiguration. Applied new settings and restarted.\n')
++  end
++
++  -- reconfigure fastd
++  if fastd_reconf_needed then
++    hoodutil.fastd_reconfigure(hood["servers"],fastd_serverlist)
++    io.stdout:write('fastd needed reconfiguration. Applied new settings and restarted.\n')
++  end
++
++  if tunneldigger_reconf_needed then
++    hoodutil.tunneldigger_reconfigure(hood["servers"])
++    io.stdout:write('tunneldigger needed reconfiguration. Applied new settings and restarted.\n')
++  end
++
++  if fastd_reconf_needed or tunneldigger_reconf_needed then
++    -- scan mode can disable VPN so we need to make shure that VPN is enabled
++    -- if the router selects a hood
++    hoodutil.vpn_enable()
++    hoodutil.vpn_start()
++  end
++
++  io.stdout:write("Set hood \""..hood["name"].."\"\n")
++  molwmtable["hoodname"] = "\"" .. hood["name"] .. "\""
++
++  if(uci:get('hoodselector', 'hoodselector' , 'hood') ~= hood["bssid"]) then
++    hoodutil.saveHoodToConfig(hood["bssid"])
++  end
++  return true
++end
++
++-- INITIALIZE AND PREPARE DATA --
++-- read hoodfile, exit if reading the hoodfile fails
++local jhood = hoodutil.readHoodfile(FILE)
++if jhood == nil then
++  hoodutil.log('There seems to have gone something wrong while reading hoodfile from ' .. FILE)
++  exit(1)
++end
++
++-- check if a default hood has been defined and exit if none has been defined
++local defaultHood = hoodutil.getDefaultHood(jhood)
++if defaultHood == nil then
++  hoodutil.log('No defaulthood defined.')
++  exit(1)
++end
++
++-- Get list of wifi devices
++local radios = hoodutil.getWifiDevices()
++
++local mesh_prefix = hoodutil.get_mesh_prefix(radios)
++
++-- VPN MODE
++-- If we have a VPN connection then we will try to get the routers location and
++-- select the hood coresponding to our location.
++-- If no hood for the location has been defined, we will select
++-- the default hood.
++-- If we can not get our routers location, we will fallback to scan mode.
++if directVPN() then
++  io.stdout:write('VPN connection found.\n')
++  local geo = hoodutil.getGeolocation()
++  if geo.lat ~= nil and geo.lon ~= nil then
++    io.stdout:write('Position found.\n')
++    local geoHood = hoodutil.getHoodByGeo(jhood, geo)
++    if geoHood ~= nil then
++      set_hoodconfig(geoHood, mesh_prefix, radios)
++      io.stdout:write('Hood set by VPN mode.\n')
++      write_molwm(geoHood,radios)
++      exit(0)
++    end
++    io.stdout:write('No hood has been defined for current position.\n')
++  else
++    io.stdout:write('No position found\n')
++  end
++  set_hoodconfig(defaultHood, mesh_prefix, radios)
++  io.stdout:write('Set defaulthood.\n')
++  write_molwm(defaultHood,radios)
++  exit(0)
++else
++  io.stdout:write('No VPN connection found\n')
++end
++
++if hoodutil.batmanHasGateway() then
++  io.stdout:write('Batman gateways found\n')
++  local gw_intf = {}
++  table.insert(gw_intf,hoodutil.get_batman_GW_interface())
++
++  if next(gw_intf) then
++    -- wifi interface
++    local bssidHood = hoodutil.get_radio_to_bssid(radios,gw_intf[1], jhood)
++    if bssidHood ~= nil then
++      --check if hood inside geo pos
++      local geo = hoodutil.getGeolocation()
++      if geo.lat ~= nil and geo.lon ~= nil then
++       io.stdout:write('Position found.\n')
++       local geoHood = hoodutil.getHoodByGeo(jhood, geo)
++       if geoHood ~= nil then
++         if string.format(hash.md5(table.tostring(bssidHood))) ~= string.format(hash.md5(table.tostring(geoHood))) then
++           io.stdout:write('Geo hood and bssid hood are not equal, do wifi scan...\n')
++           local sortedWlanList = hoodutil.wlan_list_sorted(radios, mesh_prefix)
++           for i=#sortedWlanList,1,-1 do
++             if(string.lower(geoHood.bssid) ~= string.lower(sortedWlanList[i].bssid)) then
++              table.remove(sortedWlanList, i)
++             end
++           end
++           if next(sortedWlanList) then
++             io.stdout:write('Try to switch back in our real hood!\n')
++             io.stdout:write('After filtering we will test the following wireless networks:\n')
++             for _, network in pairs(sortedWlanList) do
++              print(network["quality"].."\t"..network["frequency"].."\t"..network["bssid"].."\t"..network["ssid"])
++             end
++             io.stdout:write("Prepare configuration for testing wireless networks...\n")
++             local bssid = hoodutil.test_batman_mesh_networks(sortedWlanList, mesh_prefix)
++             hoodutil.wireless_restart()
++             io.stdout:write("Finished testing wireless networks, restored previous configuration\n")
++             if bssid ~= nil then
++              set_hoodconfig(geoHood, mesh_prefix, radios)
++              hoodutil.vpn_enable()
++              hoodutil.vpn_start()
++              io.stdout:write('Set Geo Hood by Gateway mode\n')
++              write_molwm(geoHood, radios)
++              exit(0)
++             else
++              io.stdout:write('No neighboring freifunk batman advanced mesh found.\n')
++             end
++           else
++             io.stdout:write('No networks left after filtering!\n')
++           end --end next(sortedWlanList)
++         else
++           io.stdout:write('Geo hood are equal to bssid hood no wifi scan necessary.\n')
++         end --end bssidHood ~= geoHood
++       else
++         io.stdout:write('No hood has been defined for current position.\n')
++       end --end geoHood ~= nil
++      else
++       io.stdout:write('No position found.\n')
++      end --end geo.lat ~= nil and geo.lon ~= nil
++      set_hoodconfig(bssidHood, mesh_prefix, radios)
++      io.stdout:write('Hood set by batmanHasGateway mode, GW source is wifi\n')
++      write_molwm(bssidHood,radios)
++      exit(0)
++    end --end bssidHood ~= nil
++
++    -- mesh lan or wan interface
++    if hoodutil.mesh_lan_wan(gw_intf[1]) then
++      -- if mesh_lan/wan try to get hood by selected bssid of neightbour vpnRouters
++      local neighbourBssid = hoodutil.molw_get_bssid(gw_intf)
++      if neighbourBssid ~= nil then
++        bssidHood = hoodutil.gethoodByBssid(jhood, neighbourBssid)
++        if bssidHood ~= nil then
++          set_hoodconfig(bssidHood, mesh_prefix, radios)
++          io.stdout:write('Hood set by batmanHasGateway mode, GW source is mesh on lan/wan\n')
++          molwmtable["md5hash"] = "\"" .. string.format(hash.md5(table.tostring(bssidHood))) .. "\""
++          molwmtable["hoodname"] = "\"" .. bssidHood["name"] .. "\""
++          molwmtable["bssid"] = "\"" .. bssidHood["bssid"] .. "\""
++          molwm_to_file()
++          exit(0)
++        end
++      end
++    end
++  end --end next(gw_intf)
++  local currendHood = hoodutil.getCurrentHood(jhood)
++  if currendHood ~= nil then
++    write_molwm(currendHood,radios)
++  end
++end
++
++-- SCAN MODE
++if next(radios) then
++  -- check if there exist a neighbouring freifunk batman advanced mesh
++  -- network with an active connection to a batman advanced gateway
++  local sortedWlanList = hoodutil.wlan_list_sorted(radios, mesh_prefix)
++  local meshBSSID = hoodutil.get_batman_mesh_network(sortedWlanList, defaultHood, mesh_prefix)
++  if meshBSSID ~= nil then
++    io.stdout:write("Neighoring freifunk batman advanced mesh with BSSID "..meshBSSID.." found\n")
++    local bssidHood = hoodutil.gethoodByBssid(jhood, meshBSSID)
++    if bssidHood ~= nil then
++      set_hoodconfig(bssidHood, mesh_prefix, radios)
++      io.stdout:write('Hood set by scan mode\n')
++      write_molwm(bssidHood,radios)
++      exit(0)
++    end
++
++    -- if the bssid does not corespond to any hood, we disable vpn and
++    -- just establish a wireless connection to the mesh without any vpn or
++    hoodutil.vpn_stop()
++    hoodutil.vpn_disable()
++    local ibss_exists = false
++    local mesh_exists = false
++    for _,radio in ipairs(radios) do
++      local ifname = uci:get('wireless', 'ibss_' .. radio, 'ifname')
++      if (ifname ~= nil) then
++        ibss_exists = true
++      end
++      ifname = uci:get('wireless', 'mesh_' .. radio, 'ifname')
++      if (ifname ~= nil) then
++        mesh_exists = true
++      end
++    end
++    if ibss_exists then
++      hoodutil.ibss_reconfigure(radios, meshBSSID)
++    end
++    if mesh_exists then
++      hoodutil.mesh_reconfigure(radios, mesh_prefix..meshBSSID:lower())
++    end
++    hoodutil.wireless_restart()
++    io.stdout:write('Could not select a hood but established a connection via wireless mesh.\n')
++    io.stdout:write('Disabled all connections except connections via wireless mesh.\n')
++    exit(0)
++  end
++  io.stdout:write('No neighbouring freifunk batman advanced mesh found.\n')
++end
++
++--Radio less router have mesh lan/wan neighbours
++local mesh_inf = get_mesh_if(radios);
++if next(mesh_inf) then
++  local wait_for_mesh_lan_wan = false
++  if uci:get('network', 'mesh_wan') then
++    local ifstatus_wan = io.popen(string.format("ifstatus mesh_wan"), 'r'):read('*a')
++    if ifstatus_wan ~= nil then
++      local wan, _, _ = json.parse (ifstatus_wan, 1, nil)
++      if not wan["up"] and uci:get_bool("network", "mesh_wan", "auto") then
++        hoodutil.mesh_on_wan_enable()
++        wait_for_mesh_lan_wan = true
++      end
++    end
++  end
++  if uci:get('network', 'mesh_lan') then
++    local ifstatus_lan = io.popen(string.format("ifstatus mesh_lan"), 'r'):read('*a')
++    if ifstatus_lan ~= nil then
++      local lan, _, _ = json.parse (ifstatus_lan, 1, nil)
++      if not lan["up"] and uci:get_bool("network", "mesh_lan", "auto") then
++        hoodutil.mesh_on_lan_enable()
++        wait_for_mesh_lan_wan = true
++      end
++    end
++  end
++  -- wait for network delay
++  if wait_for_mesh_lan_wan then
++    hoodutil.sleep(5)
++  end
++  local neighbourBssid = hoodutil.molw_get_bssid(mesh_inf)
++  if neighbourBssid ~= nil then
++    local bssidHood = hoodutil.gethoodByBssid(jhood, neighbourBssid)
++    if bssidHood ~= nil then
++      set_hoodconfig(bssidHood, mesh_prefix, radios)
++      io.stdout:write('Hood set by "Radio less router have mesh lan/wan neighbours"\n')
++      molwmtable["md5hash"] = "\"" .. string.format(hash.md5(table.tostring(bssidHood)    )) .. "\""
++      molwmtable["hoodname"] = "\"" .. bssidHood["name"] .. "\""
++      molwmtable["bssid"] = "\"" .. bssidHood["bssid"] .. "\""
++      molwm_to_file()
++      exit(0)
++    end
++  end
++  io.stdout:write('No molwm neighbours found\n')
++end
++
++-- DEFAULT-HOOD MODE
++-- If we do NOT have a VPN connection AND found no freifunk mesh network while
++-- scanning then we set the default hood if no current hood set.
++io.stdout:write("ENV does not give enough information set default hood\n")
++set_hoodconfig(defaultHood, mesh_prefix, radios)
++io.stdout:write('Set defaulthood.\n')
++write_molwm(defaultHood,radios)
++exit(0)
+diff --git a/package/gluon-hoodselector/src/Makefile b/package/gluon-hoodselector/src/Makefile
+new file mode 100644
+index 00000000..3ddc8a58
+--- /dev/null
++++ b/package/gluon-hoodselector/src/Makefile
+@@ -0,0 +1,6 @@
++all: respondd.so
++
++CFLAGS += -Wall
++
++respondd.so: respondd.c
++	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -shared -fPIC -D_GNU_SOURCE -o $@ $^ $(LDLIBS) -lgluonutil -luci
+diff --git a/package/gluon-hoodselector/src/respondd.c b/package/gluon-hoodselector/src/respondd.c
+new file mode 100644
+index 00000000..cc864a1c
+--- /dev/null
++++ b/package/gluon-hoodselector/src/respondd.c
+@@ -0,0 +1,139 @@
++#include <respondd.h>
++#include <json-c/json.h>
++#include <libgluonutil.h>
++#include <uci.h>
++#include <string.h>
++#include <net/if.h>
++
++#define _STRINGIFY(s) #s
++#define STRINGIFY(s) _STRINGIFY(s)
++
++bool strstw(const char *pre, const char *str) {
++	size_t lenpre = strlen(pre);
++	return strlen(str) < lenpre ? false : strncmp(pre, str, lenpre) == 0;
++}
++
++bool strrmbs(char *line, int begin, int end) { // <- ist es hier sinvoller pointer auf die ints zu setzen??
++	size_t len = strlen(line);
++	if (len < begin)
++		return false;
++
++	memmove(line, line+begin, len - begin + 1);
++	if (len < end)
++		return false;
++
++	line[len-end] = 0; //remove val of end characters on the end
++	return true;
++}
++
++// extract hood informations
++static struct json_object * get_hoodselector(void) {
++	FILE *f = fopen("/tmp/.hoodselector", "r");
++	if (!f)
++		return NULL;
++
++	struct json_object *ret = json_object_new_object();
++	char *line = NULL;
++	size_t len = 0;
++	while (getline(&line, &len, f) >= 0) {
++		//1. Get md5 hash from current selected hood.
++		if (strstw("\"md5hash\": ",line)) {
++			if (!strrmbs(line, 12, 14))
++				continue;
++
++			json_object_object_add(ret, "md5hash", gluonutil_wrap_string(line));
++		}
++		//2. Get true or false string for VPN Router.
++		if (strstw("\"vpnrouter\": ",line)) {
++			if (!strrmbs(line, 14, 16))
++				continue;
++
++			json_object_object_add(ret, "vpnrouter", gluonutil_wrap_string(line));
++		}
++		//3. Get hoodname
++		if (strstw("\"hoodname\": ",line)) {
++			if (!strrmbs(line, 13, 15))
++				continue;
++
++			json_object_object_add(ret, "hoodname", gluonutil_wrap_string(line));
++		}
++	}
++	free(line);
++	fclose(f);
++	return ret;
++}
++
++//Get uci mesh on lan wan
++static struct json_object * get_mesh_on_lan_wan(void){
++	struct uci_context *ctx = uci_alloc_context();
++	ctx->flags &= ~UCI_FLAG_STRICT;
++	struct uci_package *p;
++
++	if (!uci_load(ctx, "wireless", &p)) {
++		struct uci_element *e;
++		uci_foreach_element(&p->sections, e) {
++			struct uci_section *s = uci_to_section(e);
++			if (strcmp(s->type, "wifi-iface"))
++				continue;
++
++			if (strncmp(e->name, "ibss_", 5))
++				continue;
++
++			const char *bssid = uci_lookup_option_string(ctx, s, "bssid");
++			if (!bssid)
++				continue;
++
++			struct json_object *ret = json_object_new_object();
++			json_object_object_add(ret, "bssid", gluonutil_wrap_string(bssid));
++			free((char*)bssid);
++			if(ret) {
++				uci_free_context(ctx);
++				return ret;
++			}
++		}
++	}
++	uci_free_context(ctx);
++	FILE *f = fopen("/tmp/.hoodselector", "r");
++	if (!f)
++		return NULL;
++
++	struct json_object *ret = json_object_new_object();
++	char *line = NULL;
++	size_t len = 0;
++	while (getline(&line, &len, f) >= 0) {
++		//Get bssid from current selected hood.
++		if (strstw("\"bssid\": ",line)) {
++			if (!strrmbs(line, 10, 12))
++				continue;
++			json_object_object_add(ret, "bssid", gluonutil_wrap_string(line));
++			free(line);
++			fclose(f);
++			return ret;
++		}
++	}
++	free(line);
++	fclose(f);
++	return NULL;
++}
++
++// create final obj with logical structure
++static struct json_object * respondd_provider_hoodselector(void) {
++	struct json_object *ret = json_object_new_object();
++
++	struct json_object *hoodinfo = get_hoodselector();
++	if(hoodinfo)
++		json_object_object_add(ret, "hoodinfo", hoodinfo);
++
++	struct json_object *mesh_on_lan_wan = get_mesh_on_lan_wan();
++	if(mesh_on_lan_wan)
++		 json_object_object_add(ret, "mesh", mesh_on_lan_wan);
++
++	json_object_object_add(ret, "mac", gluonutil_wrap_and_free_string(gluonutil_get_sysconfig("primary_mac")));
++	return ret;
++}
++
++// related to respondd_provider_hoodselector
++const struct respondd_provider_info respondd_providers[] = {
++	{"hoodselector", respondd_provider_hoodselector},
++	{}
++};
+-- 
+2.15.1
+
