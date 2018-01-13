@@ -354,7 +354,7 @@ new file mode 100644
 index 00000000..978d859f
 --- /dev/null
 +++ b/package/gluon-config-mode-geo-location/jssrc/src/osm.js
-@@ -0,0 +1,70 @@
+@@ -0,0 +1,69 @@
 +function findObj(name) {
 +        list = document.getElementsByClassName("gluon-input-text");
 +        for(i = 0; i < list.length; i++) {
@@ -424,7 +424,6 @@ index 00000000..978d859f
 +                osmMap.addControl(s), s.activate()
 +        } else setTimeout(showMap, 1e3)
 +}
-+
 diff --git a/package/gluon-config-mode-geo-location/luasrc/lib/gluon/config-mode/wizard/0400-geo-location.lua b/package/gluon-config-mode-geo-location/luasrc/lib/gluon/config-mode/wizard/0400-geo-location.lua
 deleted file mode 100644
 index 4d7fec01..00000000
@@ -511,7 +510,7 @@ index 00000000..3215aa4e
 +#ifdef WITHMAP
 +
 +	local function show_lon()
-+	  	if uci_longitude ~= nil then
++		if uci_longitude ~= nil then
 +			return uci_longitude
 +		end
 +		if site.config_mode.geo_location.map_lon(false) then
@@ -521,7 +520,7 @@ index 00000000..3215aa4e
 +	end
 +
 +	local function show_lat()
-+	  	if uci_latitude ~= nil then
++		if uci_latitude ~= nil then
 +			return uci_latitude
 +		end
 +		if site.config_mode.geo_location.map_lat(false) then
