@@ -15,13 +15,13 @@ GLUON_SITE_PACKAGES := \
 	gluon-status-page \
 %A
 	gluon-geolocator \
+	gluon-hoodselector \
 	haveged \
 	iwinfo \
 	ffnw-banner \
 	ffnw-config-mode-geo-location \
 	ffnw-config-mode-contact-info \
 	ffnw-hoods \
-	ffnw-hoodselector \
 	ffnw-multiple-v6-watchdoog
 
 USB_BASIC := \
