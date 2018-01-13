@@ -14,10 +14,10 @@ GLUON_SITE_PACKAGES := \
 	gluon-radvd \
 	gluon-status-page \
 %A
+	gluon-geolocator \
 	haveged \
 	iwinfo \
 	ffnw-banner \
-	ffnw-node-info \
 	ffnw-config-mode-geo-location \
 	ffnw-config-mode-contact-info \
 	ffnw-hoods \
