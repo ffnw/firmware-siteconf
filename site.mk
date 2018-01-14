@@ -13,7 +13,7 @@ GLUON_SITE_PACKAGES := \
 	gluon-web-private-wifi \
 	gluon-radvd \
 	gluon-status-page \
-	gluon-web-mesh-vpn-fastd \
+%A
 	haveged \
 	iwinfo \
 	ffnw-banner \
@@ -55,7 +55,8 @@ endif
 GLUON_ATH10K_MESH := ibss
 
 # Allow overriding from the command line
-GLUON_RELEASE ?= $(shell date '+%Y%m%d')-$(shell git log -1 --pretty=format:%h)
+%B
+%C
 GLUON_PRIORITY ?= 0
 GLUON_REGION ?= eu
 GLUON_LANGS ?= de en

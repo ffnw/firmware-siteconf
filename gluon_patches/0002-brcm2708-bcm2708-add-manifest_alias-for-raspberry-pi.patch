@@ -1,0 +1,23 @@
+From 8d36ae89f17e04589c10970080d85e32a4426a0f Mon Sep 17 00:00:00 2001
+From: Jan-Tarek Butt <tarek@ring0.de>
+Date: Fri, 29 Dec 2017 17:52:38 +0100
+Subject: [PATCH 2/2] brcm2708-bcm2708: add manifest_alias for
+ raspberry-pi-model-b-rev-2
+
+---
+ targets/brcm2708-bcm2708 | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/targets/brcm2708-bcm2708 b/targets/brcm2708-bcm2708
+index b9f59999..51ff11fc 100644
+--- a/targets/brcm2708-bcm2708
++++ b/targets/brcm2708-bcm2708
+@@ -1,4 +1,5 @@
+ device raspberry-pi rpi
++manifest_alias raspberry-pi-model-b-rev-2
+ factory -ext4-sdcard .img.gz
+ sysupgrade -ext4-sdcard .img.gz
+ packages '-wpad-mini' # clashes with hostapd-mini
+-- 
+2.11.0
+
