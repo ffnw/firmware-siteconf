@@ -294,7 +294,15 @@ case "$1" in
     esac
   ;;
   "create_manifest")
-    make -C "$EXECDIR/.." manifest
+    if ! [ -r "$EXECDIR"/.prepare ]; then
+      echo "please run the prepare mode first"
+      exit 1
+    fi
+    if [ -a "$EXECDIR/.BROKEN" ]; then
+      make -C "$EXECDIR/.." manifest BROKEN=1 GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
+    else
+      make -C "$EXECDIR/.." manifest GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
+    fi
   ;;
   *)
     help_print
