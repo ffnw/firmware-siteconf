@@ -1,7 +1,7 @@
-From c15dc5ad565416ca56d42bcd55168520a584c473 Mon Sep 17 00:00:00 2001
+From 97dc7c16a8b488c578825dc72cf6e8a39d23e023 Mon Sep 17 00:00:00 2001
 From: Jan-Tarek Butt <tarek@ring0.de>
 Date: Fri, 28 Jul 2017 02:41:30 +0200
-Subject: [PATCH 4/4] add pkg gluon-geolocator
+Subject: [PATCH 3/3] add pkg gluon-geolocator
 
  * add check_site.lua
  * add config geolocator
@@ -36,14 +36,15 @@ Subject: [PATCH 4/4] add pkg gluon-geolocator
    - fix print message for time stamp file
  * fix intervall in 540-geolocator-settings
    - change intervall value from seconds to minutes
+ * ensure MAC addreses are filert by uppercase matching
 ---
  package/gluon-geolocator/Makefile                  |  36 ++++++
  package/gluon-geolocator/check_site.lua            |   5 +
  .../gluon-geolocator/files/etc/config/geolocator   |   2 +
  .../files/usr/lib/micron.d/geolocator              |   1 +
- .../luasrc/lib/gluon/geolocator/geolocator         | 132 +++++++++++++++++++++
+ .../luasrc/lib/gluon/geolocator/geolocator         | 135 +++++++++++++++++++++
  .../lib/gluon/upgrade/540-geolocator-settings      |  27 +++++
- 6 files changed, 203 insertions(+)
+ 6 files changed, 206 insertions(+)
  create mode 100644 package/gluon-geolocator/Makefile
  create mode 100644 package/gluon-geolocator/check_site.lua
  create mode 100644 package/gluon-geolocator/files/etc/config/geolocator
@@ -121,10 +122,10 @@ index 00000000..7379b730
 +*/5 * * * *     /lib/gluon/geolocator/geolocator
 diff --git a/package/gluon-geolocator/luasrc/lib/gluon/geolocator/geolocator b/package/gluon-geolocator/luasrc/lib/gluon/geolocator/geolocator
 new file mode 100755
-index 00000000..1be3c55c
+index 00000000..1a08ccf2
 --- /dev/null
 +++ b/package/gluon-geolocator/luasrc/lib/gluon/geolocator/geolocator
-@@ -0,0 +1,132 @@
+@@ -0,0 +1,135 @@
 +#!/usr/bin/lua
 +
 +local uci = require('simple-uci').cursor()
@@ -160,7 +161,7 @@ index 00000000..1be3c55c
 +	if file_exsist(PID_PART) then
 +		os.remove(PID_PART)
 +	end
-+	os.exit(tonumber(exc))
++	os.exit(exc)
 +end
 +
 +local function table_contains(tbl, prefix)
@@ -191,7 +192,8 @@ index 00000000..1be3c55c
 +	-- Get list of BSSID there should ignored
 +	local blacklist_bssid = { }
 +	for _, bl_bssid in ipairs(uci:get(GLC, "settings", "blacklist")) do
-+		table.insert(blacklist_bssid,string.upper(bl_bssid))
++		-- Ensure rm colons and uppercase
++		table.insert(blacklist_bssid,string.upper(bl_bssid):gsub(":", ""))
 +	end
 +
 +	local scaned_bssid = ""
@@ -203,6 +205,8 @@ index 00000000..1be3c55c
 +
 +			-- Get list of BSSID without blacklisted and redundancy entrys.
 +			for _, net in ipairs(iw.scanlist(ifname) or { }) do
++				-- Ensure rm colons and uppercase
++				net.bssid = string.upper(net.bssid:gsub(":", ""))
 +				if not uniq[net.bssid] and not table_contains(blacklist_bssid, net.bssid) then
 +					scaned_bssid  = scaned_bssid .. "," .. net.bssid
 +					uniq[net.bssid] = true
@@ -291,5 +295,5 @@ index 00000000..4c0daed2
 +})
 +uci:save(config)
 -- 
-2.15.1
+2.16.1
 
