@@ -1,7 +1,7 @@
-From 6df4101b27776f6013116853945e156e24bf4fa4 Mon Sep 17 00:00:00 2001
+From 7f769f7ea4114afeb6c13ab3786db4bb61e2f6fb Mon Sep 17 00:00:00 2001
 From: Jan-Tarek Butt <tarek@ring0.de>
 Date: Sat, 19 Aug 2017 17:25:15 +0200
-Subject: [PATCH] gluon-config-mode-geo-location: add subpackages
+Subject: [PATCH 5/5] gluon-config-mode-geo-location: add subpackages
 
    - add gluon-config-mode-geo-location-with-map
    - add gluon-config-mode-geo-location-with-geloc
@@ -43,7 +43,7 @@ Subject: [PATCH] gluon-config-mode-geo-location: add subpackages
  package/gluon-config-mode-geo-location/i18n/fr.po  |  30 ---
  .../i18n/gluon-config-mode-geo-location.pot        |  19 --
  .../gluon-config-mode-geo-location/jssrc/build.js  |   6 +
- .../jssrc/src/osm.js                               |  70 +++++++
+ .../jssrc/src/osm.js                               |  69 +++++++
  .../gluon/config-mode/wizard/0400-geo-location.lua |  64 ------
  .../src/0400-geo-location.lua.in                   | 218 +++++++++++++++++++++
  .../src/check_site.lua.in                          |   8 +
@@ -51,7 +51,7 @@ Subject: [PATCH] gluon-config-mode-geo-location: add subpackages
  .../gluon-config-mode-geo-location/src/fr.po.in    |  83 ++++++++
  .../src/gluon-config-mode-geo-location.pot.in      |  53 +++++
  .../files/etc/config/gluon-node-info               |   2 +-
- 14 files changed, 651 insertions(+), 153 deletions(-)
+ 14 files changed, 650 insertions(+), 153 deletions(-)
  delete mode 100644 package/gluon-config-mode-geo-location/check_site.lua
  delete mode 100644 package/gluon-config-mode-geo-location/i18n/de.po
  delete mode 100644 package/gluon-config-mode-geo-location/i18n/fr.po
@@ -351,7 +351,7 @@ index 00000000..146bbd10
 +})
 diff --git a/package/gluon-config-mode-geo-location/jssrc/src/osm.js b/package/gluon-config-mode-geo-location/jssrc/src/osm.js
 new file mode 100644
-index 00000000..978d859f
+index 00000000..e2f3f2ff
 --- /dev/null
 +++ b/package/gluon-config-mode-geo-location/jssrc/src/osm.js
 @@ -0,0 +1,69 @@
@@ -496,12 +496,12 @@ index 4d7fec01..00000000
 -end
 diff --git a/package/gluon-config-mode-geo-location/src/0400-geo-location.lua.in b/package/gluon-config-mode-geo-location/src/0400-geo-location.lua.in
 new file mode 100644
-index 00000000..3215aa4e
+index 00000000..7cc96bf6
 --- /dev/null
 +++ b/package/gluon-config-mode-geo-location/src/0400-geo-location.lua.in
 @@ -0,0 +1,218 @@
 +return function(form, uci)
-+	local site = require 'gluon.site'
++	local site = require 'gluon.site_config'
 +
 +	local location = uci:get_first("gluon-node-info", "location")
 +	local uci_latitude = uci:get("gluon-node-info", location, "latitude")
@@ -513,8 +513,8 @@ index 00000000..3215aa4e
 +		if uci_longitude ~= nil then
 +			return uci_longitude
 +		end
-+		if site.config_mode.geo_location.map_lon(false) then
-+			return site.config_mode.geo_location.map_lon()
++		if ((site.config_mode or {}).geo_location or {}).map_lon ~= nil then
++			return site.config_mode.geo_location.map_lon
 +		end
 +		return 0.0
 +	end
@@ -523,15 +523,15 @@ index 00000000..3215aa4e
 +		if uci_latitude ~= nil then
 +			return uci_latitude
 +		end
-+		if site.config_mode.geo_location.map_lat(false) then
-+			return site.config_mode.geo_location.map_lat()
++		if ((site.config_mode or {}).geo_location or {}).map_lat ~= nil then
++			return site.config_mode.geo_location.map_lat
 +		end
 +		return 0.0
 +	end
 +
 +	local function show_olurl()
-+		if site.config_mode.geo_location.olurl(false) then
-+			return site.config_mode.geo_location.olurl()
++		if ((site.config_mode or {}).geo_location or {}).olurl ~= nil then
++			return site.config_mode.geo_location.olurl
 +		end
 +		return 'http://dev.openlayers.org/OpenLayers.js'
 +	end
@@ -539,7 +539,7 @@ index 00000000..3215aa4e
 +#endif
 +
 +	local function show_altitude()
-+		if site.config_mode.geo_location.show_altitude(true) then
++		if ((site.config_mode or {}).geo_location or {}).show_altitude ~= false then
 +			return true
 +		end
 +		return uci:get_bool("gluon-node-info", location, "altitude")
@@ -984,5 +984,5 @@ index 8f6f472f..70026b5c 100644
  config owner
  
 -- 
-2.15.1
+2.16.1
 
