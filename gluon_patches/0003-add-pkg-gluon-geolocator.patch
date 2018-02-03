@@ -1,7 +1,7 @@
-From 97dc7c16a8b488c578825dc72cf6e8a39d23e023 Mon Sep 17 00:00:00 2001
+From 886bd0ad1b4d401452e207966e88630c55e2ebd6 Mon Sep 17 00:00:00 2001
 From: Jan-Tarek Butt <tarek@ring0.de>
 Date: Fri, 28 Jul 2017 02:41:30 +0200
-Subject: [PATCH 3/3] add pkg gluon-geolocator
+Subject: [PATCH 3/5] add pkg gluon-geolocator
 
  * add check_site.lua
  * add config geolocator
@@ -43,8 +43,8 @@ Subject: [PATCH 3/3] add pkg gluon-geolocator
  .../gluon-geolocator/files/etc/config/geolocator   |   2 +
  .../files/usr/lib/micron.d/geolocator              |   1 +
  .../luasrc/lib/gluon/geolocator/geolocator         | 135 +++++++++++++++++++++
- .../lib/gluon/upgrade/540-geolocator-settings      |  27 +++++
- 6 files changed, 206 insertions(+)
+ .../lib/gluon/upgrade/540-geolocator-settings      |  38 ++++++
+ 6 files changed, 217 insertions(+)
  create mode 100644 package/gluon-geolocator/Makefile
  create mode 100644 package/gluon-geolocator/check_site.lua
  create mode 100644 package/gluon-geolocator/files/etc/config/geolocator
@@ -263,13 +263,13 @@ index 00000000..1a08ccf2
 +exit(1)
 diff --git a/package/gluon-geolocator/luasrc/lib/gluon/upgrade/540-geolocator-settings b/package/gluon-geolocator/luasrc/lib/gluon/upgrade/540-geolocator-settings
 new file mode 100755
-index 00000000..4c0daed2
+index 00000000..6f17e8c3
 --- /dev/null
 +++ b/package/gluon-geolocator/luasrc/lib/gluon/upgrade/540-geolocator-settings
-@@ -0,0 +1,27 @@
+@@ -0,0 +1,38 @@
 +#!/usr/bin/lua
 +
-+local site = require 'gluon.site'
++local site = require 'gluon.site_config'
 +local uci = require('simple-uci').cursor()
 +
 +local config = 'geolocator'
@@ -278,12 +278,23 @@ index 00000000..4c0daed2
 +
 +local auto_location = uci:get(config, 'settings', 'auto_location')
 +if not auto_location then
-+	auto_location = site.geolocator.autolocation(false)
++  auto_location = 0
++  if site.geolocator.autolocation then
++    auto_location = tonumber(site.geolocator.autolocation)
++  end
 +end
 +
 +local refresh_interval = uci:get(config, 'settings', 'refresh_interval')
 +if not refresh_interval then
-+	refresh_interval = site.geolocator.interval(720) -- default: 12h
++  refresh_interval = 720 -- default: 12h
++  if site.config_mode.location.interval then
++    refresh_interval = site.geolocator.interval
++  end
++end
++
++local blacklist = {}
++if site.geolocator.blacklist then
++  blacklist = site.geolocator.blacklist
 +end
 +
 +uci:delete(config, 'settings')
@@ -291,7 +302,7 @@ index 00000000..4c0daed2
 +	static_location = static_location,
 +	refresh_interval = refresh_interval,
 +	auto_location = auto_location,
-+	blacklist = site.geolocator.blacklist({}),
++	blacklist = blacklist,
 +})
 +uci:save(config)
 -- 
