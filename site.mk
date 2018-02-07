@@ -41,7 +41,8 @@ ifeq ($(GLUON_TARGET),x86-generic)
 	GLUON_SITE_PACKAGES += \
 		$(USB_BASIC) \
 		kmod-usb-ohci-pci \
-		$(USB_NIC)
+		$(USB_NIC) \
+		kmod-phy-broadcom
 endif
 
 ifeq ($(GLUON_TARGET),x86-64)
