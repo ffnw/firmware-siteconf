@@ -99,7 +99,7 @@ prepare_siteconf(){
     echo "Placeholder %C not found"
   fi
   if grep -q "%D" < "$EXECDIR"/site.conf; then
-    sed -i "/^%D$/c\\\\'http://autoupdate-lede.ffnw/$vpn/nightly_master\\'," "$EXECDIR"/site.conf
+    sed -i "/^%D$/c\\\\'http://autoupdate-lede.ffnw/$vpn/nightly/master\\'," "$EXECDIR"/site.conf
     echo "Set autoupdater nightly_master URL ..."
   else
     echo "Placeholder %D not found"
