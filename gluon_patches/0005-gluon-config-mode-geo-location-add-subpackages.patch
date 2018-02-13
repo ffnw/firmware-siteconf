@@ -636,7 +636,7 @@ index 00000000..7cc96bf6
 +        --]]
 +
 +	local interval = s:option(Value, "interval", translate("Interval in minutes"), translatef("Set refresh interval"))
-+	interval.default = uci:get_first("geolocator", "settings", "refresh_interval")
++	interval.default = uci:get("geolocator", "settings", "refresh_interval")
 +	interval:depends(geolocation, "automatic")
 +	interval:depends(geolocation, "auto_static")
 +	interval.datatype = "uinteger"
