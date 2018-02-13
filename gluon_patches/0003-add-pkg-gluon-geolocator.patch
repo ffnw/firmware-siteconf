@@ -193,7 +193,7 @@ index 00000000..1a08ccf2
 +	local blacklist_bssid = { }
 +	for _, bl_bssid in ipairs(uci:get(GLC, "settings", "blacklist")) do
 +		-- Ensure rm colons and uppercase
-+		table.insert(blacklist_bssid,string.upper(bl_bssid):gsub(":", ""))
++		table.insert(blacklist_bssid,(string.upper(bl_bssid):gsub(":", "")))
 +	end
 +
 +	local scaned_bssid = ""
