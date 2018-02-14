@@ -110,9 +110,11 @@ new file mode 100644
 index 00000000..aed88cce
 --- /dev/null
 +++ b/package/gluon-geolocator/files/etc/config/geolocator
-@@ -0,0 +1,2 @@
+@@ -0,0 +1,4 @@
 +config geolocator 'settings'
 +	option static_location '0'
++       option auto_location '1'
++       option refresh_interval '1000'
 diff --git a/package/gluon-geolocator/files/usr/lib/micron.d/geolocator b/package/gluon-geolocator/files/usr/lib/micron.d/geolocator
 new file mode 100644
 index 00000000..7379b730
