@@ -53,7 +53,7 @@ ifeq ($(GLUON_TARGET),x86-64)
 		kmod-igb
 endif
 
-GLUON_ATH10K_MESH := ibss
+GLUON_ATH10K_MESH := 11s
 
 # Allow overriding from the command line
 %B
