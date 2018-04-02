@@ -22,6 +22,7 @@ GLUON_SITE_PACKAGES := \
 	gluon-hoodselector \
 	haveged \
 	iwinfo \
+	tecff-ath9k-broken-wifi-workaround \
 	ffnw-banner \
 	ffnw-hoods \
 	ffnw-multiple-v6-watchdoog
