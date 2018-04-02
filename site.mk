@@ -9,6 +9,8 @@ GLUON_SITE_PACKAGES := \
 	gluon-config-mode-contact-info \
 	gluon-ebtables-filter-multicast \
 	gluon-ebtables-filter-ra-dhcp \
+	gluon-ebtables-segment-mld \
+	gluon-ebtables-limit-arp \
 	ffho-web-autoupdater \
 	gluon-web-network \
 	gluon-web-wifi-config \
