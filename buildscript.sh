@@ -112,12 +112,12 @@ prepare_sitemk(){
   # Start prepare site.mk for build
   if grep -q "%A" < "$EXECDIR"/site.mk; then
     if [ "$vpn" == "l2tp" ]; then
-      sed -i "/^%A$/c\\\\tgluon-mesh-vpn-tunneldigger \\\\" "$EXECDIR"/site.mk
-      echo "Set gluon-mesh-vpn-tunneldigger package ..."
+      sed -i "/^%A$/c\\\\tmesh-vpn-tunneldigger \\\\" "$EXECDIR"/site.mk
+      echo "Set mesh-vpn-tunneldigger feature ..."
     fi
     if [ "$vpn" == "fastd" ]; then
-      sed -i "/^%A$/c\\\\tgluon-web-mesh-vpn-fastd \\\\" "$EXECDIR"/site.mk
-      echo "Set gluon-web-mesh-vpn-fastd package ..."
+      sed -i "/^%A$/c\\\\tweb-mesh-vpn-fastd \\\\" "$EXECDIR"/site.mk
+      echo "Set web-mesh-vpn-fastd feature ..."
     fi
   else
     echo "Placeholder %A not found"
