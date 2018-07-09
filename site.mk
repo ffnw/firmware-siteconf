@@ -25,8 +25,7 @@ GLUON_SITE_PACKAGES := \
 	tecff-ath9k-broken-wifi-workaround \
 	ffnw-banner \
 	ffnw-hoods \
-	ffnw-multiple-v6-watchdoog \
-	ffnw-netdevice-watchdoog
+	ffnw-multiple-v6-watchdoog
 
 USB_BASIC := \
 	kmod-usb-core \
