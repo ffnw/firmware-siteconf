@@ -1,32 +1,31 @@
-GLUON_SITE_PACKAGES := \
-	gluon-config-mode-core \
-	gluon-setup-mode \
-	gluon-mesh-batman-adv-15 \
-	gluon-config-mode-autoupdater \
-	gluon-config-mode-hostname \
-	gluon-config-mode-mesh-vpn \
-	gluon-config-mode-geo-location-with-geloc-map \
-	gluon-config-mode-contact-info \
-	gluon-ebtables-filter-multicast \
-	gluon-ebtables-filter-ra-dhcp \
-	gluon-ebtables-segment-mld \
-	gluon-ebtables-limit-arp \
-	ffho-web-autoupdater \
-	gluon-web-network \
-	gluon-web-wifi-config \
-	gluon-web-private-wifi \
-	gluon-radvd \
-	gluon-status-page \
+GLUON_FEATURES := \
+	web-wizard \
+	autoupdater \
+	web-advanced \
+	status-page \
+	mesh-batman-adv-15 \
 %A
-	gluon-geolocator \
-	gluon-hoodselector \
+	ebtables-filter-multicast \
+	ebtables-filter-ra-dhcp \
+	ebtables-limit-arp \
+	radvd \
+	radv-filterd \
+	web-private-wifi \
+	geolocator \
+	web-logging \
+	hoodselector
+
+GLUON_SITE_PACKAGES := \
+	-gluon-config-mode-geo-location \
+	gluon-config-mode-geo-location-with-geloc-map \
+	-gluon-web-autoupdater \
+	ffho-web-autoupdater \
 	haveged \
 	iwinfo \
 	tecff-ath9k-broken-wifi-workaround \
 	ffnw-banner \
 	ffnw-hoods \
-	ffnw-multiple-v6-watchdoog \
-	ffnw-netdevice-watchdoog
+	ffnw-multiple-v6-watchdoog
 
 USB_BASIC := \
 	kmod-usb-core \
