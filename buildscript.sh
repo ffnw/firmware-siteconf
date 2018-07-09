@@ -87,19 +87,19 @@ prepare_siteconf(){
     echo "Placeholder %A not found"
   fi
   if grep -q "%B" < "$EXECDIR"/site.conf; then
-    sed -i "/^%B$/c\\\\'http://autoupdate-lede.ffnw/$vpn/stable\\'," "$EXECDIR"/site.conf
+    sed -i "/^%B$/c\\\\'http://autoupdate-lede.ffnw/v1/$vpn/stable\\'," "$EXECDIR"/site.conf
     echo "Set autoupdater stable URL ..."
   else
     echo "Placeholder %B not found"
   fi
   if grep -q "%C" < "$EXECDIR"/site.conf; then
-    sed -i "/^%C$/c\\\\'http://autoupdate-lede.ffnw/$vpn/testing\\'," "$EXECDIR"/site.conf
+    sed -i "/^%C$/c\\\\'http://autoupdate-lede.ffnw/v1/$vpn/testing\\'," "$EXECDIR"/site.conf
     echo "Set autoupdater testing URL ..."
   else
     echo "Placeholder %C not found"
   fi
   if grep -q "%D" < "$EXECDIR"/site.conf; then
-    sed -i "/^%D$/c\\\\'http://autoupdate-lede.ffnw/$vpn/nightly/master\\'," "$EXECDIR"/site.conf
+    sed -i "/^%D$/c\\\\'http://autoupdate-lede.ffnw/v1/$vpn/nightly/master\\'," "$EXECDIR"/site.conf
     echo "Set autoupdater nightly_master URL ..."
   else
     echo "Placeholder %D not found"
