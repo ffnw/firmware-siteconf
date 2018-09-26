@@ -8,24 +8,17 @@ GLUON_FEATURES := \
 	ebtables-filter-multicast \
 	ebtables-filter-ra-dhcp \
 	ebtables-limit-arp \
+	ebtables-source-filter \
 	radvd \
 	radv-filterd \
+	lock-password \
 	web-private-wifi \
-	geolocator \
-	web-logging \
-	hoodselector
+	web-logging
 
 GLUON_SITE_PACKAGES := \
-	-gluon-config-mode-geo-location \
-	gluon-config-mode-geo-location-with-geloc-map \
-	-gluon-web-autoupdater \
-	ffho-web-autoupdater \
+	respondd-module-airtime \
 	haveged \
 	iwinfo \
-	tecff-ath9k-broken-wifi-workaround \
-	ffnw-banner \
-	ffnw-hoods \
-	ffnw-multiple-v6-watchdoog
 
 USB_BASIC := \
 	kmod-usb-core \
@@ -55,6 +48,8 @@ ifeq ($(GLUON_TARGET),x86-64)
 		kmod-phy-broadcom \
 		kmod-igb
 endif
+
+GLUON_MULTIDOMAIN=1
 
 GLUON_ATH10K_MESH := 11s
 
