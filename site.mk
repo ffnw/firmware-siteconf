@@ -11,7 +11,7 @@ GLUON_SITE_PACKAGES := \
 	gluon-ebtables-filter-ra-dhcp \
 	gluon-ebtables-segment-mld \
 	gluon-ebtables-limit-arp \
-	ffho-web-autoupdater \
+	gluon-web-autoupdater \
 	gluon-web-network \
 	gluon-web-wifi-config \
 	gluon-web-private-wifi \
