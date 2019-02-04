@@ -27,6 +27,10 @@ GLUON_SITE_PACKAGES := \
 	ffnw-hoods \
 	ffnw-multiple-v6-watchdoog
 
+# from https://github.com/Freifunk-Nord/gluon-ssid-changer:
+GLUON_SITE_PACKAGES += \
+	gluon-ssid-changer
+
 USB_BASIC := \
 	kmod-usb-core \
 	kmod-usb2 \
