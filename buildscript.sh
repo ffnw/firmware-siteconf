@@ -182,7 +182,7 @@ get_target_list(){
 
 
 if ! git -C "$EXECDIR"/.. rev-parse --abbrev-ref HEAD | grep -q "v2018.1.x"; then
-  echo "no gluon repo found or wrong branch (should be v2018.1.x). Please clone this git reposetory into the gluon git reposetory"
+  echo "no gluon repo found or wrong branch (should be v2018.1.x). Please clone this git repository into the gluon git repository"
   exit 1
 fi
 
