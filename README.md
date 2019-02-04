@@ -18,7 +18,7 @@ Auf dieser Seite wird beschrieben, wie man die Gluon Firmware für das Freifunk 
 *Wichtig* Je nach Entwicklungsstand muss die Branch Version angepasst werden.
 
     git clone https://github.com/freifunk-gluon/gluon.git ./freifunk_build -b v2016.2.x && cd ./freifunk_build
-    git clone https://git.ffnw.de/ffnw-firmware/siteconf.git site -b 20170502 && de site
+    git clone https://git.ffnw.de/ffnw-firmware/siteconf.git site -b 20170502 && cd site
 ./prepare.sh patch
     cd ..
     make update
