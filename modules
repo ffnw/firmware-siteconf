@@ -1,4 +1,4 @@
-GLUON_SITE_FEEDS='ffnw ffho tecff'
+GLUON_SITE_FEEDS='ffnw ffho tecff ssidchanger'
 
 PACKAGES_FFNW_REPO=https://git.nordwest.freifunk.net/ffnw-firmware/packages.git
 PACKAGES_FFNW_BRANCH=master
@@ -11,3 +11,7 @@ PACKAGES_FFHO_COMMIT=806f98a8f4bc0896ba29b903a8b9f72c39db2f09
 PACKAGES_TECFF_REPO=https://github.com/tecff/gluon-packages.git
 PACKAGES_TECFF_BRANCH=v2018.1.x
 PACKAGES_TECFF_COMMIT=7964a2884f1b43d994f8d1da931e89c5d36d3890
+
+PACKAGES_SSIDCHANGER_REPO=https://github.com/Freifunk-Nord/gluon-ssid-changer.git
+PACKAGES_SSIDCHANGER_COMMIT=3c6750ce8fc9cedabfa8a6f479fb12d343c6ecc2
+PACKAGES_SSIDCHANGER_BRANCH=2018.1.x
