@@ -13,7 +13,9 @@ GLUON_FEATURES := \
 	radv-filterd \
 	lock-password \
 	web-private-wifi \
-	web-logging
+	web-logging \
+	geolocator \
+	config-mode-geo-location-osm
 
 GLUON_SITE_PACKAGES := \
 	respondd-module-airtime \
@@ -51,7 +53,7 @@ endif
 
 GLUON_MULTIDOMAIN=1
 
-GLUON_ATH10K_MESH := 11s
+GLUON_WLAN_MESH := 11s
 
 # Allow overriding from the command line
 %B
