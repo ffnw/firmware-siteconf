@@ -1,0 +1,37 @@
+From f8b094deea34370f92add200896ee06a65846496 Mon Sep 17 00:00:00 2001
+From: Jan-Tarek Butt <tarek@ring0.de>
+Date: Sun, 25 Feb 2018 08:42:42 +0100
+Subject: [PATCH 2/3] ffnw config migration from gluon-node-info to geolocator
+
+Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
+---
+ .../luasrc/lib/gluon/upgrade/900-geloc-conf-migration   | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+ create mode 100755 package/gluon-geolocator/luasrc/lib/gluon/upgrade/900-geloc-conf-migration
+
+diff --git a/package/gluon-geolocator/luasrc/lib/gluon/upgrade/900-geloc-conf-migration b/package/gluon-geolocator/luasrc/lib/gluon/upgrade/900-geloc-conf-migration
+new file mode 100755
+index 00000000..6bfb1059
+--- /dev/null
++++ b/package/gluon-geolocator/luasrc/lib/gluon/upgrade/900-geloc-conf-migration
+@@ -0,0 +1,17 @@
++#!/usr/bin/lua
++
++local uci = require('simple-uci').cursor()
++local config = 'gluon-node-info'
++local sname = uci:get_first(config, 'location')
++if sname then
++  local options = {'refresh_interval', 'static_location', 'auto_location'}
++  for _, option in ipairs(options) do
++    local value = uci:get(config, sname, option)
++    if value then
++      uci:set('geolocator', 'settings', option, value)
++      uci:delete(config, sname, option)
++    end
++  end
++  uci:save(config)
++  uci:save('geolocator')
++end
+-- 
+2.11.0
+
