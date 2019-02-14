@@ -22,6 +22,11 @@ GLUON_SITE_PACKAGES := \
 	haveged \
 	iwinfo \
 
+# from https://github.com/Freifunk-Nord/gluon-ssid-changer:
+GLUON_SITE_PACKAGES += \
+	gluon-ssid-changer
+
+
 USB_BASIC := \
 	kmod-usb-core \
 	kmod-usb2 \
