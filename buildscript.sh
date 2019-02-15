@@ -18,7 +18,7 @@ help_print(){
   echo "    fastd               Prepare site repo for fastd build"
   echo "    l2tp                prepare site repo for l2tp build"
   echo "    BROKEN              y or n (default n)"
-  echo "  build <command>       <command> can be replace with targets"
+  echo "  build <command>       <command> can be replaced by targets"
   echo "    target_list         build all gluon targets"
   echo "    all                 build all gluon targes for each VPN"
   echo "    (optional) add \"fast\" as a parameter to build on multicore"
