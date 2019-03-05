@@ -1,8 +1,8 @@
 GLUON_SITE_FEEDS='ffnw ffho tecff'
 
 PACKAGES_FFNW_REPO=https://git.nordwest.freifunk.net/ffnw-firmware/packages.git
-PACKAGES_FFNW_BRANCH=master
-PACKAGES_FFNW_COMMIT=64ba97cb4238c9cdbda1a8c54989fd72a98ce5f9
+PACKAGES_FFNW_BRANCH=hwmodel-und-vpn-im-banner
+PACKAGES_FFNW_COMMIT=3359232aece0d6556399a56f20d1138924ca3fb3
 
 PACKAGES_FFHO_REPO=https://git.ffho.net/FreifunkHochstift/ffho-packages.git
 PACKAGES_FFHO_BRANCH=v2017.1.x
