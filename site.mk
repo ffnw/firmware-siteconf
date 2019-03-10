@@ -15,7 +15,8 @@ GLUON_FEATURES := \
 	web-private-wifi \
 	web-logging \
 	geolocator \
-	config-mode-geo-location-osm
+	config-mode-geo-location-osm \
+	hoodselector
 
 GLUON_SITE_PACKAGES := \
 	respondd-module-airtime \
