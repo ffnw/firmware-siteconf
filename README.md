@@ -24,7 +24,7 @@ Auf dieser Seite wird beschrieben, wie man die Gluon Firmware für das Freifunk 
     ./buildscript.sh prepare GLUON_RELEASE <Releasecodename, zB das aktuelle Datum im Format YYYYMMDD>
     ./buildscript.sh prepare <vpn, zB "fastd" oder "l2tp">
     ./buildscript.sh build <target, zB "x86-generic"> fast
-    
+
 *Hinweis* Auf Multicoresystemen sorgt die option `fast` dafür, dass alle vefügbaren CPU-Kerne für den Build genutzt werden.
 
 ### Manifest und initiale Signatur erstellen
