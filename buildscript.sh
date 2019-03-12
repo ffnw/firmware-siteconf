@@ -11,14 +11,14 @@ help_print(){
   echo "command:"
   echo "  patch                 Apply patches on gluon build ENV"
   echo "  clean_patches         Remove applied patches from gluon repo"
-  echo "  update-patches        Create patches from local gluon commits"
+  echo "  update_patches        Create patches from local gluon commits"
   echo "  prepare <command>"
   echo "    GLUON_BRANCH <str>  Set ENV variable"
   echo "    GLUON_RELEASE <str> Set ENV variable"
   echo "    fastd               Prepare site repo for fastd build"
   echo "    l2tp                prepare site repo for l2tp build"
   echo "    BROKEN              y or n (default n)"
-  echo "  build <command>       <command> can be replace with targets"
+  echo "  build <command>       <command> can be replaced by targets"
   echo "    target_list         build all gluon targets"
   echo "    all                 build all gluon targes for each VPN"
   echo "    (optional) add \"fast\" as a parameter to build on multicore"
@@ -194,7 +194,7 @@ case "$1" in
   "clean_patches")
     clean_patches
   ;;
-  "update-patches")
+  "update_patches")
     update_patches
   ;;
   "prepare")

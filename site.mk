@@ -21,6 +21,7 @@ GLUON_FEATURES := \
 GLUON_SITE_PACKAGES := \
 	respondd-module-airtime \
 	haveged \
+	ffnw-banner \
 	iwinfo \
 
 USB_BASIC := \
