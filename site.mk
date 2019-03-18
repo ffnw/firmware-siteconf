@@ -4,7 +4,7 @@ GLUON_FEATURES := \
 	web-advanced \
 	status-page \
 	mesh-batman-adv-15 \
-	gluon-config-mode-mesh-vpn \
+	config-mode-mesh-vpn \
 %A
 	ebtables-filter-multicast \
 	ebtables-filter-ra-dhcp \
