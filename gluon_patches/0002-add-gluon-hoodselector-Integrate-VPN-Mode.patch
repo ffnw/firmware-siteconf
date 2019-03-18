@@ -1,7 +1,7 @@
-From 7d7dd33c6ba3b2f86dcb8f0847ec085ccd1d1c7e Mon Sep 17 00:00:00 2001
+From c1f839edd712e11fe536eb2f201f72beaebf2c12 Mon Sep 17 00:00:00 2001
 From: Jan-Tarek Butt <tarek@ring0.de>
 Date: Sat, 12 May 2018 17:48:32 +0200
-Subject: [PATCH 2/3] add gluon-hoodselector: Integrate VPN Mode
+Subject: [PATCH 2/4] add gluon-hoodselector: Integrate VPN Mode
 
 This MR includs only the VPN MODE of the hoodselector whitch simply set
 hoods base on their geopositions.
@@ -132,7 +132,7 @@ Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
  create mode 100755 package/gluon-hoodselector/luasrc/usr/sbin/hoodselector
 
 diff --git a/docs/index.rst b/docs/index.rst
-index 73d39e4b..40adf482 100644
+index c5767ae5..c14c3396 100644
 --- a/docs/index.rst
 +++ b/docs/index.rst
 @@ -62,6 +62,7 @@ Several Freifunk communities in Germany use Gluon as the foundation of their Fre
