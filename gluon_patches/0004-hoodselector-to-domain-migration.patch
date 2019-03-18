@@ -1,0 +1,56 @@
+From b567bcfd9266c94ec0c81b06eb19ef698fd47457 Mon Sep 17 00:00:00 2001
+From: runner01 <runner01@ffnw.de>
+Date: Mon, 18 Mar 2019 21:29:26 +0100
+Subject: [PATCH 4/4] hoodselector to domain migration
+
+---
+ .../luasrc/lib/gluon/upgrade/010-domain-migrate    | 37 ++++++++++++++++++++++
+ 1 file changed, 37 insertions(+)
+ create mode 100644 package/gluon-hoodselector/luasrc/lib/gluon/upgrade/010-domain-migrate
+
+diff --git a/package/gluon-hoodselector/luasrc/lib/gluon/upgrade/010-domain-migrate b/package/gluon-hoodselector/luasrc/lib/gluon/upgrade/010-domain-migrate
+new file mode 100644
+index 00000000..d230c529
+--- /dev/null
++++ b/package/gluon-hoodselector/luasrc/lib/gluon/upgrade/010-domain-migrate
+@@ -0,0 +1,37 @@
++#!/usr/bin/lua
++
++local uci = require('simple-uci').cursor()
++local hoodutil = require('hoodselector.util')
++
++local last_hood = uci:get('hoodselector', 'hoodselector', 'hood')
++
++-- Return domain based on a given MESH-ID. nil if no matching domain could be found
++function get_domain_by_meshid(jdomains, meshid)
++	for _, jdomain in pairs(jdomains) do
++		if jdomain.domain.wifi24 ~= nil then
++			if jdomain.domain.wifi24.mesh ~= nil then
++				if meshid:lower() == jdomain.domain.wifi24.mesh.id:lower() then
++					return jdomain
++				end
++			end
++		end
++		if jdomain.domain.wifi5 ~= nil then
++			if jdomain.domain.wifi5.mesh ~= nil then
++				if meshid:lower()  == jdomain.domain.wifi5.mesh.id:lower() then
++					return jdomain
++				end
++			end
++		end
++	end
++	return nil
++end
++
++if last_hood ~= nil then
++	print(last_hood)
++	local new_domain = get_domain_by_meshid(hoodutil.get_domains(),"ffnw-mesh_"..last_hood)
++	if new_domain ~= nil then
++		print(new_domain.domain_code)
++		hoodutil.set_domain_config(new_domain)
++		os.execute("rm /etc/config/hoodselector")
++	end
++end
+-- 
+2.11.0
+

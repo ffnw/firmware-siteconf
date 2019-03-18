@@ -4,28 +4,26 @@ GLUON_FEATURES := \
 	web-advanced \
 	status-page \
 	mesh-batman-adv-15 \
+	config-mode-mesh-vpn \
 %A
 	ebtables-filter-multicast \
 	ebtables-filter-ra-dhcp \
 	ebtables-limit-arp \
+	ebtables-source-filter \
 	radvd \
 	radv-filterd \
+	lock-password \
 	web-private-wifi \
-	geolocator \
 	web-logging \
+	geolocator \
+	config-mode-geo-location-osm \
 	hoodselector
 
 GLUON_SITE_PACKAGES := \
-	-gluon-config-mode-geo-location \
-	gluon-config-mode-geo-location-with-geloc-map \
-	-gluon-web-autoupdater \
-	ffho-web-autoupdater \
+	respondd-module-airtime \
 	haveged \
-	iwinfo \
-	tecff-ath9k-broken-wifi-workaround \
 	ffnw-banner \
-	ffnw-hoods \
-	ffnw-multiple-v6-watchdoog
+	iwinfo \
 
 USB_BASIC := \
 	kmod-usb-core \
@@ -56,7 +54,9 @@ ifeq ($(GLUON_TARGET),x86-64)
 		kmod-igb
 endif
 
-GLUON_ATH10K_MESH := 11s
+GLUON_MULTIDOMAIN=1
+
+GLUON_WLAN_MESH := 11s
 
 # Allow overriding from the command line
 %B

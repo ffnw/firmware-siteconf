@@ -1,0 +1,234 @@
+From 6f6e487129eb970a0a8e29e1eada1c24f5b2f0d7 Mon Sep 17 00:00:00 2001
+From: runner01 <runner01@ffnw.de>
+Date: Fri, 8 Feb 2019 04:43:50 +0100
+Subject: [PATCH 1/4] add gluon-geolocator
+
+---
+ package/gluon-geolocator/Makefile                  |  14 +++
+ package/gluon-geolocator/check_site.lua            |   2 +
+ .../gluon-geolocator/files/etc/config/geolocator   |   2 +
+ .../files/usr/lib/micron.d/geolocator              |   1 +
+ .../luasrc/lib/gluon/geolocator/geolocator         | 130 +++++++++++++++++++++
+ .../lib/gluon/upgrade/540-geolocator-settings      |  26 +++++
+ 6 files changed, 175 insertions(+)
+ create mode 100644 package/gluon-geolocator/Makefile
+ create mode 100644 package/gluon-geolocator/check_site.lua
+ create mode 100644 package/gluon-geolocator/files/etc/config/geolocator
+ create mode 100644 package/gluon-geolocator/files/usr/lib/micron.d/geolocator
+ create mode 100755 package/gluon-geolocator/luasrc/lib/gluon/geolocator/geolocator
+ create mode 100755 package/gluon-geolocator/luasrc/lib/gluon/upgrade/540-geolocator-settings
+
+diff --git a/package/gluon-geolocator/Makefile b/package/gluon-geolocator/Makefile
+new file mode 100644
+index 00000000..54dd3002
+--- /dev/null
++++ b/package/gluon-geolocator/Makefile
+@@ -0,0 +1,14 @@
++include $(TOPDIR)/rules.mk
++
++PKG_NAME:=gluon-geolocator
++PKG_VERSION:=1
++PKG_RELEASE:=1
++
++include ../gluon.mk
++
++define Package/gluon-geolocator
++  TITLE:=Provide the geolocator to receive positions over wifi
++  DEPENDS:=+gluon-node-info +micrond
++endef
++
++$(eval $(call BuildPackageGluon,gluon-geolocator))
+diff --git a/package/gluon-geolocator/check_site.lua b/package/gluon-geolocator/check_site.lua
+new file mode 100644
+index 00000000..2771d938
+--- /dev/null
++++ b/package/gluon-geolocator/check_site.lua
+@@ -0,0 +1,2 @@
++need_boolean(in_site({'geolocator', 'autolocation'}), false)
++need_number(in_site({'geolocator', 'interval'}), false)
+diff --git a/package/gluon-geolocator/files/etc/config/geolocator b/package/gluon-geolocator/files/etc/config/geolocator
+new file mode 100644
+index 00000000..aed88cce
+--- /dev/null
++++ b/package/gluon-geolocator/files/etc/config/geolocator
+@@ -0,0 +1,2 @@
++config geolocator 'settings'
++	option static_location '0'
+diff --git a/package/gluon-geolocator/files/usr/lib/micron.d/geolocator b/package/gluon-geolocator/files/usr/lib/micron.d/geolocator
+new file mode 100644
+index 00000000..7379b730
+--- /dev/null
++++ b/package/gluon-geolocator/files/usr/lib/micron.d/geolocator
+@@ -0,0 +1 @@
++*/5 * * * *     /lib/gluon/geolocator/geolocator
+diff --git a/package/gluon-geolocator/luasrc/lib/gluon/geolocator/geolocator b/package/gluon-geolocator/luasrc/lib/gluon/geolocator/geolocator
+new file mode 100755
+index 00000000..3ec5771c
+--- /dev/null
++++ b/package/gluon-geolocator/luasrc/lib/gluon/geolocator/geolocator
+@@ -0,0 +1,130 @@
++#!/usr/bin/lua
++
++local bit = require('bit')
++local unistd = require('posix.unistd')
++local fcntl = require('posix.fcntl')
++local uci = require('simple-uci').cursor()
++local json = require ("jsonc")
++local ubus = require 'ubus'
++local iwinfo = require("iwinfo")
++
++local LOC="gluon-node-info"
++local GLC="geolocator"
++local TIME_STAMP="/tmp/geolocator_timestamp"
++
++if not uci:get_bool(GLC, "settings", "auto_location") then
++	os.exit(0)
++end
++
++-- PID file to ensure the geolocator isn't running parallel
++local lockfile = '/var/lock/geolocator.lock'
++local lockfd, err = fcntl.open(lockfile, bit.bor(fcntl.O_WRONLY, fcntl.O_CREAT), 384) -- mode 0600
++
++if not lockfd then
++	io.stderr:write(err, '\n')
++	os.exit(1)
++end
++
++local ok, _ = fcntl.fcntl(lockfd, fcntl.F_SETLK, {
++	l_start = 0,
++	l_len = 0,
++	l_type = fcntl.F_WRLCK,
++	l_whence = unistd.SEEK_SET,
++})
++
++if not ok then
++	io.stderr:write(string.format(
++		"Unable to lock file %s. Make sure there is no other instance of the geolocator running.\n",
++		lockfile
++	))
++	os.exit(1)
++end
++
++-- Iterates over all active WLAN interfaces
++-- Returning true from the callback function will skip all remaining
++-- interfaces of the same radio
++local function foreach_radio(f)
++	local uconn = assert(ubus.connect(), 'failed to connect to ubus')
++	local status = uconn:call('network.wireless', 'status', {})
++	ubus.close(uconn)
++
++	for _, radio in pairs(status) do
++		for _, iface in ipairs(radio.interfaces) do
++			if f(iface.ifname) then
++				break
++			end
++		end
++	end
++end
++
++local function receive_json(request)
++	local f = assert(io.popen(string.format("exec wget -T 15 -q -O- '%s'", request)), 'failed to run wget')
++	local data = f:read('*a')
++	f:close()
++
++	return json.parse(data)
++end
++
++-- Get position
++local function locate()
++	local done_bssids = {}
++	local found_bssids = {}
++	foreach_radio(function(ifname)
++		local iw = iwinfo[iwinfo.type(ifname)]
++		if not iw then
++			-- Skip other ifaces of this radio, as they
++			-- will have the same type
++			return true
++		end
++
++		local scanlist = iw.scanlist(ifname)
++		if not scanlist then
++			return false
++		end
++
++		for _, entry in ipairs(scanlist) do
++			if entry.mode:match("Master") then
++				local bssid = string.upper(entry.bssid:gsub(":", ""))
++				if not done_bssids[bssid] then
++					table.insert(found_bssids, bssid)
++					done_bssids[bssid] = true
++				end
++			end
++		end
++
++		return true
++	end)
++
++	assert(#found_bssids > 0, 'insufficient BSSIDs found')
++
++	local data = receive_json('http://openwifi.su/api/v1/bssids/' .. table.concat(found_bssids, ','))
++	assert(type(data) == 'table' and data.lon and data.lat, 'location not available')
++
++	return data
++end
++
++-- Check if interval over or not exist
++if io.open(TIME_STAMP) ~= nil then
++	if os.time() - tonumber(io.open(TIME_STAMP):read("*a")) < uci:get(GLC, "settings", "refresh_interval") * 60 then
++		os.exit(0)
++	end
++end
++
++local pos = locate()
++if not next(pos) then
++	os.exit(1)
++end
++if not uci:get_bool(GLC, "settings", "static_location") then
++	uci:set(LOC, uci:get_first(LOC, 'location'), 'latitude', pos.lat)
++	uci:set(LOC, uci:get_first(LOC, 'location'), 'longitude', pos.lon)
++	uci:save(LOC)
++	uci:commit(LOC)
++end
++local timestap = io.open(TIME_STAMP, "w")
++if timestap ~= nil then
++	timestap:write(os.time())
++	timestap:close()
++	os.exit(0)
++end
++io.stdout:write("Can`t create file on " .. TIME_STAMP .. "\n")
++os.exit(1)
+diff --git a/package/gluon-geolocator/luasrc/lib/gluon/upgrade/540-geolocator-settings b/package/gluon-geolocator/luasrc/lib/gluon/upgrade/540-geolocator-settings
+new file mode 100755
+index 00000000..84c9f99c
+--- /dev/null
++++ b/package/gluon-geolocator/luasrc/lib/gluon/upgrade/540-geolocator-settings
+@@ -0,0 +1,26 @@
++#!/usr/bin/lua
++
++local site = require 'gluon.site'
++local uci = require('simple-uci').cursor()
++
++local config = 'geolocator'
++
++local static_location = uci:get(config, 'settings', 'static_location')
++
++local auto_location = uci:get(config, 'settings', 'auto_location')
++if not auto_location then
++	auto_location = site.geolocator.autolocation(false)
++end
++
++local refresh_interval = uci:get(config, 'settings', 'refresh_interval')
++if not refresh_interval then
++	refresh_interval = site.geolocator.interval(720) -- default: 12h
++end
++
++uci:delete(config, 'settings')
++uci:section(config, config, 'settings', {
++	static_location = static_location,
++	refresh_interval = refresh_interval,
++	auto_location = auto_location,
++})
++uci:save(config)
+-- 
+2.11.0
+

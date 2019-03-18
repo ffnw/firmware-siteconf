@@ -5,7 +5,7 @@ https://wiki.ffnw.de/Entwicklung/Als\_Entwickler\_t%C3%A4tig\_werden
 
 ## Firmware Kompilieren
 
-### Voraussetzungen (Stand Gluon v2016.2.x):
+### Voraussetzungen (Stand Gluon v2018.2.x):
 
 Muss auf dem Rechner installiert sein. Hier Beispiel Debian:
 
@@ -17,20 +17,19 @@ Auf dieser Seite wird beschrieben, wie man die Gluon Firmware für das Freifunk 
 
 *Wichtig* Je nach Entwicklungsstand muss die Branch Version angepasst werden.
 
-    git clone https://github.com/freifunk-gluon/gluon.git ./freifunk_build -b v2016.2.x && cd ./freifunk_build
-    git clone https://git.ffnw.de/ffnw-firmware/siteconf.git site -b 20170502 && cd site
-./prepare.sh patch
-    cd ..
-    make update
-    # GLUON_BRANCH: gibt den zu verwendenden Gluon-Branch an
-    # GLUON_TARGET: gibt die Gruppe der zu bauenden Images an (siehe Gluon Doku)
-    # V: wenn V=s dann wird debug Output beim Kompilieren eingeschaltet
-    make -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_BRANCH=stable GLUON_TARGET=ar71xx-generic V=s
+    git clone https://github.com/freifunk-gluon/gluon.git ./freifunk_build -b v2018.2.x && cd ./freifunk_build
+    git clone https://git.ffnw.de/ffnw-firmware/siteconf.git site && cd site
+    ./buildscript.sh patch
+    ./buildscript.sh prepare GLUON_BRANCH <autoupdater-branch, also zB "stable" oder "testing">
+    ./buildscript.sh prepare GLUON_RELEASE <Releasecodename, zB das aktuelle Datum im Format YYYYMMDD>
+    ./buildscript.sh prepare <vpn, zB "fastd" oder "l2tp">
+    ./buildscript.sh build <target, zB "x86-generic"> fast
+
+*Hinweis* Auf Multicoresystemen sorgt die option `fast` dafür, dass alle vefügbaren CPU-Kerne für den Build genutzt werden.
 
 ### Manifest und initiale Signatur erstellen
 
-    make manifest GLUON_BRANCH=stable
-
+    ./buildscript.sh create_manifest manifest
     ./contrib/sign.sh ../firmware/release_keys/ecdsa-privatekey ./output/images/sysupgrade/stable.manifest
 
 Weitere Informationen z.B. zu automatischen Builds auch unter https://gluon.readthedocs.org/en/latest/features/autoupdater.html
