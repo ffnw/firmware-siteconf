@@ -1,6 +1,6 @@
 ## Als Entwickler tätig werden
 
-Falls dich das Thema der Software entwicklung begeistert und du gerne bereit bist dich in komplexe strukturen einzuarbeiten, sowie gerne einen beitreg zu Freifunk leisten möchtes kannst du dich unter folgenden Link über einen einstieg erkundigen:
+Falls dich das Thema der Softwareentwicklung begeistert und du gerne bereit bist dich in komplexe Strukturen einzuarbeiten, sowie gerne einen Beitrag zu Freifunk leisten möchtest kannst du dich unter folgendem Link über einen Einstieg erkundigen:
 https://wiki.ffnw.de/Entwicklung/Als\_Entwickler\_t%C3%A4tig\_werden
 
 ## Firmware Kompilieren
