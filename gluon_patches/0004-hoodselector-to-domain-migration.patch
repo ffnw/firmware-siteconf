@@ -1,19 +1,22 @@
-From b567bcfd9266c94ec0c81b06eb19ef698fd47457 Mon Sep 17 00:00:00 2001
+From ff190d99d664cd5e641d878ce6565f71b5b912c8 Mon Sep 17 00:00:00 2001
 From: runner01 <runner01@ffnw.de>
 Date: Mon, 18 Mar 2019 21:29:26 +0100
 Subject: [PATCH 4/4] hoodselector to domain migration
 
+Domain migration: restart services after migration
+
+Signed-off-by: runner01 <runner01@ffnw.de>
 ---
- .../luasrc/lib/gluon/upgrade/010-domain-migrate    | 37 ++++++++++++++++++++++
- 1 file changed, 37 insertions(+)
+ .../luasrc/lib/gluon/upgrade/010-domain-migrate    | 38 ++++++++++++++++++++++
+ 1 file changed, 38 insertions(+)
  create mode 100644 package/gluon-hoodselector/luasrc/lib/gluon/upgrade/010-domain-migrate
 
 diff --git a/package/gluon-hoodselector/luasrc/lib/gluon/upgrade/010-domain-migrate b/package/gluon-hoodselector/luasrc/lib/gluon/upgrade/010-domain-migrate
 new file mode 100644
-index 00000000..d230c529
+index 00000000..9146970b
 --- /dev/null
 +++ b/package/gluon-hoodselector/luasrc/lib/gluon/upgrade/010-domain-migrate
-@@ -0,0 +1,37 @@
+@@ -0,0 +1,38 @@
 +#!/usr/bin/lua
 +
 +local uci = require('simple-uci').cursor()
@@ -49,6 +52,7 @@ index 00000000..d230c529
 +		print(new_domain.domain_code)
 +		hoodutil.set_domain_config(new_domain)
 +		os.execute("rm /etc/config/hoodselector")
++		hoodutil.restart_services()
 +	end
 +end
 -- 
