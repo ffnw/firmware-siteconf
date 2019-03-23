@@ -1,4 +1,4 @@
-From ff190d99d664cd5e641d878ce6565f71b5b912c8 Mon Sep 17 00:00:00 2001
+From 59b2d8c89fc8c09a03e84987b13f0a08a57edf23 Mon Sep 17 00:00:00 2001
 From: runner01 <runner01@ffnw.de>
 Date: Mon, 18 Mar 2019 21:29:26 +0100
 Subject: [PATCH 4/4] hoodselector to domain migration
@@ -9,10 +9,10 @@ Signed-off-by: runner01 <runner01@ffnw.de>
 ---
  .../luasrc/lib/gluon/upgrade/010-domain-migrate    | 38 ++++++++++++++++++++++
  1 file changed, 38 insertions(+)
- create mode 100644 package/gluon-hoodselector/luasrc/lib/gluon/upgrade/010-domain-migrate
+ create mode 100755 package/gluon-hoodselector/luasrc/lib/gluon/upgrade/010-domain-migrate
 
 diff --git a/package/gluon-hoodselector/luasrc/lib/gluon/upgrade/010-domain-migrate b/package/gluon-hoodselector/luasrc/lib/gluon/upgrade/010-domain-migrate
-new file mode 100644
+new file mode 100755
 index 00000000..9146970b
 --- /dev/null
 +++ b/package/gluon-hoodselector/luasrc/lib/gluon/upgrade/010-domain-migrate

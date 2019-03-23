@@ -1,4 +1,4 @@
-From 262cac96cf2875b0344adc4dc80dbf127345eb3a Mon Sep 17 00:00:00 2001
+From 41ec6805a5bc3928cb9f383303e73a0aa32bd90b Mon Sep 17 00:00:00 2001
 From: Jan-Tarek Butt <tarek@ring0.de>
 Date: Sun, 25 Feb 2018 08:42:42 +0100
 Subject: [PATCH 3/4] ffnw config migration from gluon-node-info to geolocator
