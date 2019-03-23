@@ -1,4 +1,4 @@
-From 170e8f72abd2d73528fcb571b8c25c2c214461f1 Mon Sep 17 00:00:00 2001
+From 65c9c65f28ab43b794cf8454b7f101df526a742f Mon Sep 17 00:00:00 2001
 From: Jan-Tarek Butt <tarek@ring0.de>
 Date: Sat, 12 May 2018 17:48:32 +0200
 Subject: [PATCH 2/4] add gluon-hoodselector: Integrate VPN Mode
@@ -107,6 +107,22 @@ Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
 package/gluon-hoodselector util: fix wrong function signature
 
 Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
+
+small typo fixes
+
+small typo fixes
+
+Update util.lua
+
+now polygons with holes are recognized correctly. also a mix of nested polygons and boxes should be possible as shapes[]
+
+Update util.lua
+
+processes are really restarted now. new (old) problem: nodes will not forget their former ipv6-addresses. watchdog could here with that.
+
+gluon-hoodselector util.lua: replace i iterator with _
+
+Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
 ---
  docs/index.rst                                     |    1 +
  docs/package/gluon-hoodselector.dia                | 1219 ++++++++++++++++++++
@@ -117,9 +133,9 @@ Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
  package/gluon-hoodselector/Makefile                |   26 +
  package/gluon-hoodselector/check_site.lua          |   35 +
  .../files/usr/lib/micron.d/hoodselector            |    1 +
- .../luasrc/usr/lib/lua/hoodselector/util.lua       |  151 +++
+ .../luasrc/usr/lib/lua/hoodselector/util.lua       |  153 +++
  .../luasrc/usr/sbin/hoodselector                   |   56 +
- 11 files changed, 1787 insertions(+)
+ 11 files changed, 1789 insertions(+)
  create mode 100644 docs/package/gluon-hoodselector.dia
  create mode 100644 docs/package/gluon-hoodselector.rst
  create mode 100644 docs/package/gluon-hoodselector.svg
@@ -7509,10 +7525,10 @@ index 00000000..6e793151
 +*/2 * * * * /usr/sbin/hoodselector
 diff --git a/package/gluon-hoodselector/luasrc/usr/lib/lua/hoodselector/util.lua b/package/gluon-hoodselector/luasrc/usr/lib/lua/hoodselector/util.lua
 new file mode 100644
-index 00000000..c7d76cce
+index 00000000..1050146b
 --- /dev/null
 +++ b/package/gluon-hoodselector/luasrc/usr/lib/lua/hoodselector/util.lua
-@@ -0,0 +1,151 @@
+@@ -0,0 +1,153 @@
 +local unistd = require('posix.unistd')
 +local util = require 'gluon.util'
 +local json = require 'jsonc'
@@ -7537,7 +7553,7 @@ index 00000000..c7d76cce
 +	return list
 +end
 +
-+-- Return the default domain from the domaon list.
++-- Return the default domain from the domain list.
 +-- This method can return the following data:
 +-- * default domain
 +-- * nil if no default domain has been defined
@@ -7613,24 +7629,26 @@ index 00000000..c7d76cce
 +	return t
 +end
 +
-+-- Return domain from the domain list based on geo position or nil if no geo base domain could be
++-- Return domain from the domain list based on geo position or nil if no geo based domain could be
 +-- determined. First check if an area has > 2 points and is hence a polygon. Else assume it is a
-+-- rectangular box defined by two points (south-west and north-east)
++-- rectangular box defined by two points (south-west and north-east). Furthermore keep record of
++-- how many nested shapes we are in, e.g. a polyon with holes.
 +function M.get_domain_by_geo(jdomains,geo)
 +	for _, domain in pairs(jdomains) do
 +		if domain.domain_code ~= site.default_domain() then
-+		for _, area in pairs(domain.domain.hoodselector.shapes) do
-+			if #area > 2 then
-+				if (M.point_in_polygon(area,geo) == 1) then
-+					return domain
-+				end
-+			else
-+				if ( geo.lat >= area[1].lat and geo.lat < area[2].lat and geo.lon >= area[1].lon
-+					and geo.lon < area[2].lon ) then
-+					return domain
++			local nesting = 1
++			for _, area in pairs(domain.domain.hoodselector.shapes) do
++				if #area > 2 then
++					if (M.point_in_polygon(area,geo) == 1) then
++						nesting = nesting * (-1)
++					end
++				else
++					if ( geo.lat >= area[1].lat and geo.lat < area[2].lat and geo.lon >= area[1].lon and geo.lon < area[2].lon ) then
++						nesting = nesting * (-1)
++					end
 +				end
 +			end
-+		end
++			if nesting == -1 then return domain end
 +		end
 +	end
 +	return nil
@@ -7655,7 +7673,7 @@ index 00000000..c7d76cce
 +		"gluon-respondd",
 +	}
 +
-+	for proc in ipairs(proc_tbl) do
++	for _, proc in ipairs(proc_tbl) do
 +		if unistd.access("/etc/init.d/"..proc, "x") == 0 then
 +			print(proc.." restarting ...")
 +			os.execute("/etc/init.d/"..proc.." restart")
@@ -7666,7 +7684,7 @@ index 00000000..c7d76cce
 +return M
 diff --git a/package/gluon-hoodselector/luasrc/usr/sbin/hoodselector b/package/gluon-hoodselector/luasrc/usr/sbin/hoodselector
 new file mode 100755
-index 00000000..2ed74440
+index 00000000..19b469f4
 --- /dev/null
 +++ b/package/gluon-hoodselector/luasrc/usr/sbin/hoodselector
 @@ -0,0 +1,56 @@
@@ -7702,9 +7720,9 @@ index 00000000..2ed74440
 +end
 +
 +-- geolocation mode
-+-- If we have a location we will try to select the domain coresponding to this location.
++-- If we have a location we will try to select the domain corresponding to this location.
 +-- If no domain for the location has been defined or if we can't determine the node's location,
-+-- we will select the default domain as last fallback instanc.
++-- we will select the default domain as last fallback instance.
 +local geo = hoodutil.get_geolocation()
 +if geo.lat ~= nil and geo.lon ~= nil then
 +	io.stdout:write('Position found. Enter "geolocation mode" ...\n')
@@ -7717,9 +7735,9 @@ index 00000000..2ed74440
 +		end
 +		return
 +	end
-+	io.stdout:write('No domain has been defined for the current position. Continure with default domain mode\n')
++	io.stdout:write('No domain has been defined for the current position. Continue with default domain mode\n')
 +else
-+	io.stdout:write('No position found. Continure with default domain mode\n')
++	io.stdout:write('No position found. Continue with default domain mode\n')
 +end
 +
 +-- default domain mode
