@@ -1,7 +1,7 @@
-From 363c606d384218b0a3741c0aa1c8e53a02d1cab8 Mon Sep 17 00:00:00 2001
+From 997eb13de13cb1096410e302b21d0e36d5edef5e Mon Sep 17 00:00:00 2001
 From: runner01 <runner01@ffnw.de>
 Date: Mon, 18 Mar 2019 21:29:26 +0100
-Subject: [PATCH 4/5] hoodselector to domain migration
+Subject: [PATCH 4/6] hoodselector to domain migration
 
 Domain migration: restart services after migration
 

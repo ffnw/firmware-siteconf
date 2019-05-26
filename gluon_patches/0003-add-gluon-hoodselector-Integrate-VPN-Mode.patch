@@ -1,7 +1,7 @@
-From 7324839b953cf5168cbb0f6ddf101ce96cfe5511 Mon Sep 17 00:00:00 2001
+From bfd39542050c08c2176761459f8931dee9b14487 Mon Sep 17 00:00:00 2001
 From: Jan-Tarek Butt <tarek@ring0.de>
 Date: Sat, 12 May 2018 17:48:32 +0200
-Subject: [PATCH 2/5] add gluon-hoodselector: Integrate VPN Mode
+Subject: [PATCH 3/6] add gluon-hoodselector: Integrate VPN Mode
 
 This MR includs only the VPN MODE of the hoodselector whitch simply set
 hoods base on their geopositions.
@@ -114,28 +114,64 @@ small typo fixes
 
 Update util.lua
 
-now polygons with holes are recognized correctly. also a mix of nested polygons and boxes should be possible as shapes[]
-
-Update util.lua
-
 processes are really restarted now. new (old) problem: nodes will not forget their former ipv6-addresses. watchdog could here with that.
 
 gluon-hoodselector util.lua: replace i iterator with _
 
 Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
+
+Update util.lua
+
+now polygons with holes are recognized correctly. also a mix of nested polygons and boxes should be possible as shapes[]
+
+package/gluon-hoodselector: hoodselector use gluon-reload for daemon restarts/reloads
+
+Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
+
+package/gluon-hoodselector: util.lua use math-polygon lib and rm restart_services function. Rectengles will be converted into polygons now
+
+Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
+
+package/gluon-hoodselector: Makefile rewrite description update depends list
+
+Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
+
+package/gluon-hoodselector: check_site.lua reduce complexity
+
+Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
+
+docs/package/gluon-hoodselector: update .dia and .svg to current code behave
+
+Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
+
+docs/package/gluon-hoodselector: replace hood with domain update doc to current code behave
+
+Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
+
+package/gluon-hoodselector: use : for gluon_version Val
+
+Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
+
+package/gluon-hoodselector: fix if equal syntax
+
+Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
+
+luasrc/usr/lib/lua/hoodselector/util.lua: check_site.lua simplify checksite script and fix if logic
+
+Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
 ---
  docs/index.rst                                     |    1 +
- docs/package/gluon-hoodselector.dia                | 1219 ++++++++++++++++++++
- docs/package/gluon-hoodselector.rst                |  121 ++
- docs/package/gluon-hoodselector.svg                |  161 +++
+ docs/package/gluon-hoodselector.dia                | 1080 ++++++++++++++++++++
+ docs/package/gluon-hoodselector.rst                |  128 +++
+ docs/package/gluon-hoodselector.svg                |  142 +++
  docs/package/hoodmap.jpeg                          |  Bin 0 -> 298171 bytes
  docs/package/rectangle-example.svg                 |   16 +
- package/gluon-hoodselector/Makefile                |   26 +
- package/gluon-hoodselector/check_site.lua          |   35 +
+ package/gluon-hoodselector/Makefile                |   23 +
+ package/gluon-hoodselector/check_site.lua          |   26 +
  .../files/usr/lib/micron.d/hoodselector            |    1 +
- .../luasrc/usr/lib/lua/hoodselector/util.lua       |  153 +++
+ .../luasrc/usr/lib/lua/hoodselector/util.lua       |   83 ++
  .../luasrc/usr/sbin/hoodselector                   |   56 +
- 11 files changed, 1789 insertions(+)
+ 11 files changed, 1556 insertions(+)
  create mode 100644 docs/package/gluon-hoodselector.dia
  create mode 100644 docs/package/gluon-hoodselector.rst
  create mode 100644 docs/package/gluon-hoodselector.svg
@@ -161,10 +197,10 @@ index 31e8e977..d43db7c6 100644
     package/gluon-web-admin
 diff --git a/docs/package/gluon-hoodselector.dia b/docs/package/gluon-hoodselector.dia
 new file mode 100644
-index 00000000..1812e94d
+index 00000000..95c1b54b
 --- /dev/null
 +++ b/docs/package/gluon-hoodselector.dia
-@@ -0,0 +1,1219 @@
+@@ -0,0 +1,1080 @@
 +<?xml version="1.0" encoding="UTF-8"?>
 +<dia:diagram xmlns:dia="http://www.lysator.liu.se/~alla/dia/">
 +  <dia:diagramdata>
@@ -257,7 +293,7 @@ index 00000000..1812e94d
 +        <dia:real val="0.5"/>
 +      </dia:attribute>
 +      <dia:connections>
-+        <dia:connection handle="0" to="O30" connection="16"/>
++        <dia:connection handle="0" to="O22" connection="16"/>
 +        <dia:connection handle="1" to="O1" connection="16"/>
 +      </dia:connections>
 +    </dia:object>
@@ -309,64 +345,16 @@ index 00000000..1812e94d
 +        </dia:composite>
 +      </dia:attribute>
 +    </dia:object>
-+    <dia:object type="Flowchart - Ellipse" version="0" id="O2">
++    <dia:object type="Standard - Line" version="0" id="O2">
 +      <dia:attribute name="obj_pos">
-+        <dia:point val="18.2865,5.11825"/>
++        <dia:point val="15.9492,6.48801"/>
 +      </dia:attribute>
 +      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="18.2615,5.09325;23.8385,7.90675"/>
-+      </dia:attribute>
-+      <dia:attribute name="elem_corner">
-+        <dia:point val="18.2865,5.11825"/>
-+      </dia:attribute>
-+      <dia:attribute name="elem_width">
-+        <dia:real val="5.5270093757161156"/>
-+      </dia:attribute>
-+      <dia:attribute name="elem_height">
-+        <dia:real val="2.7635046878580578"/>
-+      </dia:attribute>
-+      <dia:attribute name="border_width">
-+        <dia:real val="0.05000000074505806"/>
-+      </dia:attribute>
-+      <dia:attribute name="show_background">
-+        <dia:boolean val="true"/>
-+      </dia:attribute>
-+      <dia:attribute name="padding">
-+        <dia:real val="0.35355339059327379"/>
-+      </dia:attribute>
-+      <dia:attribute name="text">
-+        <dia:composite type="text">
-+          <dia:attribute name="string">
-+            <dia:string>#directVPN#</dia:string>
-+          </dia:attribute>
-+          <dia:attribute name="font">
-+            <dia:font family="sans" style="0" name="Helvetica"/>
-+          </dia:attribute>
-+          <dia:attribute name="height">
-+            <dia:real val="0.80000000000000004"/>
-+          </dia:attribute>
-+          <dia:attribute name="pos">
-+            <dia:point val="21.05,6.695"/>
-+          </dia:attribute>
-+          <dia:attribute name="color">
-+            <dia:color val="#000000"/>
-+          </dia:attribute>
-+          <dia:attribute name="alignment">
-+            <dia:enum val="1"/>
-+          </dia:attribute>
-+        </dia:composite>
-+      </dia:attribute>
-+    </dia:object>
-+    <dia:object type="Standard - Line" version="0" id="O3">
-+      <dia:attribute name="obj_pos">
-+        <dia:point val="15.9497,6.49251"/>
-+      </dia:attribute>
-+      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="15.9247,6.20469;18.3175,6.78559"/>
++        <dia:rectangle val="15.9242,6.19756;17.8779,6.77846"/>
 +      </dia:attribute>
 +      <dia:attribute name="conn_endpoints">
-+        <dia:point val="15.9497,6.49251"/>
-+        <dia:point val="18.2616,6.49591"/>
++        <dia:point val="15.9492,6.48801"/>
++        <dia:point val="17.822,6.48801"/>
 +      </dia:attribute>
 +      <dia:attribute name="numcp">
 +        <dia:int val="1"/>
@@ -385,15 +373,15 @@ index 00000000..1812e94d
 +      </dia:attribute>
 +      <dia:connections>
 +        <dia:connection handle="0" to="O1" connection="16"/>
-+        <dia:connection handle="1" to="O2" connection="16"/>
++        <dia:connection handle="1" to="O5" connection="16"/>
 +      </dia:connections>
 +    </dia:object>
-+    <dia:object type="Standard - Text" version="1" id="O4">
++    <dia:object type="Standard - Text" version="1" id="O3">
 +      <dia:attribute name="obj_pos">
-+        <dia:point val="5.3,5.85"/>
++        <dia:point val="5.3,3.85"/>
 +      </dia:attribute>
 +      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="5.3,5.255;9.1875,6.0025"/>
++        <dia:rectangle val="5.3,3.255;9.1875,4.0025"/>
 +      </dia:attribute>
 +      <dia:attribute name="text">
 +        <dia:composite type="text">
@@ -407,7 +395,7 @@ index 00000000..1812e94d
 +            <dia:real val="0.80000000000000004"/>
 +          </dia:attribute>
 +          <dia:attribute name="pos">
-+            <dia:point val="5.3,5.85"/>
++            <dia:point val="5.3,3.85"/>
 +          </dia:attribute>
 +          <dia:attribute name="color">
 +            <dia:color val="#000000"/>
@@ -427,19 +415,17 @@ index 00000000..1812e94d
 +        <dia:boolean val="true"/>
 +      </dia:attribute>
 +    </dia:object>
-+    <dia:object type="Standard - Text" version="1" id="O5">
++    <dia:object type="Standard - Text" version="1" id="O4">
 +      <dia:attribute name="obj_pos">
-+        <dia:point val="21.35,2.95"/>
++        <dia:point val="20.9,3.85"/>
 +      </dia:attribute>
 +      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="17.2825,2.33631;25.4362,4.73988"/>
++        <dia:rectangle val="18.0225,3.255;23.7775,4.0025"/>
 +      </dia:attribute>
 +      <dia:attribute name="text">
 +        <dia:composite type="text">
 +          <dia:attribute name="string">
-+            <dia:string>#(VPN MODE)
-+Router has a batman-adv
-+connection via VPN.#</dia:string>
++            <dia:string>#geolocation mode#</dia:string>
 +          </dia:attribute>
 +          <dia:attribute name="font">
 +            <dia:font family="sans" style="0" name="Helvetica"/>
@@ -448,7 +434,7 @@ index 00000000..1812e94d
 +            <dia:real val="0.80000000000000004"/>
 +          </dia:attribute>
 +          <dia:attribute name="pos">
-+            <dia:point val="21.35,2.95"/>
++            <dia:point val="20.9,3.85"/>
 +          </dia:attribute>
 +          <dia:attribute name="color">
 +            <dia:color val="#000000"/>
@@ -468,15 +454,15 @@ index 00000000..1812e94d
 +        <dia:boolean val="true"/>
 +      </dia:attribute>
 +    </dia:object>
-+    <dia:object type="Flowchart - Ellipse" version="0" id="O6">
++    <dia:object type="Flowchart - Ellipse" version="0" id="O5">
 +      <dia:attribute name="obj_pos">
-+        <dia:point val="17.8469,10.7141"/>
++        <dia:point val="17.8469,4.6641"/>
 +      </dia:attribute>
 +      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="17.8219,10.6891;24.2302,14.3869"/>
++        <dia:rectangle val="17.8219,4.6391;24.2302,8.33694"/>
 +      </dia:attribute>
 +      <dia:attribute name="elem_corner">
-+        <dia:point val="17.8469,10.7141"/>
++        <dia:point val="17.8469,4.6641"/>
 +      </dia:attribute>
 +      <dia:attribute name="elem_width">
 +        <dia:real val="6.3582762174076271"/>
@@ -505,7 +491,7 @@ index 00000000..1812e94d
 +            <dia:real val="0.80000000000000004"/>
 +          </dia:attribute>
 +          <dia:attribute name="pos">
-+            <dia:point val="21.026,12.733"/>
++            <dia:point val="21.026,6.68302"/>
 +          </dia:attribute>
 +          <dia:attribute name="color">
 +            <dia:color val="#000000"/>
@@ -516,16 +502,16 @@ index 00000000..1812e94d
 +        </dia:composite>
 +      </dia:attribute>
 +    </dia:object>
-+    <dia:object type="Standard - Line" version="0" id="O7">
++    <dia:object type="Standard - Line" version="0" id="O6">
 +      <dia:attribute name="obj_pos">
-+        <dia:point val="21.0444,7.90669"/>
++        <dia:point val="24.2046,6.4672"/>
 +      </dia:attribute>
 +      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="20.745,7.88159;21.3259,10.745"/>
++        <dia:rectangle val="24.1794,6.13989;30.4126,6.72078"/>
 +      </dia:attribute>
 +      <dia:attribute name="conn_endpoints">
-+        <dia:point val="21.0444,7.90669"/>
-+        <dia:point val="21.0334,10.6891"/>
++        <dia:point val="24.2046,6.4672"/>
++        <dia:point val="30.3567,6.4269"/>
 +      </dia:attribute>
 +      <dia:attribute name="numcp">
 +        <dia:int val="1"/>
@@ -543,80 +529,16 @@ index 00000000..1812e94d
 +        <dia:real val="0.5"/>
 +      </dia:attribute>
 +      <dia:connections>
-+        <dia:connection handle="0" to="O2" connection="16"/>
-+        <dia:connection handle="1" to="O6" connection="16"/>
++        <dia:connection handle="0" to="O5" connection="16"/>
++        <dia:connection handle="1" to="O24" connection="16"/>
 +      </dia:connections>
 +    </dia:object>
-+    <dia:object type="Standard - Text" version="1" id="O8">
++    <dia:object type="Standard - Text" version="1" id="O7">
 +      <dia:attribute name="obj_pos">
-+        <dia:point val="21.6,9.3"/>
++        <dia:point val="26.05,6.1"/>
 +      </dia:attribute>
 +      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="21.6,8.705;22.9125,9.4525"/>
-+      </dia:attribute>
-+      <dia:attribute name="text">
-+        <dia:composite type="text">
-+          <dia:attribute name="string">
-+            <dia:string>#true#</dia:string>
-+          </dia:attribute>
-+          <dia:attribute name="font">
-+            <dia:font family="sans" style="0" name="Helvetica"/>
-+          </dia:attribute>
-+          <dia:attribute name="height">
-+            <dia:real val="0.80000000000000004"/>
-+          </dia:attribute>
-+          <dia:attribute name="pos">
-+            <dia:point val="21.6,9.3"/>
-+          </dia:attribute>
-+          <dia:attribute name="color">
-+            <dia:color val="#000000"/>
-+          </dia:attribute>
-+          <dia:attribute name="alignment">
-+            <dia:enum val="0"/>
-+          </dia:attribute>
-+        </dia:composite>
-+      </dia:attribute>
-+      <dia:attribute name="valign">
-+        <dia:enum val="3"/>
-+      </dia:attribute>
-+    </dia:object>
-+    <dia:object type="Standard - Line" version="0" id="O9">
-+      <dia:attribute name="obj_pos">
-+        <dia:point val="23.757,6.5"/>
-+      </dia:attribute>
-+      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="23.732,6.20955;29.3693,6.79045"/>
-+      </dia:attribute>
-+      <dia:attribute name="conn_endpoints">
-+        <dia:point val="23.757,6.5"/>
-+        <dia:point val="29.3134,6.5"/>
-+      </dia:attribute>
-+      <dia:attribute name="numcp">
-+        <dia:int val="1"/>
-+      </dia:attribute>
-+      <dia:attribute name="line_width">
-+        <dia:real val="0.05000000074505806"/>
-+      </dia:attribute>
-+      <dia:attribute name="end_arrow">
-+        <dia:enum val="3"/>
-+      </dia:attribute>
-+      <dia:attribute name="end_arrow_length">
-+        <dia:real val="0.5"/>
-+      </dia:attribute>
-+      <dia:attribute name="end_arrow_width">
-+        <dia:real val="0.5"/>
-+      </dia:attribute>
-+      <dia:connections>
-+        <dia:connection handle="0" to="O2" connection="16"/>
-+        <dia:connection handle="1" to="O25" connection="16"/>
-+      </dia:connections>
-+    </dia:object>
-+    <dia:object type="Standard - Text" version="1" id="O10">
-+      <dia:attribute name="obj_pos">
-+        <dia:point val="24.75,5.9"/>
-+      </dia:attribute>
-+      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="24.75,5.305;26.2725,6.0525"/>
++        <dia:rectangle val="26.05,5.505;27.5725,6.2525"/>
 +      </dia:attribute>
 +      <dia:attribute name="text">
 +        <dia:composite type="text">
@@ -630,7 +552,119 @@ index 00000000..1812e94d
 +            <dia:real val="0.80000000000000004"/>
 +          </dia:attribute>
 +          <dia:attribute name="pos">
-+            <dia:point val="24.75,5.9"/>
++            <dia:point val="26.05,6.1"/>
++          </dia:attribute>
++          <dia:attribute name="color">
++            <dia:color val="#000000"/>
++          </dia:attribute>
++          <dia:attribute name="alignment">
++            <dia:enum val="0"/>
++          </dia:attribute>
++        </dia:composite>
++      </dia:attribute>
++      <dia:attribute name="valign">
++        <dia:enum val="3"/>
++      </dia:attribute>
++    </dia:object>
++    <dia:object type="Flowchart - Ellipse" version="0" id="O8">
++      <dia:attribute name="obj_pos">
++        <dia:point val="17.7746,11.5374"/>
++      </dia:attribute>
++      <dia:attribute name="obj_bb">
++        <dia:rectangle val="17.7496,11.5124;24.2503,14.7877"/>
++      </dia:attribute>
++      <dia:attribute name="elem_corner">
++        <dia:point val="17.7746,11.5374"/>
++      </dia:attribute>
++      <dia:attribute name="elem_width">
++        <dia:real val="6.4506704922983635"/>
++      </dia:attribute>
++      <dia:attribute name="elem_height">
++        <dia:real val="3.2253352461491853"/>
++      </dia:attribute>
++      <dia:attribute name="border_width">
++        <dia:real val="0.05000000074505806"/>
++      </dia:attribute>
++      <dia:attribute name="show_background">
++        <dia:boolean val="true"/>
++      </dia:attribute>
++      <dia:attribute name="padding">
++        <dia:real val="0.35355339059327379"/>
++      </dia:attribute>
++      <dia:attribute name="text">
++        <dia:composite type="text">
++          <dia:attribute name="string">
++            <dia:string>#get geoDomain#</dia:string>
++          </dia:attribute>
++          <dia:attribute name="font">
++            <dia:font family="sans" style="0" name="Helvetica"/>
++          </dia:attribute>
++          <dia:attribute name="height">
++            <dia:real val="0.80000000000000004"/>
++          </dia:attribute>
++          <dia:attribute name="pos">
++            <dia:point val="21,13.345"/>
++          </dia:attribute>
++          <dia:attribute name="color">
++            <dia:color val="#000000"/>
++          </dia:attribute>
++          <dia:attribute name="alignment">
++            <dia:enum val="1"/>
++          </dia:attribute>
++        </dia:composite>
++      </dia:attribute>
++    </dia:object>
++    <dia:object type="Standard - Line" version="0" id="O9">
++      <dia:attribute name="obj_pos">
++        <dia:point val="21.0188,8.3365"/>
++      </dia:attribute>
++      <dia:attribute name="obj_bb">
++        <dia:rectangle val="20.718,8.3114;21.2989,11.5689"/>
++      </dia:attribute>
++      <dia:attribute name="conn_endpoints">
++        <dia:point val="21.0188,8.3365"/>
++        <dia:point val="21.0064,11.513"/>
++      </dia:attribute>
++      <dia:attribute name="numcp">
++        <dia:int val="1"/>
++      </dia:attribute>
++      <dia:attribute name="line_width">
++        <dia:real val="0.05000000074505806"/>
++      </dia:attribute>
++      <dia:attribute name="end_arrow">
++        <dia:enum val="3"/>
++      </dia:attribute>
++      <dia:attribute name="end_arrow_length">
++        <dia:real val="0.5"/>
++      </dia:attribute>
++      <dia:attribute name="end_arrow_width">
++        <dia:real val="0.5"/>
++      </dia:attribute>
++      <dia:connections>
++        <dia:connection handle="0" to="O5" connection="16"/>
++        <dia:connection handle="1" to="O8" connection="16"/>
++      </dia:connections>
++    </dia:object>
++    <dia:object type="Standard - Text" version="1" id="O10">
++      <dia:attribute name="obj_pos">
++        <dia:point val="21.4,9.75"/>
++      </dia:attribute>
++      <dia:attribute name="obj_bb">
++        <dia:rectangle val="21.4,9.155;22.7125,9.9025"/>
++      </dia:attribute>
++      <dia:attribute name="text">
++        <dia:composite type="text">
++          <dia:attribute name="string">
++            <dia:string>#true#</dia:string>
++          </dia:attribute>
++          <dia:attribute name="font">
++            <dia:font family="sans" style="0" name="Helvetica"/>
++          </dia:attribute>
++          <dia:attribute name="height">
++            <dia:real val="0.80000000000000004"/>
++          </dia:attribute>
++          <dia:attribute name="pos">
++            <dia:point val="21.4,9.75"/>
 +          </dia:attribute>
 +          <dia:attribute name="color">
 +            <dia:color val="#000000"/>
@@ -646,14 +680,14 @@ index 00000000..1812e94d
 +    </dia:object>
 +    <dia:object type="Standard - Line" version="0" id="O11">
 +      <dia:attribute name="obj_pos">
-+        <dia:point val="23.2954,11.236"/>
++        <dia:point val="21,14.7867"/>
 +      </dia:attribute>
 +      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="23.2613,7.31167;30.1234,11.2701"/>
++        <dia:rectangle val="20.7096,14.7617;21.2905,16.6596"/>
 +      </dia:attribute>
 +      <dia:attribute name="conn_endpoints">
-+        <dia:point val="23.2954,11.236"/>
-+        <dia:point val="30.0749,7.34633"/>
++        <dia:point val="21,14.7867"/>
++        <dia:point val="21,16.6037"/>
 +      </dia:attribute>
 +      <dia:attribute name="numcp">
 +        <dia:int val="1"/>
@@ -671,165 +705,20 @@ index 00000000..1812e94d
 +        <dia:real val="0.5"/>
 +      </dia:attribute>
 +      <dia:connections>
-+        <dia:connection handle="0" to="O6" connection="16"/>
-+        <dia:connection handle="1" to="O25" connection="16"/>
-+      </dia:connections>
-+    </dia:object>
-+    <dia:object type="Standard - Text" version="1" id="O12">
-+      <dia:attribute name="obj_pos">
-+        <dia:point val="25.35,10.65"/>
-+      </dia:attribute>
-+      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="25.35,10.055;26.8725,10.8025"/>
-+      </dia:attribute>
-+      <dia:attribute name="text">
-+        <dia:composite type="text">
-+          <dia:attribute name="string">
-+            <dia:string>#false#</dia:string>
-+          </dia:attribute>
-+          <dia:attribute name="font">
-+            <dia:font family="sans" style="0" name="Helvetica"/>
-+          </dia:attribute>
-+          <dia:attribute name="height">
-+            <dia:real val="0.80000000000000004"/>
-+          </dia:attribute>
-+          <dia:attribute name="pos">
-+            <dia:point val="25.35,10.65"/>
-+          </dia:attribute>
-+          <dia:attribute name="color">
-+            <dia:color val="#000000"/>
-+          </dia:attribute>
-+          <dia:attribute name="alignment">
-+            <dia:enum val="0"/>
-+          </dia:attribute>
-+        </dia:composite>
-+      </dia:attribute>
-+      <dia:attribute name="valign">
-+        <dia:enum val="3"/>
-+      </dia:attribute>
-+    </dia:object>
-+    <dia:object type="Flowchart - Ellipse" version="0" id="O13">
-+      <dia:attribute name="obj_pos">
-+        <dia:point val="17.8505,16.6753"/>
-+      </dia:attribute>
-+      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="17.8255,16.6503;24.1744,19.8498"/>
-+      </dia:attribute>
-+      <dia:attribute name="elem_corner">
-+        <dia:point val="17.8505,16.6753"/>
-+      </dia:attribute>
-+      <dia:attribute name="elem_width">
-+        <dia:real val="6.2989283700224838"/>
-+      </dia:attribute>
-+      <dia:attribute name="elem_height">
-+        <dia:real val="3.1494641850112455"/>
-+      </dia:attribute>
-+      <dia:attribute name="border_width">
-+        <dia:real val="0.05000000074505806"/>
-+      </dia:attribute>
-+      <dia:attribute name="show_background">
-+        <dia:boolean val="true"/>
-+      </dia:attribute>
-+      <dia:attribute name="padding">
-+        <dia:real val="0.35355339059327379"/>
-+      </dia:attribute>
-+      <dia:attribute name="text">
-+        <dia:composite type="text">
-+          <dia:attribute name="string">
-+            <dia:string>#get geoHood#</dia:string>
-+          </dia:attribute>
-+          <dia:attribute name="font">
-+            <dia:font family="sans" style="0" name="Helvetica"/>
-+          </dia:attribute>
-+          <dia:attribute name="height">
-+            <dia:real val="0.80000000000000004"/>
-+          </dia:attribute>
-+          <dia:attribute name="pos">
-+            <dia:point val="21,18.445"/>
-+          </dia:attribute>
-+          <dia:attribute name="color">
-+            <dia:color val="#000000"/>
-+          </dia:attribute>
-+          <dia:attribute name="alignment">
-+            <dia:enum val="1"/>
-+          </dia:attribute>
-+        </dia:composite>
-+      </dia:attribute>
-+    </dia:object>
-+    <dia:object type="Standard - Line" version="0" id="O14">
-+      <dia:attribute name="obj_pos">
-+        <dia:point val="21.0176,14.3858"/>
-+      </dia:attribute>
-+      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="20.7192,14.3607;21.3001,16.7061"/>
-+      </dia:attribute>
-+      <dia:attribute name="conn_endpoints">
-+        <dia:point val="21.0176,14.3858"/>
-+        <dia:point val="21.0073,16.6502"/>
-+      </dia:attribute>
-+      <dia:attribute name="numcp">
-+        <dia:int val="1"/>
-+      </dia:attribute>
-+      <dia:attribute name="line_width">
-+        <dia:real val="0.05000000074505806"/>
-+      </dia:attribute>
-+      <dia:attribute name="end_arrow">
-+        <dia:enum val="3"/>
-+      </dia:attribute>
-+      <dia:attribute name="end_arrow_length">
-+        <dia:real val="0.5"/>
-+      </dia:attribute>
-+      <dia:attribute name="end_arrow_width">
-+        <dia:real val="0.5"/>
-+      </dia:attribute>
-+      <dia:connections>
-+        <dia:connection handle="0" to="O6" connection="16"/>
++        <dia:connection handle="0" to="O8" connection="16"/>
 +        <dia:connection handle="1" to="O13" connection="16"/>
 +      </dia:connections>
 +    </dia:object>
-+    <dia:object type="Standard - Text" version="1" id="O15">
++    <dia:object type="Standard - Line" version="0" id="O12">
 +      <dia:attribute name="obj_pos">
-+        <dia:point val="21.4,15.65"/>
++        <dia:point val="23.2629,11.9796"/>
 +      </dia:attribute>
 +      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="21.4,15.055;22.7125,15.8025"/>
-+      </dia:attribute>
-+      <dia:attribute name="text">
-+        <dia:composite type="text">
-+          <dia:attribute name="string">
-+            <dia:string>#true#</dia:string>
-+          </dia:attribute>
-+          <dia:attribute name="font">
-+            <dia:font family="sans" style="0" name="Helvetica"/>
-+          </dia:attribute>
-+          <dia:attribute name="height">
-+            <dia:real val="0.80000000000000004"/>
-+          </dia:attribute>
-+          <dia:attribute name="pos">
-+            <dia:point val="21.4,15.65"/>
-+          </dia:attribute>
-+          <dia:attribute name="color">
-+            <dia:color val="#000000"/>
-+          </dia:attribute>
-+          <dia:attribute name="alignment">
-+            <dia:enum val="0"/>
-+          </dia:attribute>
-+        </dia:composite>
-+      </dia:attribute>
-+      <dia:attribute name="valign">
-+        <dia:enum val="3"/>
-+      </dia:attribute>
-+    </dia:object>
-+    <dia:object type="Standard - Line" version="0" id="O16">
-+      <dia:attribute name="obj_pos">
-+        <dia:point val="19.753,19.7188"/>
-+      </dia:attribute>
-+      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="16.9985,19.6836;19.7882,22.9634"/>
++        <dia:rectangle val="23.2292,7.69634;31.5265,12.0133"/>
 +      </dia:attribute>
 +      <dia:attribute name="conn_endpoints">
-+        <dia:point val="19.753,19.7188"/>
-+        <dia:point val="17.0346,22.9207"/>
++        <dia:point val="23.2629,11.9796"/>
++        <dia:point val="31.4768,7.73127"/>
 +      </dia:attribute>
 +      <dia:attribute name="numcp">
 +        <dia:int val="1"/>
@@ -847,56 +736,25 @@ index 00000000..1812e94d
 +        <dia:real val="0.5"/>
 +      </dia:attribute>
 +      <dia:connections>
-+        <dia:connection handle="0" to="O13" connection="16"/>
-+        <dia:connection handle="1" to="O18" connection="16"/>
++        <dia:connection handle="0" to="O8" connection="16"/>
++        <dia:connection handle="1" to="O24" connection="16"/>
 +      </dia:connections>
 +    </dia:object>
-+    <dia:object type="Standard - Line" version="0" id="O17">
++    <dia:object type="Flowchart - Ellipse" version="0" id="O13">
 +      <dia:attribute name="obj_pos">
-+        <dia:point val="22.1734,19.7344"/>
++        <dia:point val="17.8077,16.6288"/>
 +      </dia:attribute>
 +      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="22.1383,19.6993;24.7106,22.9434"/>
-+      </dia:attribute>
-+      <dia:attribute name="conn_endpoints">
-+        <dia:point val="22.1734,19.7344"/>
-+        <dia:point val="24.6755,22.8996"/>
-+      </dia:attribute>
-+      <dia:attribute name="numcp">
-+        <dia:int val="1"/>
-+      </dia:attribute>
-+      <dia:attribute name="line_width">
-+        <dia:real val="0.05000000074505806"/>
-+      </dia:attribute>
-+      <dia:attribute name="end_arrow">
-+        <dia:enum val="3"/>
-+      </dia:attribute>
-+      <dia:attribute name="end_arrow_length">
-+        <dia:real val="0.5"/>
-+      </dia:attribute>
-+      <dia:attribute name="end_arrow_width">
-+        <dia:real val="0.5"/>
-+      </dia:attribute>
-+      <dia:connections>
-+        <dia:connection handle="0" to="O13" connection="16"/>
-+        <dia:connection handle="1" to="O19" connection="16"/>
-+      </dia:connections>
-+    </dia:object>
-+    <dia:object type="Flowchart - Ellipse" version="0" id="O18">
-+      <dia:attribute name="obj_pos">
-+        <dia:point val="12.6811,22.8155"/>
-+      </dia:attribute>
-+      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="12.6561,22.7905;18.944,25.9594"/>
++        <dia:rectangle val="17.7827,16.6038;24.2174,19.8462"/>
 +      </dia:attribute>
 +      <dia:attribute name="elem_corner">
-+        <dia:point val="12.6811,22.8155"/>
++        <dia:point val="17.8077,16.6288"/>
 +      </dia:attribute>
 +      <dia:attribute name="elem_width">
-+        <dia:real val="6.2378905364164705"/>
++        <dia:real val="6.3847117521647201"/>
 +      </dia:attribute>
 +      <dia:attribute name="elem_height">
-+        <dia:real val="3.1189452682082353"/>
++        <dia:real val="3.19235587608236"/>
 +      </dia:attribute>
 +      <dia:attribute name="border_width">
 +        <dia:real val="0.05000000074505806"/>
@@ -910,7 +768,7 @@ index 00000000..1812e94d
 +      <dia:attribute name="text">
 +        <dia:composite type="text">
 +          <dia:attribute name="string">
-+            <dia:string>#set geoHood#</dia:string>
++            <dia:string>#set geoDomain#</dia:string>
 +          </dia:attribute>
 +          <dia:attribute name="font">
 +            <dia:font family="sans" style="0" name="Helvetica"/>
@@ -919,7 +777,7 @@ index 00000000..1812e94d
 +            <dia:real val="0.80000000000000004"/>
 +          </dia:attribute>
 +          <dia:attribute name="pos">
-+            <dia:point val="15.8,24.57"/>
++            <dia:point val="21,18.42"/>
 +          </dia:attribute>
 +          <dia:attribute name="color">
 +            <dia:color val="#000000"/>
@@ -930,60 +788,12 @@ index 00000000..1812e94d
 +        </dia:composite>
 +      </dia:attribute>
 +    </dia:object>
-+    <dia:object type="Flowchart - Ellipse" version="0" id="O19">
++    <dia:object type="Standard - Text" version="1" id="O14">
 +      <dia:attribute name="obj_pos">
-+        <dia:point val="22.436,22.793"/>
++        <dia:point val="25.8,9.7625"/>
 +      </dia:attribute>
 +      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="22.411,22.768;29.5889,26.382"/>
-+      </dia:attribute>
-+      <dia:attribute name="elem_corner">
-+        <dia:point val="22.436,22.793"/>
-+      </dia:attribute>
-+      <dia:attribute name="elem_width">
-+        <dia:real val="7.1279497495860493"/>
-+      </dia:attribute>
-+      <dia:attribute name="elem_height">
-+        <dia:real val="3.5639748747930247"/>
-+      </dia:attribute>
-+      <dia:attribute name="border_width">
-+        <dia:real val="0.05000000074505806"/>
-+      </dia:attribute>
-+      <dia:attribute name="show_background">
-+        <dia:boolean val="true"/>
-+      </dia:attribute>
-+      <dia:attribute name="padding">
-+        <dia:real val="0.35355339059327379"/>
-+      </dia:attribute>
-+      <dia:attribute name="text">
-+        <dia:composite type="text">
-+          <dia:attribute name="string">
-+            <dia:string>#set defaultHood#</dia:string>
-+          </dia:attribute>
-+          <dia:attribute name="font">
-+            <dia:font family="sans" style="0" name="Helvetica"/>
-+          </dia:attribute>
-+          <dia:attribute name="height">
-+            <dia:real val="0.80000000000000004"/>
-+          </dia:attribute>
-+          <dia:attribute name="pos">
-+            <dia:point val="26,24.77"/>
-+          </dia:attribute>
-+          <dia:attribute name="color">
-+            <dia:color val="#000000"/>
-+          </dia:attribute>
-+          <dia:attribute name="alignment">
-+            <dia:enum val="1"/>
-+          </dia:attribute>
-+        </dia:composite>
-+      </dia:attribute>
-+    </dia:object>
-+    <dia:object type="Standard - Text" version="1" id="O20">
-+      <dia:attribute name="obj_pos">
-+        <dia:point val="23.5,20.7125"/>
-+      </dia:attribute>
-+      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="23.5,20.1175;25.0225,20.865"/>
++        <dia:rectangle val="25.8,9.1675;27.3225,9.915"/>
 +      </dia:attribute>
 +      <dia:attribute name="text">
 +        <dia:composite type="text">
@@ -997,7 +807,7 @@ index 00000000..1812e94d
 +            <dia:real val="0.80000000000000004"/>
 +          </dia:attribute>
 +          <dia:attribute name="pos">
-+            <dia:point val="23.5,20.7125"/>
++            <dia:point val="25.8,9.7625"/>
 +          </dia:attribute>
 +          <dia:attribute name="color">
 +            <dia:color val="#000000"/>
@@ -1011,12 +821,12 @@ index 00000000..1812e94d
 +        <dia:enum val="3"/>
 +      </dia:attribute>
 +    </dia:object>
-+    <dia:object type="Standard - Text" version="1" id="O21">
++    <dia:object type="Standard - Text" version="1" id="O15">
 +      <dia:attribute name="obj_pos">
-+        <dia:point val="17.45,20.6125"/>
++        <dia:point val="21.5,15.6625"/>
 +      </dia:attribute>
 +      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="17.45,20.0175;18.7625,20.765"/>
++        <dia:rectangle val="21.5,15.0675;22.8125,15.815"/>
 +      </dia:attribute>
 +      <dia:attribute name="text">
 +        <dia:composite type="text">
@@ -1030,7 +840,7 @@ index 00000000..1812e94d
 +            <dia:real val="0.80000000000000004"/>
 +          </dia:attribute>
 +          <dia:attribute name="pos">
-+            <dia:point val="17.45,20.6125"/>
++            <dia:point val="21.5,15.6625"/>
 +          </dia:attribute>
 +          <dia:attribute name="color">
 +            <dia:color val="#000000"/>
@@ -1044,15 +854,15 @@ index 00000000..1812e94d
 +        <dia:enum val="3"/>
 +      </dia:attribute>
 +    </dia:object>
-+    <dia:object type="Flowchart - Ellipse" version="0" id="O22">
++    <dia:object type="Flowchart - Ellipse" version="0" id="O16">
 +      <dia:attribute name="obj_pos">
-+        <dia:point val="18.7879,29.1189"/>
++        <dia:point val="18.7879,21.5689"/>
 +      </dia:attribute>
 +      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="18.7629,29.0939;23.2372,31.356"/>
++        <dia:rectangle val="18.7629,21.5439;23.2372,23.806"/>
 +      </dia:attribute>
 +      <dia:attribute name="elem_corner">
-+        <dia:point val="18.7879,29.1189"/>
++        <dia:point val="18.7879,21.5689"/>
 +      </dia:attribute>
 +      <dia:attribute name="elem_width">
 +        <dia:real val="4.4242658164348718"/>
@@ -1081,7 +891,7 @@ index 00000000..1812e94d
 +            <dia:real val="0.80000000000000004"/>
 +          </dia:attribute>
 +          <dia:attribute name="pos">
-+            <dia:point val="21,30.42"/>
++            <dia:point val="21,22.87"/>
 +          </dia:attribute>
 +          <dia:attribute name="color">
 +            <dia:color val="#000000"/>
@@ -1092,16 +902,16 @@ index 00000000..1812e94d
 +        </dia:composite>
 +      </dia:attribute>
 +    </dia:object>
-+    <dia:object type="Standard - Line" version="0" id="O23">
++    <dia:object type="Standard - Line" version="0" id="O17">
 +      <dia:attribute name="obj_pos">
-+        <dia:point val="24.5419,26.2227"/>
++        <dia:point val="21,19.8465"/>
 +      </dia:attribute>
 +      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="21.8742,26.1874;24.5772,29.2371"/>
++        <dia:rectangle val="20.7096,19.8215;21.2905,21.5999"/>
 +      </dia:attribute>
 +      <dia:attribute name="conn_endpoints">
-+        <dia:point val="24.5419,26.2227"/>
-+        <dia:point val="21.9113,29.1953"/>
++        <dia:point val="21,19.8465"/>
++        <dia:point val="21,21.544"/>
 +      </dia:attribute>
 +      <dia:attribute name="numcp">
 +        <dia:int val="1"/>
@@ -1119,90 +929,11 @@ index 00000000..1812e94d
 +        <dia:real val="0.5"/>
 +      </dia:attribute>
 +      <dia:connections>
-+        <dia:connection handle="0" to="O19" connection="16"/>
-+        <dia:connection handle="1" to="O22" connection="16"/>
++        <dia:connection handle="0" to="O13" connection="16"/>
++        <dia:connection handle="1" to="O16" connection="16"/>
 +      </dia:connections>
 +    </dia:object>
-+    <dia:object type="Standard - Line" version="0" id="O24">
-+      <dia:attribute name="obj_pos">
-+        <dia:point val="17.0829,25.8182"/>
-+      </dia:attribute>
-+      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="17.0476,25.7829;20.1225,29.2377"/>
-+      </dia:attribute>
-+      <dia:attribute name="conn_endpoints">
-+        <dia:point val="17.0829,25.8182"/>
-+        <dia:point val="20.0853,29.1959"/>
-+      </dia:attribute>
-+      <dia:attribute name="numcp">
-+        <dia:int val="1"/>
-+      </dia:attribute>
-+      <dia:attribute name="line_width">
-+        <dia:real val="0.05000000074505806"/>
-+      </dia:attribute>
-+      <dia:attribute name="end_arrow">
-+        <dia:enum val="3"/>
-+      </dia:attribute>
-+      <dia:attribute name="end_arrow_length">
-+        <dia:real val="0.5"/>
-+      </dia:attribute>
-+      <dia:attribute name="end_arrow_width">
-+        <dia:real val="0.5"/>
-+      </dia:attribute>
-+      <dia:connections>
-+        <dia:connection handle="0" to="O18" connection="16"/>
-+        <dia:connection handle="1" to="O22" connection="16"/>
-+      </dia:connections>
-+    </dia:object>
-+    <dia:object type="Flowchart - Ellipse" version="0" id="O25">
-+      <dia:attribute name="obj_pos">
-+        <dia:point val="29.3379,5.39393"/>
-+      </dia:attribute>
-+      <dia:attribute name="obj_bb">
-+        <dia:rectangle val="29.3129,5.36893;33.7872,7.63106"/>
-+      </dia:attribute>
-+      <dia:attribute name="elem_corner">
-+        <dia:point val="29.3379,5.39393"/>
-+      </dia:attribute>
-+      <dia:attribute name="elem_width">
-+        <dia:real val="4.4242658164348629"/>
-+      </dia:attribute>
-+      <dia:attribute name="elem_height">
-+        <dia:real val="2.2121329082174346"/>
-+      </dia:attribute>
-+      <dia:attribute name="border_width">
-+        <dia:real val="0.05000000074505806"/>
-+      </dia:attribute>
-+      <dia:attribute name="show_background">
-+        <dia:boolean val="true"/>
-+      </dia:attribute>
-+      <dia:attribute name="padding">
-+        <dia:real val="0.35355339059327379"/>
-+      </dia:attribute>
-+      <dia:attribute name="text">
-+        <dia:composite type="text">
-+          <dia:attribute name="string">
-+            <dia:string>#Exit#</dia:string>
-+          </dia:attribute>
-+          <dia:attribute name="font">
-+            <dia:font family="sans" style="0" name="Helvetica"/>
-+          </dia:attribute>
-+          <dia:attribute name="height">
-+            <dia:real val="0.80000000000000004"/>
-+          </dia:attribute>
-+          <dia:attribute name="pos">
-+            <dia:point val="31.55,6.695"/>
-+          </dia:attribute>
-+          <dia:attribute name="color">
-+            <dia:color val="#000000"/>
-+          </dia:attribute>
-+          <dia:attribute name="alignment">
-+            <dia:enum val="1"/>
-+          </dia:attribute>
-+        </dia:composite>
-+      </dia:attribute>
-+    </dia:object>
-+    <dia:object type="Standard - Text" version="1" id="O26">
++    <dia:object type="Standard - Text" version="1" id="O18">
 +      <dia:attribute name="obj_pos">
 +        <dia:point val="45.6176,6.49732"/>
 +      </dia:attribute>
@@ -1235,7 +966,7 @@ index 00000000..1812e94d
 +        <dia:enum val="3"/>
 +      </dia:attribute>
 +    </dia:object>
-+    <dia:object type="Standard - Text" version="1" id="O27">
++    <dia:object type="Standard - Text" version="1" id="O19">
 +      <dia:attribute name="obj_pos">
 +        <dia:point val="45.6176,6.49732"/>
 +      </dia:attribute>
@@ -1268,7 +999,7 @@ index 00000000..1812e94d
 +        <dia:enum val="3"/>
 +      </dia:attribute>
 +    </dia:object>
-+    <dia:object type="Standard - Text" version="1" id="O28">
++    <dia:object type="Standard - Text" version="1" id="O20">
 +      <dia:attribute name="obj_pos">
 +        <dia:point val="4.825,11.825"/>
 +      </dia:attribute>
@@ -1301,7 +1032,7 @@ index 00000000..1812e94d
 +        <dia:enum val="3"/>
 +      </dia:attribute>
 +    </dia:object>
-+    <dia:object type="Standard - Text" version="1" id="O29">
++    <dia:object type="Standard - Text" version="1" id="O21">
 +      <dia:attribute name="obj_pos">
 +        <dia:point val="4.775,12.575"/>
 +      </dia:attribute>
@@ -1334,7 +1065,7 @@ index 00000000..1812e94d
 +        <dia:enum val="3"/>
 +      </dia:attribute>
 +    </dia:object>
-+    <dia:object type="Flowchart - Ellipse" version="0" id="O30">
++    <dia:object type="Flowchart - Ellipse" version="0" id="O22">
 +      <dia:attribute name="obj_pos">
 +        <dia:point val="1.83,5.245"/>
 +      </dia:attribute>
@@ -1382,21 +1113,191 @@ index 00000000..1812e94d
 +        </dia:composite>
 +      </dia:attribute>
 +    </dia:object>
++    <dia:object type="Standard - Text" version="1" id="O23">
++      <dia:attribute name="obj_pos">
++        <dia:point val="33.97,3.865"/>
++      </dia:attribute>
++      <dia:attribute name="obj_bb">
++        <dia:rectangle val="30.5337,3.27;37.4062,4.0175"/>
++      </dia:attribute>
++      <dia:attribute name="text">
++        <dia:composite type="text">
++          <dia:attribute name="string">
++            <dia:string>#default domain mode#</dia:string>
++          </dia:attribute>
++          <dia:attribute name="font">
++            <dia:font family="sans" style="0" name="Helvetica"/>
++          </dia:attribute>
++          <dia:attribute name="height">
++            <dia:real val="0.80000000000000004"/>
++          </dia:attribute>
++          <dia:attribute name="pos">
++            <dia:point val="33.97,3.865"/>
++          </dia:attribute>
++          <dia:attribute name="color">
++            <dia:color val="#000000"/>
++          </dia:attribute>
++          <dia:attribute name="alignment">
++            <dia:enum val="1"/>
++          </dia:attribute>
++        </dia:composite>
++      </dia:attribute>
++      <dia:attribute name="valign">
++        <dia:enum val="3"/>
++      </dia:attribute>
++      <dia:attribute name="fill_color">
++        <dia:color val="#00ff00"/>
++      </dia:attribute>
++      <dia:attribute name="show_background">
++        <dia:boolean val="true"/>
++      </dia:attribute>
++    </dia:object>
++    <dia:object type="Flowchart - Ellipse" version="0" id="O24">
++      <dia:attribute name="obj_pos">
++        <dia:point val="30.38,4.57"/>
++      </dia:attribute>
++      <dia:attribute name="obj_bb">
++        <dia:rectangle val="30.355,4.545;37.7359,8.26046"/>
++      </dia:attribute>
++      <dia:attribute name="elem_corner">
++        <dia:point val="30.38,4.57"/>
++      </dia:attribute>
++      <dia:attribute name="elem_width">
++        <dia:real val="7.3309270381183858"/>
++      </dia:attribute>
++      <dia:attribute name="elem_height">
++        <dia:real val="3.6654635190591929"/>
++      </dia:attribute>
++      <dia:attribute name="border_width">
++        <dia:real val="0.05000000074505806"/>
++      </dia:attribute>
++      <dia:attribute name="show_background">
++        <dia:boolean val="true"/>
++      </dia:attribute>
++      <dia:attribute name="padding">
++        <dia:real val="0.35355339059327379"/>
++      </dia:attribute>
++      <dia:attribute name="text">
++        <dia:composite type="text">
++          <dia:attribute name="string">
++            <dia:string>#set defaultDomain#</dia:string>
++          </dia:attribute>
++          <dia:attribute name="font">
++            <dia:font family="sans" style="0" name="Helvetica"/>
++          </dia:attribute>
++          <dia:attribute name="height">
++            <dia:real val="0.80000000000000004"/>
++          </dia:attribute>
++          <dia:attribute name="pos">
++            <dia:point val="34.0455,6.59773"/>
++          </dia:attribute>
++          <dia:attribute name="color">
++            <dia:color val="#000000"/>
++          </dia:attribute>
++          <dia:attribute name="alignment">
++            <dia:enum val="1"/>
++          </dia:attribute>
++        </dia:composite>
++      </dia:attribute>
++    </dia:object>
++    <dia:object type="Flowchart - Ellipse" version="0" id="O25">
++      <dia:attribute name="obj_pos">
++        <dia:point val="40.5379,5.19393"/>
++      </dia:attribute>
++      <dia:attribute name="obj_bb">
++        <dia:rectangle val="40.5129,5.16893;44.9872,7.43106"/>
++      </dia:attribute>
++      <dia:attribute name="elem_corner">
++        <dia:point val="40.5379,5.19393"/>
++      </dia:attribute>
++      <dia:attribute name="elem_width">
++        <dia:real val="4.4242658164348629"/>
++      </dia:attribute>
++      <dia:attribute name="elem_height">
++        <dia:real val="2.2121329082174346"/>
++      </dia:attribute>
++      <dia:attribute name="border_width">
++        <dia:real val="0.05000000074505806"/>
++      </dia:attribute>
++      <dia:attribute name="show_background">
++        <dia:boolean val="true"/>
++      </dia:attribute>
++      <dia:attribute name="padding">
++        <dia:real val="0.35355339059327379"/>
++      </dia:attribute>
++      <dia:attribute name="text">
++        <dia:composite type="text">
++          <dia:attribute name="string">
++            <dia:string>#Exit#</dia:string>
++          </dia:attribute>
++          <dia:attribute name="font">
++            <dia:font family="sans" style="0" name="Helvetica"/>
++          </dia:attribute>
++          <dia:attribute name="height">
++            <dia:real val="0.80000000000000004"/>
++          </dia:attribute>
++          <dia:attribute name="pos">
++            <dia:point val="42.75,6.495"/>
++          </dia:attribute>
++          <dia:attribute name="color">
++            <dia:color val="#000000"/>
++          </dia:attribute>
++          <dia:attribute name="alignment">
++            <dia:enum val="1"/>
++          </dia:attribute>
++        </dia:composite>
++      </dia:attribute>
++    </dia:object>
++    <dia:object type="Standard - Line" version="0" id="O26">
++      <dia:attribute name="obj_pos">
++        <dia:point val="37.7352,6.35918"/>
++      </dia:attribute>
++      <dia:attribute name="obj_bb">
++        <dia:rectangle val="37.7352,6.08231;40.5139,6.58227"/>
++      </dia:attribute>
++      <dia:attribute name="conn_endpoints">
++        <dia:point val="37.7352,6.35918"/>
++        <dia:point val="40.5139,6.32639"/>
++      </dia:attribute>
++      <dia:attribute name="numcp">
++        <dia:int val="1"/>
++      </dia:attribute>
++      <dia:attribute name="line_width">
++        <dia:real val="0"/>
++      </dia:attribute>
++      <dia:attribute name="end_arrow">
++        <dia:enum val="3"/>
++      </dia:attribute>
++      <dia:attribute name="end_arrow_length">
++        <dia:real val="0.5"/>
++      </dia:attribute>
++      <dia:attribute name="end_arrow_width">
++        <dia:real val="0.5"/>
++      </dia:attribute>
++      <dia:connections>
++        <dia:connection handle="0" to="O24" connection="16"/>
++        <dia:connection handle="1" to="O25" connection="16"/>
++      </dia:connections>
++    </dia:object>
 +  </dia:layer>
 +</dia:diagram>
 diff --git a/docs/package/gluon-hoodselector.rst b/docs/package/gluon-hoodselector.rst
 new file mode 100644
-index 00000000..a3acb2f4
+index 00000000..0776fc67
 --- /dev/null
 +++ b/docs/package/gluon-hoodselector.rst
-@@ -0,0 +1,121 @@
+@@ -0,0 +1,128 @@
 +gluon-hoodselector
 +==================
 +
-+This package provides an automatism of selecting the right hood network in an
-+intelligent way. This hood bases on geostationary fixed quadrants for
-+batman-adv mesh networks. The Hoodselector makes it possible to build scaled
-+decentralised mesh-networks.
++This package provides an automatism of selecting the right domain network in an
++intelligent way. The job of the hoodselector is to automatically detect in which
++domain the node is located by its geolocation settings. Therefore the domains
++needs to have geostationary fixed quadrants defined as polygons or rectangles.
++Based on this information the hoodselector will select a domain from a list of
++known domains and adjust the domain related settings e.g. VPN, wireless ...
++This package makes able to build scaled decentralised mesh-networks in a dynamical
++and easy extendable way.
 +
 +Background informations
 +-----------------------
@@ -1408,13 +1309,13 @@ index 00000000..a3acb2f4
 +ideas like building separate firmwares for each region. This kind of solution
 +would have problems with splitting regions again and problems with scattered
 +nodes, which belong to an other region. Therefore we decided to develop a
-+dynamic and decentralised management of regions called hoods.
-+The Hoodselector's task is to choose the "right" hoods in an intelligent way
++dynamic and decentralised management of regions called domains.
++The Hoodselector's task is to choose the "right" domains in an intelligent way
 +and to hold the network together and accessible.
 +
-+A hood is defined by geostationary fixed shapes by using longitude & latitude
++A domain is defined by geostationary fixed shapes by using longitude & latitude
 +in combination with the domain configuration system. Below you can see a visual
-+example of regional hoods:
++example of regional domain:
 +
 +.. image:: hoodmap.jpeg
 +
@@ -1429,39 +1330,42 @@ index 00000000..a3acb2f4
 +The sequence of this diagramm is given the priority of running modes.
 +Each mode will be explained seperatedly below.
 +
-+VPN mode
-+^^^^^^^^
++geolocation mode
++^^^^^^^^^^^^^^^^
 +
-+This mode will be entered only if a router can see batman-adv gateways over VPN.
-+Routers which have a VPN connection to a supernode will set their hood based on
-+their position if they have one. If a node has a position which is outside of
-+all defined shapes, it will set the default hood. If no position is set,
-+the node will continue with the next mode. The VPN mode will be entered first.
-+This way, the Hoodselector takes care of holding nodes around supernodes
-+to ensure that nodes can at least reach the autoupdate server.
++This mode will be entered only if a node have set a geo location.
++Nodes which have a position will set their domain based on
++it. If a node has a position which is outside of all defined shapes,
++it will continue with the next mode. If no position is set,
++the node will continue with the next mode too.
 +
-+Hood
-+----
++default domain mode
++^^^^^^^^^^^^^^^^^^^
 +
-+A hood bases on the related domain configuration with some additional
-+configuration. There are two types of hoods: one without any defined shapes
++This mode will be entered if no other modes before fits.
++It will simply set the default domain.
++
++Domain shapes
++-------------
++
++There are two types of domainss: one without any defined shapes
 +which has to be unique and others which contain shapes.
 +
-+* **default hood**
++* **default domain**
 +
-+defaulthood: The default hood doesn’t have shapes and is the inverted form of
-+all other hoods with geo coordinates. It will be entered if no node matches to a
-+real hood. A suggested approach is to define the "old" network as default hood
-+and gradually migrate parts from there to shape defined hoods ("real hood").
++default domain: The default domain doesn’t have shapes and is the inverted form of
++all other domains with geo coordinates. It will be entered if no node matches to a
++real domain. A suggested approach is to define the "old" network as default domain
++and gradually migrate parts from there to shape defined domains ("real domain").
 +
-+* **real hood**
++* **real domains**
 +
-+A real hood contains shapes, which are described by three dimensional arrays and
-+represents the geographical size of the real hood. There are two possible
++A real domain contains shapes, which are described by three dimensional arrays and
++represents the geographical size of the domain. There are two possible
 +definitions of these shapes. The first one is using rectangulars so that only
 +two coordinates per box are needed to reconstruct it (see below for an example).
 +The second one is using polygons which can have multible edges.
-+Each real hood can have multiple defined shapes.
++Each domain can have multiple defined shapes.
 +
 +.. image:: rectangle-example.svg
 +
@@ -1513,13 +1417,13 @@ index 00000000..a3acb2f4
 +This package is incompatible with the :doc:`gluon-config-mode-domain-select`.
 diff --git a/docs/package/gluon-hoodselector.svg b/docs/package/gluon-hoodselector.svg
 new file mode 100644
-index 00000000..e9742b0f
+index 00000000..fbf79a14
 --- /dev/null
 +++ b/docs/package/gluon-hoodselector.svg
-@@ -0,0 +1,161 @@
+@@ -0,0 +1,142 @@
 +<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 +<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
-+<svg width="32cm" height="30cm" viewBox="36 46 640 581" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
++<svg width="44cm" height="21cm" viewBox="36 65 864 412" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 +  <g>
 +    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="102.36" y1="128.823" x2="185.552" y2="129.326"/>
 +    <polygon style="fill: #000000" points="185.521,134.325 195.551,129.386 185.582,124.326 "/>
@@ -1533,130 +1437,86 @@ index 00000000..e9742b0f
 +    </text>
 +  </g>
 +  <g>
-+    <ellipse style="fill: #ffffff" cx="421" cy="130" rx="55.2701" ry="27.635"/>
-+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" cx="421" cy="130" rx="55.2701" ry="27.635"/>
-+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="421" y="133.9">
-+      <tspan x="421" y="133.9">directVPN</tspan>
++    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="318.984" y1="129.76" x2="345.941" y2="129.76"/>
++    <polygon style="fill: #000000" points="345.941,134.76 355.941,129.76 345.941,124.76 "/>
++    <polygon style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="345.941,134.76 355.941,129.76 345.941,124.76 "/>
++  </g>
++  <g>
++    <rect style="fill: #00ff00" x="106" y="65.1" width="77.75" height="14.95"/>
++    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="106" y="77">
++      <tspan x="106" y="77">initialization</tspan>
 +    </text>
 +  </g>
 +  <g>
-+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="318.995" y1="129.85" x2="354.733" y2="129.903"/>
-+    <polygon style="fill: #000000" points="354.726,134.903 364.733,129.917 354.74,124.903 "/>
-+    <polygon style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="354.726,134.903 364.733,129.917 354.74,124.903 "/>
-+  </g>
-+  <g>
-+    <rect style="fill: #00ff00" x="106" y="105.1" width="77.75" height="14.95"/>
-+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="106" y="117">
-+      <tspan x="106" y="117">initialization</tspan>
++    <rect style="fill: #00ff00" x="360.45" y="65.1" width="115.1" height="14.95"/>
++    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="418" y="77">
++      <tspan x="418" y="77">geolocation mode</tspan>
 +    </text>
 +  </g>
 +  <g>
-+    <rect style="fill: #00ff00" x="345.65" y="46.7263" width="163.074" height="48.0712"/>
-+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="427" y="59">
-+      <tspan x="427" y="59">(VPN MODE)</tspan>
-+      <tspan x="427" y="75">Router has a batman-adv</tspan>
-+      <tspan x="427" y="91">connection via VPN.</tspan>
++    <ellipse style="fill: #ffffff" cx="420.521" cy="129.76" rx="63.5828" ry="36.4784"/>
++    <ellipse style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" cx="420.521" cy="129.76" rx="63.5828" ry="36.4784"/>
++    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="420.521" y="133.66">
++      <tspan x="420.521" y="133.66">geo pos. exist</tspan>
 +    </text>
 +  </g>
 +  <g>
-+    <ellipse style="fill: #ffffff" cx="420.521" cy="250.76" rx="63.5828" ry="36.4784"/>
-+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" cx="420.521" cy="250.76" rx="63.5828" ry="36.4784"/>
-+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="420.521" y="254.66">
-+      <tspan x="420.521" y="254.66">geo pos. exist</tspan>
-+    </text>
++    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="484.092" y1="129.344" x2="596.635" y2="128.607"/>
++    <polygon style="fill: #000000" points="596.668,133.607 606.635,128.541 596.602,123.607 "/>
++    <polygon style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="596.668,133.607 606.635,128.541 596.602,123.607 "/>
 +  </g>
-+  <g>
-+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="420.888" y1="158.134" x2="420.709" y2="203.282"/>
-+    <polygon style="fill: #000000" points="415.709,203.262 420.67,213.282 425.709,203.302 "/>
-+    <polygon style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="415.709,203.262 420.67,213.282 425.709,203.302 "/>
-+  </g>
-+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="432" y="186">
-+    <tspan x="432" y="186">true</tspan>
++  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="521" y="122">
++    <tspan x="521" y="122">false</tspan>
 +  </text>
 +  <g>
-+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="475.141" y1="130" x2="575.768" y2="130"/>
-+    <polygon style="fill: #000000" points="575.768,135 585.768,130 575.768,125 "/>
-+    <polygon style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="575.768,135 585.768,130 575.768,125 "/>
-+  </g>
-+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="495" y="118">
-+    <tspan x="495" y="118">false</tspan>
-+  </text>
-+  <g>
-+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="465.908" y1="224.72" x2="592.391" y2="152.152"/>
-+    <polygon style="fill: #000000" points="594.879,156.489 601.065,147.175 589.903,147.815 "/>
-+    <polygon style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="594.879,156.489 601.065,147.175 589.903,147.815 "/>
-+  </g>
-+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="507" y="213">
-+    <tspan x="507" y="213">false</tspan>
-+  </text>
-+  <g>
-+    <ellipse style="fill: #ffffff" cx="419.999" cy="365.001" rx="62.9893" ry="31.4946"/>
-+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" cx="419.999" cy="365.001" rx="62.9893" ry="31.4946"/>
-+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="419.999" y="368.901">
-+      <tspan x="419.999" y="368.901">get geoHood</tspan>
++    <ellipse style="fill: #ffffff" cx="419.999" cy="263.001" rx="64.5067" ry="32.2534"/>
++    <ellipse style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" cx="419.999" cy="263.001" rx="64.5067" ry="32.2534"/>
++    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="419.999" y="266.901">
++      <tspan x="419.999" y="266.901">get geoDomain</tspan>
 +    </text>
 +  </g>
 +  <g>
-+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="420.352" y1="287.716" x2="420.193" y2="322.503"/>
-+    <polygon style="fill: #000000" points="415.193,322.48 420.148,332.503 425.193,322.526 "/>
-+    <polygon style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="415.193,322.48 420.148,332.503 425.193,322.526 "/>
++    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="420.376" y1="166.73" x2="420.169" y2="219.76"/>
++    <polygon style="fill: #000000" points="415.169,219.74 420.129,229.76 425.168,219.779 "/>
++    <polygon style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="415.169,219.74 420.129,229.76 425.168,219.779 "/>
 +  </g>
-+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="428" y="313">
-+    <tspan x="428" y="313">true</tspan>
++  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="428" y="195">
++    <tspan x="428" y="195">true</tspan>
 +  </text>
 +  <g>
-+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="395.06" y1="394.377" x2="347.488" y2="450.411"/>
-+    <polygon style="fill: #000000" points="343.677,447.175 341.017,458.034 351.3,453.647 "/>
-+    <polygon style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="343.677,447.175 341.017,458.034 351.3,453.647 "/>
++    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="420" y1="295.735" x2="420" y2="321.575"/>
++    <polygon style="fill: #000000" points="415,321.575 420,331.575 425,321.575 "/>
++    <polygon style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="415,321.575 420,331.575 425,321.575 "/>
 +  </g>
 +  <g>
-+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="443.467" y1="394.687" x2="486.999" y2="449.754"/>
-+    <polygon style="fill: #000000" points="483.076,452.855 493.2,457.599 490.921,446.653 "/>
-+    <polygon style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="483.076,452.855 493.2,457.599 490.921,446.653 "/>
++    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="465.257" y1="239.593" x2="620.21" y2="159.449"/>
++    <polygon style="fill: #000000" points="622.507,163.89 629.092,154.855 617.913,155.008 "/>
++    <polygon style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="622.507,163.89 629.092,154.855 617.913,155.008 "/>
 +  </g>
 +  <g>
-+    <ellipse style="fill: #ffffff" cx="316.001" cy="487.499" rx="62.3789" ry="31.1895"/>
-+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" cx="316.001" cy="487.499" rx="62.3789" ry="31.1895"/>
-+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="316.001" y="491.399">
-+      <tspan x="316.001" y="491.399">set geoHood</tspan>
++    <ellipse style="fill: #ffffff" cx="420.001" cy="364.499" rx="63.8471" ry="31.9236"/>
++    <ellipse style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" cx="420.001" cy="364.499" rx="63.8471" ry="31.9236"/>
++    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="420.001" y="368.399">
++      <tspan x="420.001" y="368.399">set geoDomain</tspan>
 +    </text>
 +  </g>
-+  <g>
-+    <ellipse style="fill: #ffffff" cx="519.999" cy="491.5" rx="71.2795" ry="35.6397"/>
-+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" cx="519.999" cy="491.5" rx="71.2795" ry="35.6397"/>
-+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="519.999" y="495.4">
-+      <tspan x="519.999" y="495.4">set defaultHood</tspan>
-+    </text>
-+  </g>
-+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="470" y="414.25">
-+    <tspan x="470" y="414.25">false</tspan>
++  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="516" y="195.25">
++    <tspan x="516" y="195.25">false</tspan>
 +  </text>
-+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="349" y="412.25">
-+    <tspan x="349" y="412.25">true</tspan>
++  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="430" y="313.25">
++    <tspan x="430" y="313.25">true</tspan>
 +  </text>
 +  <g>
-+    <ellipse style="fill: #ffffff" cx="420.001" cy="604.499" rx="44.2427" ry="22.1213"/>
-+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" cx="420.001" cy="604.499" rx="44.2427" ry="22.1213"/>
-+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="420.001" y="608.399">
-+      <tspan x="420.001" y="608.399">Exit</tspan>
++    <ellipse style="fill: #ffffff" cx="420.001" cy="453.499" rx="44.2427" ry="22.1213"/>
++    <ellipse style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" cx="420.001" cy="453.499" rx="44.2427" ry="22.1213"/>
++    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="420.001" y="457.399">
++      <tspan x="420.001" y="457.399">Exit</tspan>
 +    </text>
 +  </g>
 +  <g>
-+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="490.837" y1="524.453" x2="445.184" y2="576.042"/>
-+    <polygon style="fill: #000000" points="441.44,572.728 438.557,583.531 448.928,579.355 "/>
-+    <polygon style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="441.44,572.728 438.557,583.531 448.928,579.355 "/>
-+  </g>
-+  <g>
-+    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="341.658" y1="516.364" x2="394.731" y2="576.071"/>
-+    <polygon style="fill: #000000" points="390.994,579.393 401.375,583.545 398.468,572.749 "/>
-+    <polygon style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="390.994,579.393 401.375,583.545 398.468,572.749 "/>
-+  </g>
-+  <g>
-+    <ellipse style="fill: #ffffff" cx="631.001" cy="130" rx="44.2427" ry="22.1213"/>
-+    <ellipse style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" cx="631.001" cy="130" rx="44.2427" ry="22.1213"/>
-+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="631.001" y="133.9">
-+      <tspan x="631.001" y="133.9">Exit</tspan>
-+    </text>
++    <line style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" x1="420.001" y1="396.929" x2="420.001" y2="420.38"/>
++    <polygon style="fill: #000000" points="415.001,420.38 420.001,430.38 425.001,420.38 "/>
++    <polygon style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" points="415.001,420.38 420.001,430.38 425.001,420.38 "/>
 +  </g>
 +  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="912.352" y="129.946">
 +    <tspan x="912.352" y="129.946"></tspan>
@@ -1676,6 +1536,31 @@ index 00000000..e9742b0f
 +    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="69.241" y="132.524">
 +      <tspan x="69.241" y="132.524">Start</tspan>
 +    </text>
++  </g>
++  <g>
++    <rect style="fill: #00ff00" x="610.675" y="65.4" width="137.45" height="14.95"/>
++    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="679.4" y="77.3">
++      <tspan x="679.4" y="77.3">default domain mode</tspan>
++    </text>
++  </g>
++  <g>
++    <ellipse style="fill: #ffffff" cx="680.909" cy="128.055" rx="73.3093" ry="36.6546"/>
++    <ellipse style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" cx="680.909" cy="128.055" rx="73.3093" ry="36.6546"/>
++    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="680.909" y="131.955">
++      <tspan x="680.909" y="131.955">set defaultDomain</tspan>
++    </text>
++  </g>
++  <g>
++    <ellipse style="fill: #ffffff" cx="855.001" cy="126" rx="44.2427" ry="22.1213"/>
++    <ellipse style="fill: none; fill-opacity:0; stroke-width: 1; stroke: #000000" cx="855.001" cy="126" rx="44.2427" ry="22.1213"/>
++    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="855.001" y="129.9">
++      <tspan x="855.001" y="129.9">Exit</tspan>
++    </text>
++  </g>
++  <g>
++    <line style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #000000" x1="754.705" y1="127.184" x2="800.277" y2="126.646"/>
++    <polygon style="fill: #000000" points="800.336,131.645 810.276,126.528 800.218,121.646 "/>
++    <polygon style="fill: none; fill-opacity:0; stroke-width: 0.02; stroke: #000000" points="800.336,131.645 810.276,126.528 800.218,121.646 "/>
 +  </g>
 +</svg>
 diff --git a/docs/package/hoodmap.jpeg b/docs/package/hoodmap.jpeg
@@ -7445,76 +7330,64 @@ index 00000000..74d52968
 +</svg>
 diff --git a/package/gluon-hoodselector/Makefile b/package/gluon-hoodselector/Makefile
 new file mode 100644
-index 00000000..d6207a0f
+index 00000000..f1d86728
 --- /dev/null
 +++ b/package/gluon-hoodselector/Makefile
-@@ -0,0 +1,26 @@
+@@ -0,0 +1,23 @@
 +include $(TOPDIR)/rules.mk
 +
 +PKG_NAME:=gluon-hoodselector
 +
-+GLUON_VERSION = 3
++GLUON_VERSION:=3
 +PKG_VERSION:=2
 +
 +include ../gluon.mk
 +
 +define Package/gluon-hoodselector
-+  TITLE:=Automatically sortes nodes into network hoods.
-+  DEPENDS:=+gluon-site +gluon-mesh-batman-adv-15 +gluon-mesh-vpn-core +micrond +libjson-c +luaposix +luabitop @GLUON_MULTIDOMAIN
++  TITLE:=Automatically sortes nodes into network domains.
++  DEPENDS:=+luaposix +libgluonutil +lua-math-polygon +libjson-c +gluon-site +micrond +luabitop @GLUON_MULTIDOMAIN
 +  CONFLICTS:=+gluon-config-mode-domain-select
 +endef
 +
 +define Package/gluon-hoodselector/description
-+  This is the hoodselector. The hoodselector is one of the main components for
-+  splitting a layer 2 mesh network into seperated network segments (hoods).
-+  The job of the hoodselector is to automatically detect in which hood
-+  the node is located based on geo settings or by scanning its environment.
-+  Based on this information the hoodselector should select a hood from a
-+  list of known hoods (hoodlist) and adjust VPN, wireless and mesh on lan
-+  configuration based on the settings given for the selected hood.
++  The job of the hoodselector is to automatically detect in which domain
++  the node is located based on geo settings. Based on this information
++  the hoodselector will select a domain from a list of known domains
++  and adjust the domain related settings e.g. VPN, wireless ...
 +endef
 +
 +$(eval $(call BuildPackageGluon,gluon-hoodselector))
 diff --git a/package/gluon-hoodselector/check_site.lua b/package/gluon-hoodselector/check_site.lua
 new file mode 100644
-index 00000000..6396a67d
+index 00000000..d16df082
 --- /dev/null
 +++ b/package/gluon-hoodselector/check_site.lua
-@@ -0,0 +1,35 @@
-+function need_nil(path)
-+  need(path, function(val)
-+    if val == nil then
-+      return true
-+    end
-+    return false
-+  end, true, "The default domain should not contain shapes")
-+  return nil
+@@ -0,0 +1,26 @@
++function check_lat_lon_range(pos,range,label)
++	need({'hoodselector', 'shapes'}, function(err)
++		if (type(pos) ~= "number") then
++			return false
++		end
++		if pos > range or pos < -range then
++			return false
++		end
++		return true
++	end, true, label.." must match a range +/-"..range)
 +end
 +
-+--Need to check if not default domain and does the default not contain shapes
 +if this_domain() ~= need_string(in_site({'default_domain'})) then
-+  local no_shapes = true
-+  for _,shape in ipairs(need_table(in_domain({'hoodselector', 'shapes'}))) do
-+    no_shapes = false
-+    if #shape >= 2 then
-+      for _, pos in ipairs(shape) do
-+        if pos.lat == nil or not ( pos.lat < 90.0 and pos.lat > -90.0 ) then
-+          need(in_domain({'hoodselector', 'shapes'}), function(err) return false end, true, "lat must match a range +/-90.0")
-+        end
-+        if pos.lon == nil or not ( pos.lon < 180.0 and pos.lon > -180.0 ) then
-+          need(in_domain({'hoodselector', 'shapes'}), function(err) return false end, true, "lon must match a range +/-180.0")
-+        end
-+      end
-+    end
-+    if #shape < 2 then
-+      need(in_domain({'hoodselector', 'shapes'}), function(err) return false end, true, "needs to have at least 2 coordinates for rectangular shapes.")
-+    end
-+  end
-+  if no_shapes then
-+    need(in_domain({'hoodselector', 'shapes'}), function(err) return false end, true, "no shapes are defined in domainss")
-+  end
-+else -- ente by default domain
-+  need_nil(in_domain({'hoodselector', 'shapes'}))
++	for _,shape in pairs(need_table(in_domain({'hoodselector', 'shapes'}))) do
++		need({'hoodselector', 'shapes'}, function(err)
++			if #shape < 2 then
++				return false
++			end
++			for k,v in ipairs(shape) do
++				check_lat_lon_range(v.lat,90.0,"lat")
++				check_lat_lon_range(v.lon,180.0,"lon")
++			end
++			return true
++		end, true, "needs to have at least 2 coordinates for rectangular shapes.")
++	end
 +end
 diff --git a/package/gluon-hoodselector/files/usr/lib/micron.d/hoodselector b/package/gluon-hoodselector/files/usr/lib/micron.d/hoodselector
 new file mode 100644
@@ -7525,12 +7398,13 @@ index 00000000..6e793151
 +*/2 * * * * /usr/sbin/hoodselector
 diff --git a/package/gluon-hoodselector/luasrc/usr/lib/lua/hoodselector/util.lua b/package/gluon-hoodselector/luasrc/usr/lib/lua/hoodselector/util.lua
 new file mode 100644
-index 00000000..1050146b
+index 00000000..5d82a72c
 --- /dev/null
 +++ b/package/gluon-hoodselector/luasrc/usr/lib/lua/hoodselector/util.lua
-@@ -0,0 +1,153 @@
+@@ -0,0 +1,83 @@
 +local unistd = require('posix.unistd')
 +local util = require 'gluon.util'
++local math_polygon = require('math-polygon')
 +local json = require 'jsonc'
 +local uci = require('simple-uci').cursor()
 +local site = require 'gluon.site'
@@ -7577,75 +7451,20 @@ index 00000000..1050146b
 +	}
 +end
 +
-+-- Source with pseudocode: https://de.wikipedia.org/wiki/Punkt-in-Polygon-Test_nach_Jordan
-+-- see also https://en.wikipedia.org/wiki/Point_in_polygon
-+-- parameters: points A = (x_a,y_a), B = (x_b,y_b), C = (x_c,y_c)
-+-- return value: −1 if the ray from A to the right bisects the edge [BC] (the lower vortex of [BC]
-+-- is not seen as part of [BC]);
-+--                0 if A is on [BC];
-+--                +1 else
-+function M.cross_prod_test(x_a,y_a,x_b,y_b,x_c,y_c)
-+	if y_a == y_b and y_b == y_c then
-+		if (x_b <= x_a and x_a <= x_c) or (x_c <= x_a and x_a <= x_b) then
-+			return 0
-+		end
-+		return 1
-+	end
-+	if not ((y_a == y_b) and (x_a == x_b)) then
-+		if y_b > y_c then
-+			-- swap b and c
-+			local h = x_b
-+			x_b = x_c
-+			x_c = h
-+			h = y_b
-+			y_b = y_c
-+			y_c = h
-+		end
-+		if (y_a <= y_b) or (y_a > y_c) then
-+			return 1
-+		end
-+		local delta = (x_b-x_a) * (y_c-y_a) - (y_b-y_a) * (x_c-x_a)
-+		if delta > 0 then
-+			return 1
-+		elseif delta < 0 then
-+			return -1
-+		end
-+	end
-+	return 0
-+end
-+
-+-- Source with pseudocode: https://de.wikipedia.org/wiki/Punkt-in-Polygon-Test_nach_Jordan
-+-- see also: https://en.wikipedia.org/wiki/Point_in_polygon
-+-- let P be a 2D Polygon and Q a 2D Point
-+-- return value:  +1 if Q within P;
-+--                −1 if Q outside of P;
-+--                0 if Q on an edge of P
-+function M.point_in_polygon(poly, point)
-+	local t = -1
-+	for i=1,#poly-1 do
-+		t = t * M.cross_prod_test(point.lon,point.lat,poly[i].lon,poly[i].lat,poly[i+1].lon,poly[i+1].lat)
-+		if t == 0 then break end
-+	end
-+	return t
-+end
-+
 +-- Return domain from the domain list based on geo position or nil if no geo based domain could be
-+-- determined. First check if an area has > 2 points and is hence a polygon. Else assume it is a
-+-- rectangular box defined by two points (south-west and north-east). Furthermore keep record of
-+-- how many nested shapes we are in, e.g. a polyon with holes.
++-- determined.
 +function M.get_domain_by_geo(jdomains,geo)
 +	for _, domain in pairs(jdomains) do
 +		if domain.domain_code ~= site.default_domain() then
++			-- Keep record of how many nested shapes we are in, e.g. a polyon with holes.
 +			local nesting = 1
 +			for _, area in pairs(domain.domain.hoodselector.shapes) do
-+				if #area > 2 then
-+					if (M.point_in_polygon(area,geo) == 1) then
-+						nesting = nesting * (-1)
-+					end
-+				else
-+					if ( geo.lat >= area[1].lat and geo.lat < area[2].lat and geo.lon >= area[1].lon and geo.lon < area[2].lon ) then
-+						nesting = nesting * (-1)
-+					end
++				-- Convert rectangle, defined by to points, into polygon
++				if #area == 2 then
++					area = math_polygon.two_point_rec_to_poly(area)
++				end
++				if (math_polygon.point_in_polygon(area,geo) == 1) then
++					nesting = nesting * (-1)
 +				end
 +			end
 +			if nesting == -1 then return domain end
@@ -7665,26 +7484,10 @@ index 00000000..1050146b
 +	return false
 +end
 +
-+function M.restart_services()
-+	local proc_tbl = {
-+		"fastd",
-+		"tunneldigger",
-+		"network",
-+		"gluon-respondd",
-+	}
-+
-+	for _, proc in ipairs(proc_tbl) do
-+		if unistd.access("/etc/init.d/"..proc, "x") == 0 then
-+			print(proc.." restarting ...")
-+			os.execute("/etc/init.d/"..proc.." restart")
-+		end
-+	end
-+end
-+
 +return M
 diff --git a/package/gluon-hoodselector/luasrc/usr/sbin/hoodselector b/package/gluon-hoodselector/luasrc/usr/sbin/hoodselector
 new file mode 100755
-index 00000000..19b469f4
+index 00000000..12125da7
 --- /dev/null
 +++ b/package/gluon-hoodselector/luasrc/usr/sbin/hoodselector
 @@ -0,0 +1,56 @@
@@ -7730,7 +7533,7 @@ index 00000000..19b469f4
 +	local geo_base_domain = hoodutil.get_domain_by_geo(jdomains, geo)
 +	if geo_base_domain ~= nil then
 +		if hoodutil.set_domain_config(geo_base_domain) then
-+			hoodutil.restart_services()
++			os.execute("gluon-reload")
 +			hoodutil.log('Domain set by geolocation mode.\n')
 +		end
 +		return
@@ -7742,7 +7545,7 @@ index 00000000..19b469f4
 +
 +-- default domain mode
 +if hoodutil.set_domain_config(hoodutil.get_default_domain(hoodutil.get_domains())) then
-+	hoodutil.restart_services()
++	os.execute("gluon-reload")
 +end
 -- 
 2.11.0

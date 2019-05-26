@@ -1,0 +1,26 @@
+From d710cbe84fa44068ca349bd22ab36e2970431e0f Mon Sep 17 00:00:00 2001
+From: Matthias Schiffer <mschiffer@universe-factory.net>
+Date: Wed, 1 May 2019 16:19:28 +0200
+Subject: [PATCH 6/6] modules: update Gluon packages
+
+9a364fb8d0a4 respondd: fix crash caused by division by zero
+67177de99afc libs/lua-math-polygon: add add math lib for gauss jordan Ponit in Polygon algorithm
+
+Fixes #1717
+---
+ modules | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules b/modules
+index afea0830..f76a773b 100644
+--- a/modules
++++ b/modules
+@@ -17,4 +17,4 @@ PACKAGES_LUCI_BRANCH=openwrt-18.06
+ PACKAGES_LUCI_COMMIT=4ba85e3d82b684262c570e38a72d2dc3bb712a13
+ 
+ PACKAGES_GLUON_REPO=https://github.com/freifunk-gluon/packages.git
+-PACKAGES_GLUON_COMMIT=a52d5ced54acfe399b3ac36b33d53034f341f06b
++PACKAGES_GLUON_COMMIT=9a364fb8d0a4f9fecb6a3aac7525fedf759fe81a
+-- 
+2.11.0
+
