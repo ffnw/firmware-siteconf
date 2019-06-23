@@ -1,4 +1,4 @@
-From d7ca6015474a2197686c4026ff091f504435fbbc Mon Sep 17 00:00:00 2001
+From b97dec669a6a8ed9571e9e3616ae0884b3c2d4e6 Mon Sep 17 00:00:00 2001
 From: Tata <tarek@ring0.de>
 Date: Tue, 23 Apr 2019 17:34:49 +0200
 Subject: [PATCH 5/6] Add mechanism to reload domain related services (#1710)
