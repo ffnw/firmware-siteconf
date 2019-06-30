@@ -1,4 +1,4 @@
-GLUON_SITE_FEEDS='ffnw tecff'
+GLUON_SITE_FEEDS='ffnw tecff ffho'
 
 PACKAGES_FFNW_REPO=https://git.nordwest.freifunk.net/ffnw-firmware/packages.git
 PACKAGES_FFNW_BRANCH=master
@@ -7,3 +7,7 @@ PACKAGES_FFNW_COMMIT=ca8f033e5614b82e75f1e6fd65aff67e44a6495e
 PACKAGES_TECFF_REPO=https://github.com/tecff/gluon-packages.git
 PACKAGES_TECFF_BRANCH=v2018.1.x
 PACKAGES_TECFF_COMMIT=7964a2884f1b43d994f8d1da931e89c5d36d3890
+
+PACKAGES_FFHO_REPO=https://git.ffho.net/FreifunkHochstift/ffho-packages.git
+PACKAGES_FFHO_BRANCH=master
+PACKAGES_FFHO_COMMIT=a2521ef8cd6774a0470a7b2568d0240e679e95e7

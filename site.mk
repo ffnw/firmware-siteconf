@@ -24,6 +24,7 @@ GLUON_SITE_PACKAGES := \
 	haveged \
 	ffnw-banner \
 	iwinfo \
+	ffho-autoupdater-wifi-fallback
 
 USB_BASIC := \
 	kmod-usb-core \
