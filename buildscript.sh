@@ -174,7 +174,7 @@ get_target_list(){
         TARGET_LIST[${#TARGET_LIST[@]}]="$targ"
       fi
     else
-      if [[ $line == *BROKEN* ]] && ! [ -a "$EXECDIR/.BROKEN" ]; then
+      if [[ $line == *BROKEN* ]] && ! [[ $line == *GLUON_WLAN_MESH_11s* ]] && ! [ -a "$EXECDIR/.BROKEN" ]; then
         break
       fi
     fi
