@@ -1,4 +1,4 @@
-From 9e1977deebfa7d29f859b7efa53e0b9eb2e7bd8d Mon Sep 17 00:00:00 2001
+From 6ea8b47ee5d30663fdaef97e9797b8eaab9d5ffb Mon Sep 17 00:00:00 2001
 From: runner01 <runner01@ffnw.de>
 Date: Mon, 18 Mar 2019 21:29:26 +0100
 Subject: [PATCH 4/6] hoodselector to domain migration
@@ -7,7 +7,7 @@ Domain migration: restart services after migration
 
 Signed-off-by: runner01 <runner01@ffnw.de>
 ---
- .../luasrc/lib/gluon/upgrade/010-domain-migrate    | 38 ++++++++++++++++++++++
+ .../lib/gluon/upgrade/010-domain-migrate      | 38 +++++++++++++++++++
  1 file changed, 38 insertions(+)
  create mode 100755 package/gluon-hoodselector/luasrc/lib/gluon/upgrade/010-domain-migrate
 
@@ -56,5 +56,5 @@ index 00000000..9146970b
 +	end
 +end
 -- 
-2.11.0
+2.20.1
 

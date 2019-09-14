@@ -1,17 +1,17 @@
-From b97dec669a6a8ed9571e9e3616ae0884b3c2d4e6 Mon Sep 17 00:00:00 2001
+From 6e53b1a4d94f2f1cc5599e47b24137128dc06019 Mon Sep 17 00:00:00 2001
 From: Tata <tarek@ring0.de>
 Date: Tue, 23 Apr 2019 17:34:49 +0200
 Subject: [PATCH 5/6] Add mechanism to reload domain related services (#1710)
 
 ---
- package/gluon-core/files/lib/gluon/reload.d/500-core    |  2 ++
- package/gluon-core/files/usr/bin/gluon-reload           | 17 +++++++++++++++++
- .../files/lib/gluon/reload.d/200-mesh-vpn-fastd-stop    |  2 ++
- .../files/lib/gluon/reload.d/800-mesh-vpn-fastd-start   |  2 ++
- .../lib/gluon/reload.d/200-mesh-vpn-tunneldigger-stop   |  2 ++
- .../lib/gluon/reload.d/800-mesh-vpn-tunneldigger-start  |  2 ++
- .../files/lib/gluon/reload.d/100-respondd-stop          |  2 ++
- .../files/lib/gluon/reload.d/900-respondd-start         |  2 ++
+ .../files/lib/gluon/reload.d/500-core           |  2 ++
+ package/gluon-core/files/usr/bin/gluon-reload   | 17 +++++++++++++++++
+ .../lib/gluon/reload.d/200-mesh-vpn-fastd-stop  |  2 ++
+ .../lib/gluon/reload.d/800-mesh-vpn-fastd-start |  2 ++
+ .../reload.d/200-mesh-vpn-tunneldigger-stop     |  2 ++
+ .../reload.d/800-mesh-vpn-tunneldigger-start    |  2 ++
+ .../files/lib/gluon/reload.d/100-respondd-stop  |  2 ++
+ .../files/lib/gluon/reload.d/900-respondd-start |  2 ++
  8 files changed, 31 insertions(+)
  create mode 100755 package/gluon-core/files/lib/gluon/reload.d/500-core
  create mode 100755 package/gluon-core/files/usr/bin/gluon-reload
@@ -102,5 +102,5 @@ index 00000000..3890bd77
 +#!/bin/sh
 +/etc/init.d/gluon-respondd start
 -- 
-2.11.0
+2.20.1
 

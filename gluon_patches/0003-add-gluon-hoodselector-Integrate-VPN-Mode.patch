@@ -1,4 +1,4 @@
-From 310524189d3316c3dcbde500a44b6bddcc838476 Mon Sep 17 00:00:00 2001
+From 5e087a257ab566d4fd016727bc34619aa54056d7 Mon Sep 17 00:00:00 2001
 From: Jan-Tarek Butt <tarek@ring0.de>
 Date: Sat, 12 May 2018 17:48:32 +0200
 Subject: [PATCH 3/6] add gluon-hoodselector: Integrate VPN Mode
@@ -160,17 +160,17 @@ luasrc/usr/lib/lua/hoodselector/util.lua: check_site.lua simplify checksite scri
 
 Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
 ---
- docs/index.rst                                     |    1 +
- docs/package/gluon-hoodselector.dia                | 1080 ++++++++++++++++++++
- docs/package/gluon-hoodselector.rst                |  128 +++
- docs/package/gluon-hoodselector.svg                |  142 +++
- docs/package/hoodmap.jpeg                          |  Bin 0 -> 298171 bytes
- docs/package/rectangle-example.svg                 |   16 +
- package/gluon-hoodselector/Makefile                |   23 +
- package/gluon-hoodselector/check_site.lua          |   26 +
- .../files/usr/lib/micron.d/hoodselector            |    1 +
- .../luasrc/usr/lib/lua/hoodselector/util.lua       |   83 ++
- .../luasrc/usr/sbin/hoodselector                   |   56 +
+ docs/index.rst                                |    1 +
+ docs/package/gluon-hoodselector.dia           | 1080 +++++++++++++++++
+ docs/package/gluon-hoodselector.rst           |  128 ++
+ docs/package/gluon-hoodselector.svg           |  142 +++
+ docs/package/hoodmap.jpeg                     |  Bin 0 -> 298171 bytes
+ docs/package/rectangle-example.svg            |   16 +
+ package/gluon-hoodselector/Makefile           |   23 +
+ package/gluon-hoodselector/check_site.lua     |   26 +
+ .../files/usr/lib/micron.d/hoodselector       |    1 +
+ .../luasrc/usr/lib/lua/hoodselector/util.lua  |   83 ++
+ .../luasrc/usr/sbin/hoodselector              |   56 +
  11 files changed, 1556 insertions(+)
  create mode 100644 docs/package/gluon-hoodselector.dia
  create mode 100644 docs/package/gluon-hoodselector.rst
@@ -184,7 +184,7 @@ Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
  create mode 100755 package/gluon-hoodselector/luasrc/usr/sbin/hoodselector
 
 diff --git a/docs/index.rst b/docs/index.rst
-index bbb3296a..3aee9cf2 100644
+index c7256f0d..94b896ea 100644
 --- a/docs/index.rst
 +++ b/docs/index.rst
 @@ -62,6 +62,7 @@ Several Freifunk communities in Germany use Gluon as the foundation of their Fre
@@ -7548,5 +7548,5 @@ index 00000000..12125da7
 +	os.execute("gluon-reload")
 +end
 -- 
-2.11.0
+2.20.1
 
