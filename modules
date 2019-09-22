@@ -1,4 +1,4 @@
-GLUON_SITE_FEEDS='ffnw tecff ffho'
+GLUON_SITE_FEEDS='ffnw tecff ffho ssidchanger'
 
 PACKAGES_FFNW_REPO=https://git.nordwest.freifunk.net/ffnw-firmware/packages.git
 PACKAGES_FFNW_BRANCH=master
