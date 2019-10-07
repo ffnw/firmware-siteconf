@@ -2,7 +2,8 @@ test:
   tags:
     - firmware
   script:
-    - git clone https://github.com/freifunk-gluon/gluon.git . -b v2018.2.x
-    - mv $GIT_CLONE_PATH site
+    - pwd
+    - echo $CI_BUILDS_DIR
+    - echo $GIT_CLONE_PATH
+    - git clone https://github.com/freifunk-gluon/gluon.git ./gluon -b v2018.2.x
     - ls
-    - ls site
