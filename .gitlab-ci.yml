@@ -1,3 +1,6 @@
+variables:
+  GIT_CLONE_PATH: $CI_BUILDS_DIR/siteconf
+
 test:
   tags:
     - firmware
@@ -5,5 +8,7 @@ test:
     - pwd
     - echo $CI_BUILDS_DIR
     - echo $GIT_CLONE_PATH
-    - git clone https://github.com/freifunk-gluon/gluon.git ./gluon -b v2018.2.x
+    - git clone https://github.com/freifunk-gluon/gluon.git . -b v2018.2.x
+    - mv $GIT_CLONE_PATH .
     - ls
+    - ls site
