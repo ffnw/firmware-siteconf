@@ -11,5 +11,7 @@ test:
     - git clone https://github.com/freifunk-gluon/gluon.git $CI_BUILDS_DIR/freifunk_build -b v2018.2.x
     - cd $CI_BUILDS_DIR/freifunk_build
     - mv $GIT_CLONE_PATH ./site
+    - mv $CI_BUILDS_DIR/freifunk_build $GIT_CLONE_PATH
+    - cd $GIT_CLONE_PATH
     - ls
     - ls site
