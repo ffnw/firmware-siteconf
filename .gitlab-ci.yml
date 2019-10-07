@@ -12,6 +12,5 @@ test:
     - cd $CI_BUILDS_DIR/freifunk_build
     - mv $GIT_CLONE_PATH ./site
     - mv $CI_BUILDS_DIR/freifunk_build $GIT_CLONE_PATH
-    - cd $GIT_CLONE_PATH
-    - ls
-    - ls site
+    - cd $GIT_CLONE_PATH/site
+    - ./buildscript.sh patch
