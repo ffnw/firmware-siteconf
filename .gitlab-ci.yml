@@ -14,3 +14,6 @@ test:
     - mv $CI_BUILDS_DIR/freifunk_build $GIT_CLONE_PATH
     - cd $GIT_CLONE_PATH/site
     - ./buildscript.sh patch
+    - ./buildscript.sh prepare GLUON_BRANCH testing
+    - ./buildscript.sh prepare GLUON_RELEASE $(date +%Y%m%d)
+    - ./buildscript.sh prepare l2tp
