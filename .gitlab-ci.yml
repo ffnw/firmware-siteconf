@@ -10,6 +10,7 @@ dependencies:
   stage: dependencies
   tags:
     - firmware
+  before_script: cd ..;git am --abort
   script:
     - bash ./buildscript.sh clean_patches
     - bash ./buildscript.sh update_patches
