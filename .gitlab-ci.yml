@@ -15,8 +15,8 @@ dependencies:
     - if [ $(git status | grep -c am) -gt 0 ];then echo "am running"; git am --abort;else echo "not running";fi
     - cd site
   script:
-    - bash ./buildscript.sh clean_patches
-    - bash ./buildscript.sh update_patches
+#    - bash ./buildscript.sh clean_patches
+#    - bash ./buildscript.sh update_patches
     - bash ./buildscript.sh patch
     - bash ./buildscript.sh prepare GLUON_BRANCH nightly_master
     - bash ./buildscript.sh prepare GLUON_RELEASE $(date +%Y%m%d)
