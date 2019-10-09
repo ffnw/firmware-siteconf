@@ -11,7 +11,8 @@ dependencies:
   tags:
     - firmware
   before_script: 
-    - cd ..;git am --abort
+    - cd ..
+    - git am show-curent-patch
   script:
     - ./buildscript.sh clean_patches
     - ./buildscript.sh update_patches
