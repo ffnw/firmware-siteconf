@@ -36,6 +36,8 @@ dependencies:
 
 cleanup:
   stage: cleanup
+  tags:
+    - firmware
   script:
     - bash ./buildscript.sh clean_patches
 
