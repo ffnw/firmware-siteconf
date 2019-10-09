@@ -12,7 +12,7 @@ dependencies:
     - firmware
   before_script: 
     - cd ..
-    - if [ $(git status | grep -c am) -gt 0 ];then echo "am running"; git am --abort;else echo "not running";fi
+    - if [ $(git status | grep -c am) -gt 0 ];then echo "am running"; git am --show-current-patch;git am --abort;else echo "not running";fi
     - cd site
   script:
 #    - bash ./buildscript.sh clean_patches
