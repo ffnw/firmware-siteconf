@@ -11,6 +11,8 @@ dependencies:
   tags:
     - firmware
   script:
+    - bash ./buildscript.sh clean_patches
+    - bash ./buildscript.sh update_patches
     - bash ./buildscript.sh patch
     - bash ./buildscript.sh prepare GLUON_BRANCH nightly_master
     - bash ./buildscript.sh prepare GLUON_RELEASE $(date +%Y%m%d)
