@@ -12,7 +12,7 @@ dependencies:
     - firmware
   before_script: 
     - cd ..
-    - git am --show-curent-patch
+    - git am --show-current-patch
   script:
     - ./buildscript.sh clean_patches
     - ./buildscript.sh update_patches
