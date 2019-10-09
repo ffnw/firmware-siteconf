@@ -21,7 +21,7 @@ dependencies:
     - bash ./buildscript.sh patch
     - bash ./buildscript.sh prepare GLUON_BRANCH nightly_master
     - bash ./buildscript.sh prepare GLUON_RELEASE $(date +%Y%m%d)
-    - bash ./buildscript.sh prepare l2tp
+    #- bash ./buildscript.sh prepare l2tp
 
 #build:
 #  stage: build
