@@ -3,9 +3,9 @@ variables:
 
 stages:
   - dependencies
-  - build
-  - test
-  - cleanup
+#  - build
+#  - test
+
 
 dependencies:
   stage: dependencies
@@ -22,6 +22,8 @@ dependencies:
     - bash ./buildscript.sh prepare GLUON_BRANCH nightly_master
     - bash ./buildscript.sh prepare GLUON_RELEASE $(date +%Y%m%d)
     #- bash ./buildscript.sh prepare l2tp
+  after_script:
+    - bash ./buildscript.sh clean_patches
 
 #build:
 #  stage: build
@@ -33,11 +35,3 @@ dependencies:
 #  script:
 #    - echo testing
 #    - test -f build/test.txt
-
-cleanup:
-  stage: cleanup
-  tags:
-    - firmware
-  script:
-    - bash ./buildscript.sh clean_patches
-
