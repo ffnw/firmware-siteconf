@@ -8,8 +8,6 @@ stages:
 
 dependencies:
   stage: dependencies
-  only:
-    - master
   tags:
     - firmware
   script:
