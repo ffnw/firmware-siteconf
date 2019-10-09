@@ -10,14 +10,15 @@ dependencies:
   stage: dependencies
   tags:
     - firmware
-  before_script: cd ..;git am --abort
+  before_script: 
+    - cd ..;git am --abort
   script:
-    - bash ./buildscript.sh clean_patches
-    - bash ./buildscript.sh update_patches
-    - bash ./buildscript.sh patch
-    - bash ./buildscript.sh prepare GLUON_BRANCH nightly_master
-    - bash ./buildscript.sh prepare GLUON_RELEASE $(date +%Y%m%d)
-    - bash ./buildscript.sh prepare l2tp
+    - ./buildscript.sh clean_patches
+    - ./buildscript.sh update_patches
+    - ./buildscript.sh patch
+    - ./buildscript.sh prepare GLUON_BRANCH nightly_master
+    - ./buildscript.sh prepare GLUON_RELEASE $(date +%Y%m%d)
+    - ./buildscript.sh prepare l2tp
 
 #build:
 #  stage: build
