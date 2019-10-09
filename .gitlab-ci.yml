@@ -5,6 +5,7 @@ stages:
   - dependencies
   - build
   - test
+  - cleanup
 
 dependencies:
   stage: dependencies
@@ -33,5 +34,8 @@ dependencies:
 #    - echo testing
 #    - test -f build/test.txt
 
-
+cleanup:
+  stage: cleanup
+  script:
+    - bash ./buildscript.sh clean_patches
 
