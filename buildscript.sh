@@ -20,7 +20,7 @@ help_print(){
   echo "    BROKEN              y or n (default n)"
   echo "  build <command>       <command> can be replaced by targets"
   echo "    target_list         build all gluon targets"
-  echo "    all                 build all gluon targes for each VPN"
+  echo "    all                 build all gluon targets for each VPN"
   echo "    (optional) add \"fast\" as a parameter to build on multicore"
   echo "  create_manifest       create manifest"
   echo
@@ -286,7 +286,7 @@ case "$1" in
           fi
         done
         if [ "$err" == "yes" ]; then
-          echo "Please use targes from the following list as parameter:"
+          echo "Please use targets from the following list as parameter:"
           for targ in "${TARGET_LIST[@]}"; do
             echo "$targ"
           done
