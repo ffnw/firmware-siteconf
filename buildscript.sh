@@ -22,6 +22,7 @@ help_print(){
   echo "    target_list         build all gluon targets"
   echo "    all                 build all gluon targets for each VPN"
   echo "    (optional) add \"fast\" as a parameter to build on multicore"
+#  echo "    (optional) add \"silent\" as a parameter to avoid loads of output"
   echo "  create_manifest       create manifest"
   echo
 }
@@ -140,11 +141,19 @@ prepare_sitemk(){
 
 gluon_build(){
   if [ "$2" == "fast" ] && [ -a "/proc/cpuinfo" ]; then
-    if [ -a "$EXECDIR/.BROKEN" ]; then
-      make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
-    else
-      make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
-    fi
+      if [ "$3" == "silent" ]; then
+        if [ -a "$EXECDIR/.BROKEN" ]; then
+          make --silent -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
+        else
+          make --silent -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
+        fi
+      else
+        if [ -a "$EXECDIR/.BROKEN" ]; then
+          make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
+        else
+          make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
+        fi
+      fi
   else
     if [ -a "$EXECDIR/.BROKEN" ]; then
       make -C "$EXECDIR/.." BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
@@ -259,7 +268,11 @@ case "$1" in
       "target_list")
         for targ in "${TARGET_LIST[@]}"; do
           if [ "$3" == "fast" ]; then
-            gluon_build "$targ" "fast"
+            if [ "$4" == "silent" ]; then
+              gluon_build "$targ" "fast" "silent"
+            else
+              gluon_build "$targ" "fast"
+            fi
           else
             gluon_build "$targ"
           fi
@@ -267,10 +280,10 @@ case "$1" in
       ;;
       "all")
         "$EXECDIR/$0" prepare fastd
-        "$EXECDIR/$0" build target_list "fast"
+        "$EXECDIR/$0" build target_list "fast" "silent"
         "$EXECDIR/$0" create_manifest
         "$EXECDIR/$0" prepare l2tp
-        "$EXECDIR/$0" build target_list "fast"
+        "$EXECDIR/$0" build target_list "fast" "silent"
         "$EXECDIR/$0" create_manifest
       ;;
       *)
