@@ -1,0 +1,53 @@
+variables:
+  GIT_CLONE_PATH: $CI_BUILDS_DIR/2c952829/0/gluon/site
+stages:
+  - patch
+  - parameters
+  - build
+  - cleanup
+patch:
+  stage: patch
+  only:
+    - master
+  tags: 
+    - firmware
+  artifacts:
+    paths:
+      - .patched
+    expire_in: 1 day
+  before_script: 
+    - cd ..
+    - if [ $(git status | grep -c am) -gt 0 ];then git am --abort;fi
+    - cd site
+  script:
+    - ./buildscript.sh clean_patches
+    - ./buildscript.sh patch
+parameters:
+  stage: parameters
+  only:
+    - master
+  tags:
+    - firmware
+  artifacts:
+    paths:
+      - .GLUON_BRANCH
+      - .GLUON_RELEASE
+  script:
+    - ./buildscript.sh prepare GLUON_BRANCH nightly_master
+    - ./buildscript.sh prepare GLUON_RELEASE $(date +%Y%m%d)
+build:
+  stage: build
+  only:
+    - master
+  tags:
+    - firmware
+  script:
+    - touch .prepare
+    - ./buildscript.sh build all
+cleanup:
+  stage: cleanup
+  only:
+    - master
+  tags:
+    - firmware
+  script: ./buildscript.sh clean_patches
