@@ -178,7 +178,8 @@ get_target_list(){
   while read -r line; do
     if [[ $line == *GluonTarget* ]]; then
       # extract arcitecture parameter value
-      local targ="$(echo "$line" | sed -e 's/^.*GluonTarget,//' -e 's/)).*//' -r -e 's/([^,]+,[^,]*).*/\1/' -e 's/[,]/-/')"
+      local targ
+      targ="$(echo "$line" | sed -e 's/^.*GluonTarget,//' -e 's/)).*//' -r -e 's/([^,]+,[^,]*).*/\1/' -e 's/[,]/-/')"
       if [ -n "$targ" ]; then
         TARGET_LIST[${#TARGET_LIST[@]}]="$targ"
       fi

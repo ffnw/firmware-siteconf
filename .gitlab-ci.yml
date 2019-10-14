@@ -1,40 +1,70 @@
+---
 variables:
   GIT_CLONE_PATH: $CI_BUILDS_DIR/2c952829/0/gluon/site
 stages:
+  - dependencies
+  - lint
   - patch
   - parameters
   - build
+  - sign
+  - deploy
   - cleanup
-patch:
+
+# check all needed dependencies.
+dependencies:
+  stage: dependencies
+  tags:
+    - firmware
+  script:
+    - ./.ci/dependencies.sh
+
+# lint all common shell scripts
+shelllint:
+  stage: lint
+  tags:
+    - firmware
+  script:
+    - ./.ci/shelllint.sh
+
+# lint all common yamel files
+yamllint:
+  stage: lint
+  tags:
+    - firmware
+  script:
+    - ./.ci/yamllint.sh
+
+# update and patch gluon
+prepare_gluon:
   stage: patch
-  only:
-    - master
-  tags: 
+  tags:
     - firmware
   artifacts:
     paths:
       - .patched
     expire_in: 1 day
-  before_script: 
-    - cd ..
-    - if [ $(git status | grep -c am) -gt 0 ];then git am --abort;fi
-    - cd site
+  before_script:
+    - ( cd ..; [ $(git status | grep -c am) -eq 0 ] || git am --abort; )
   script:
+    - touch .patched
     - ./buildscript.sh clean_patches
+    - ( cd ..; git pull; git checkout $UPSTREAM_GLUON_BRANCH )
     - ./buildscript.sh patch
+
 parameters:
   stage: parameters
-  only:
-    - master
   tags:
     - firmware
   artifacts:
     paths:
       - .GLUON_BRANCH
       - .GLUON_RELEASE
+    expire_in: 1 day
   script:
     - ./buildscript.sh prepare GLUON_BRANCH nightly_master
     - ./buildscript.sh prepare GLUON_RELEASE $(date +%Y%m%d)
+
 build:
   stage: build
   only:
@@ -44,10 +74,32 @@ build:
   script:
     - touch .prepare
     - ./buildscript.sh build all
+
+sign:
+  stage: sign
+  only:
+    - master
+  tags:
+    - firmware
+  script:
+    - ./.ci/sign.sh $ECDSA_PRIVAT_KEY
+
+deploy:
+  stage: deploy
+  only:
+    - master
+  tags:
+    - firmware
+  script:
+    - ./.ci/deploy.sh $CI_BUILD_REF_NAME
+
 cleanup:
   stage: cleanup
   only:
     - master
   tags:
     - firmware
-  script: ./buildscript.sh clean_patches
+  script:
+    - touch .patched
+    - ./buildscript.sh clean_patches
+    - rm -rf ../output

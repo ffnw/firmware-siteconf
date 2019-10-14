@@ -1,0 +1,9 @@
+---
+
+extends: default
+
+rules:
+  line-length:
+    level: error
+    max: 100
+    allow-non-breakable-inline-mappings: true
