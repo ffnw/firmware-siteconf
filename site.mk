@@ -62,7 +62,6 @@ GLUON_WLAN_MESH := 11s
 # Allow overriding from the command line
 %B
 %C
-%D
 GLUON_PRIORITY ?= 0
 GLUON_REGION ?= eu
 GLUON_LANGS ?= de en

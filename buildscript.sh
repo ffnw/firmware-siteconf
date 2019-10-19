@@ -15,7 +15,6 @@ help_print(){
   echo "  prepare <command>"
   echo "    GLUON_BRANCH <str>  Set ENV variable"
   echo "    GLUON_RELEASE <str> Set ENV variable"
-  echo "    GLUON_DEPRECATED    Set ENV variable to 0, upgrade or full. See gluon documentation if unsure"
   echo "    fastd               Prepare site repo for fastd build"
   echo "    l2tp                prepare site repo for l2tp build"
   echo "    BROKEN              y or n (default n)"
@@ -138,12 +137,6 @@ prepare_sitemk(){
   else
     echo "Placeholder %C not found"
   fi
-  if grep -q "%D" < "$EXECDIR"/site.mk; then
-    sed -i "/^%D$/c\\GLUON_DEPRECATED ?= $(cat "$EXECDIR/.GLUON_DEPRECATED")" "$EXECDIR"/site.mk
-    echo "Set GLUON_DEPRECATED ..."
-  else
-    echo "Placeholder %D not found"
-  fi
 }
 
 gluon_build(){
@@ -177,10 +170,6 @@ prepare_precondition(){
   fi
   if ! [ -s "$EXECDIR/.GLUON_RELEASE" ]; then
     echo "please run '$0 prepare GLUON_RELEASE' first"
-    exit 1
-  fi
-  if ! [ -s "$EXECDIR/.GLUON_DEPRECATED" ]; then
-    echo "please run '$0 prepare GLUON_DEPRECATED' first"
     exit 1
   fi
 }
@@ -252,13 +241,6 @@ case "$1" in
           echo "$3" > "$EXECDIR/.GLUON_RELEASE"
         else
           echo "$2 needs a parameter e.g. 20170104"
-        fi
-      ;;
-      "GLUON_DEPRECATED")
-        if [ -n "$3" ]; then
-          echo "$3" > "$EXECDIR/.GLUON_DEPRECATED"
-        else
-          echo "$2 needs a parameter e.g. 0, upgrade or full. See gluon documentation if unsure."
         fi
       ;;
       "BROKEN")
