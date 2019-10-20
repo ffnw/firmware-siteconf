@@ -1,8 +1,8 @@
 GLUON_SITE_FEEDS='ffnw tecff ffho'
 
 PACKAGES_FFNW_REPO=https://git.nordwest.freifunk.net/ffnw-firmware/packages.git
-PACKAGES_FFNW_BRANCH=remove-package-disable-11s
-PACKAGES_FFNW_COMMIT=50ef13f0f10604f376b17608f8a7c11faf3fb24f
+PACKAGES_FFNW_BRANCH=master
+PACKAGES_FFNW_COMMIT=7a52798fa903baa27fb29c150773d3403283be2e
 
 PACKAGES_TECFF_REPO=https://github.com/tecff/gluon-packages.git
 PACKAGES_TECFF_BRANCH=v2018.2.x
