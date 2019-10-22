@@ -10,7 +10,6 @@ GLUON_FEATURES := \
 	ebtables-filter-ra-dhcp \
 	ebtables-limit-arp \
 	ebtables-source-filter \
-	radvd \
 	radv-filterd \
 	lock-password \
 	web-private-wifi \
@@ -65,3 +64,4 @@ GLUON_WLAN_MESH := 11s
 GLUON_PRIORITY ?= 0
 GLUON_REGION ?= eu
 GLUON_LANGS ?= de en
+GLUON_DEPRECATED ?= upgrade

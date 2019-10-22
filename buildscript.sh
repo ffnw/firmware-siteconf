@@ -50,7 +50,7 @@ clean_patches(){
   if [ -f "$EXECDIR/.patched" ]; then
     local base="$EXECDIR"
     cd "$EXECDIR"/.. || exit 1
-    git reset --hard "origin/v2018.2.x"
+    git reset --hard "origin/v2019.1.x"
     cd "$EXECDIR" || exit 1
     rm "$EXECDIR/.patched"
   else
@@ -61,7 +61,7 @@ clean_patches(){
 update_patches() {
   local base="$EXECDIR"
   cd "$EXECDIR"/.. || exit 1
-  git format-patch "origin/v2018.2.x" -o "$EXECDIR/gluon_patches"
+  git format-patch "origin/v2019.1.x" -o "$EXECDIR/gluon_patches"
   cd "$base" || exit 1
 }
 
@@ -192,8 +192,8 @@ get_target_list(){
 }
 
 
-if ! git -C "$EXECDIR"/.. rev-parse --abbrev-ref HEAD | grep -q "v2018.2.x"; then
-  echo "no gluon repo found or wrong branch (should be v2018.2.x). Please clone this git repository into the gluon git repository"
+if ! git -C "$EXECDIR"/.. rev-parse --abbrev-ref HEAD | grep -q "v2019.1.x"; then
+  echo "no gluon repo found or wrong branch (should be v2019.1.x). Please clone this git repository into the gluon git repository"
   exit 1
 fi
 
