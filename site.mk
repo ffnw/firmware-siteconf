@@ -10,7 +10,6 @@ GLUON_FEATURES := \
 	ebtables-filter-ra-dhcp \
 	ebtables-limit-arp \
 	ebtables-source-filter \
-	radvd \
 	radv-filterd \
 	lock-password \
 	web-private-wifi \
