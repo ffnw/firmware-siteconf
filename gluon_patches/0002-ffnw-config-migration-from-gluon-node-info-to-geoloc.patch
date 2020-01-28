@@ -1,11 +1,11 @@
-From a41530ada3b1f14d36bfce80ff7f05fb67d4ee28 Mon Sep 17 00:00:00 2001
+From a0dace39f87ef109ebb7c53f442cc7c1f25563bb Mon Sep 17 00:00:00 2001
 From: Jan-Tarek Butt <tarek@ring0.de>
 Date: Sun, 25 Feb 2018 08:42:42 +0100
-Subject: [PATCH 3/5] ffnw config migration from gluon-node-info to geolocator
+Subject: [PATCH 2/6] ffnw config migration from gluon-node-info to geolocator
 
 Signed-off-by: Jan-Tarek Butt <tarek@ring0.de>
 ---
- .../luasrc/lib/gluon/upgrade/900-geloc-conf-migration   | 17 +++++++++++++++++
+ .../lib/gluon/upgrade/900-geloc-conf-migration  | 17 +++++++++++++++++
  1 file changed, 17 insertions(+)
  create mode 100755 package/gluon-geolocator/luasrc/lib/gluon/upgrade/900-geloc-conf-migration
 
@@ -33,5 +33,5 @@ index 00000000..6bfb1059
 +  uci:save('geolocator')
 +end
 -- 
-2.11.0
+2.20.1
 

@@ -20,8 +20,9 @@ help_print(){
   echo "    BROKEN              y or n (default n)"
   echo "  build <command>       <command> can be replaced by targets"
   echo "    target_list         build all gluon targets"
-  echo "    all                 build all gluon targes for each VPN"
+  echo "    all                 build all gluon targets for each VPN"
   echo "    (optional) add \"fast\" as a parameter to build on multicore"
+#  echo "    (optional) add \"silent\" as a parameter to avoid loads of output"
   echo "  create_manifest       create manifest"
   echo
 }
@@ -49,7 +50,7 @@ clean_patches(){
   if [ -f "$EXECDIR/.patched" ]; then
     local base="$EXECDIR"
     cd "$EXECDIR"/.. || exit 1
-    git reset --hard "origin/v2018.2.x"
+    git reset --hard "origin/v2019.1.x"
     cd "$EXECDIR" || exit 1
     rm "$EXECDIR/.patched"
   else
@@ -60,7 +61,7 @@ clean_patches(){
 update_patches() {
   local base="$EXECDIR"
   cd "$EXECDIR"/.. || exit 1
-  git format-patch "origin/v2018.2.x" -o "$EXECDIR/gluon_patches"
+  git format-patch "origin/v2019.1.x" -o "$EXECDIR/gluon_patches"
   cd "$base" || exit 1
 }
 
@@ -140,11 +141,19 @@ prepare_sitemk(){
 
 gluon_build(){
   if [ "$2" == "fast" ] && [ -a "/proc/cpuinfo" ]; then
-    if [ -a "$EXECDIR/.BROKEN" ]; then
-      make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
-    else
-      make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
-    fi
+      if [ "$3" == "silent" ]; then
+        if [ -a "$EXECDIR/.BROKEN" ]; then
+          make --silent -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
+        else
+          make --silent -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
+        fi
+      else
+        if [ -a "$EXECDIR/.BROKEN" ]; then
+          make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
+        else
+          make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
+        fi
+      fi
   else
     if [ -a "$EXECDIR/.BROKEN" ]; then
       make -C "$EXECDIR/.." BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
@@ -169,12 +178,13 @@ get_target_list(){
   while read -r line; do
     if [[ $line == *GluonTarget* ]]; then
       # extract arcitecture parameter value
-      local targ="$(echo "$line" | sed -e 's/^.*GluonTarget,//' -e 's/)).*//' -r -e 's/([^,]+,[^,]*).*/\1/' -e 's/[,]/-/')"
+      local targ
+      targ="$(echo "$line" | sed -e 's/^.*GluonTarget,//' -e 's/)).*//' -r -e 's/([^,]+,[^,]*).*/\1/' -e 's/[,]/-/')"
       if [ -n "$targ" ]; then
         TARGET_LIST[${#TARGET_LIST[@]}]="$targ"
       fi
     else
-      if [[ $line == *BROKEN* ]] && ! [ -a "$EXECDIR/.BROKEN" ]; then
+      if [[ $line == *BROKEN* ]] && ! [[ $line == *GLUON_WLAN_MESH_11s* ]] && ! [ -a "$EXECDIR/.BROKEN" ]; then
         break
       fi
     fi
@@ -182,8 +192,8 @@ get_target_list(){
 }
 
 
-if ! git -C "$EXECDIR"/.. rev-parse --abbrev-ref HEAD | grep -q "v2018.2.x"; then
-  echo "no gluon repo found or wrong branch (should be v2018.2.x). Please clone this git repository into the gluon git repository"
+if ! git -C "$EXECDIR"/.. rev-parse --abbrev-ref HEAD | grep -q "v2019.1.x"; then
+  echo "no gluon repo found or wrong branch (should be v2019.1.x). Please clone this git repository into the gluon git repository"
   exit 1
 fi
 
@@ -259,7 +269,11 @@ case "$1" in
       "target_list")
         for targ in "${TARGET_LIST[@]}"; do
           if [ "$3" == "fast" ]; then
-            gluon_build "$targ" "fast"
+            if [ "$4" == "silent" ]; then
+              gluon_build "$targ" "fast" "silent"
+            else
+              gluon_build "$targ" "fast"
+            fi
           else
             gluon_build "$targ"
           fi
@@ -267,10 +281,10 @@ case "$1" in
       ;;
       "all")
         "$EXECDIR/$0" prepare fastd
-        "$EXECDIR/$0" build target_list "fast"
+        "$EXECDIR/$0" build target_list "fast" "silent"
         "$EXECDIR/$0" create_manifest
         "$EXECDIR/$0" prepare l2tp
-        "$EXECDIR/$0" build target_list "fast"
+        "$EXECDIR/$0" build target_list "fast" "silent"
         "$EXECDIR/$0" create_manifest
       ;;
       *)
@@ -286,7 +300,7 @@ case "$1" in
           fi
         done
         if [ "$err" == "yes" ]; then
-          echo "Please use targes from the following list as parameter:"
+          echo "Please use targets from the following list as parameter:"
           for targ in "${TARGET_LIST[@]}"; do
             echo "$targ"
           done

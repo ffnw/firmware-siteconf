@@ -5,9 +5,9 @@ https://wiki.ffnw.de/Entwicklung/Als\_Entwickler\_t%C3%A4tig\_werden
 
 ## Firmware Kompilieren
 
-### Voraussetzungen (Stand Gluon v2018.2.x):
+### Voraussetzungen (Stand Gluon v2019.1.x):
 
-Muss auf dem Rechner installiert sein. Hier Beispiel Debian:
+Folgende Pakete müssen auf dem Rechner installiert sein. Hier Beispiel Debian:
 
     apt-get install git subversion python build-essential gawk unzip libncurses-dev libz-dev libssl-dev
 
@@ -17,7 +17,7 @@ Auf dieser Seite wird beschrieben, wie man die Gluon Firmware für das Freifunk 
 
 *Wichtig* Je nach Entwicklungsstand muss die Branch Version angepasst werden.
 
-    git clone https://github.com/freifunk-gluon/gluon.git ./freifunk_build -b v2018.2.x && cd ./freifunk_build
+    git clone https://github.com/freifunk-gluon/gluon.git -b v2019.1.x && cd gluon
     git clone https://git.ffnw.de/ffnw-firmware/siteconf.git site && cd site
     ./buildscript.sh patch
     ./buildscript.sh prepare GLUON_BRANCH <autoupdater-branch, also zB "stable" oder "testing">
