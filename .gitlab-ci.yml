@@ -45,7 +45,7 @@ prepare_gluon:
       - .patched
     expire_in: 1 day
   before_script:
-    - ( cd ..; [ $(git status | grep -c am) -eq 0 ] || git am --abort; )
+    - ( cd ..; [ $(git status | grep -c 'git am') -eq 0 ] || git am --abort; )
   script:
     - touch .patched
     - ./buildscript.sh clean_patches
