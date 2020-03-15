@@ -56,8 +56,6 @@ endif
 
 GLUON_MULTIDOMAIN=1
 
-GLUON_WLAN_MESH := 11s
-
 # Allow overriding from the command line
 %B
 %C
