@@ -15,7 +15,7 @@ help_print(){
   echo "  prepare <command>"
   echo "    GLUON_BRANCH <str>  Set ENV variable"
   echo "    GLUON_RELEASE <str> Set ENV variable"
-  echo "    fastd               Prepare site repo for fastd build"
+#  echo "    fastd               Prepare site repo for fastd build"
   echo "    l2tp                prepare site repo for l2tp build"
   echo "    BROKEN              y or n (default n)"
   echo "  build <command>       <command> can be replaced by targets"
@@ -209,16 +209,16 @@ case "$1" in
   ;;
   "prepare")
     case "$2" in
-      "fastd")
-        prepare_precondition
-        if ! [ -f "$EXECDIR/.patched" ]; then
-          patch_gluon
-        fi
-        prepare_siteconf "$2"
-        prepare_sitemk "$2"
-        make -C "$EXECDIR"/.. update
-        echo "$2" > "$EXECDIR/.prepare"
-      ;;
+#      "fastd")
+#        prepare_precondition
+#        if ! [ -f "$EXECDIR/.patched" ]; then
+#          patch_gluon
+#        fi
+#        prepare_siteconf "$2"
+#        prepare_sitemk "$2"
+#        make -C "$EXECDIR"/.. update
+#        echo "$2" > "$EXECDIR/.prepare"
+#      ;;
       "l2tp")
         prepare_precondition
         if ! [ -f "$EXECDIR/.patched" ]; then
@@ -280,9 +280,9 @@ case "$1" in
         done
       ;;
       "all")
-        "$EXECDIR/$0" prepare fastd
-        "$EXECDIR/$0" build target_list "fast" "silent"
-        "$EXECDIR/$0" create_manifest
+#        "$EXECDIR/$0" prepare fastd
+#        "$EXECDIR/$0" build target_list "fast" "silent"
+#        "$EXECDIR/$0" create_manifest
         "$EXECDIR/$0" prepare l2tp
         "$EXECDIR/$0" build target_list "fast" "silent"
         "$EXECDIR/$0" create_manifest
