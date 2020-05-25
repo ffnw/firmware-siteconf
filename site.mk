@@ -22,8 +22,7 @@ GLUON_SITE_PACKAGES := \
 	respondd-module-airtime \
 	haveged \
 	ffnw-banner \
-	iwinfo \
-	ffho-autoupdater-wifi-fallback
+	iwinfo
 
 USB_BASIC := \
 	kmod-usb-core \
