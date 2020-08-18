@@ -8,7 +8,6 @@ GLUON_FEATURES := \
 %A
 	ebtables-filter-multicast \
 	ebtables-filter-ra-dhcp \
-	ebtables-limit-arp \
 	ebtables-source-filter \
 	radv-filterd \
 	lock-password \
@@ -18,11 +17,15 @@ GLUON_FEATURES := \
 	config-mode-geo-location-osm \
 	hoodselector
 
+GLUON_FEATURES_standard := \
+	wireless-encryption-wpa3
+
 GLUON_SITE_PACKAGES := \
-	respondd-module-airtime \
-	haveged \
 	ffnw-banner \
 	iwinfo
+
+GLUON_SITE_PACKAGES_standard := \
+	respondd-module-airtime
 
 USB_BASIC := \
 	kmod-usb-core \
