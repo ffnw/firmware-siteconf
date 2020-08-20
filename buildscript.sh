@@ -1,6 +1,6 @@
 #!/bin/bash
 
-GLUON_BRANCH="v2020.2.x"
+GLUON_REMOTE_BRANCH="v2020.2.x"
 
 # get location of executed file.
 EXECDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -52,7 +52,7 @@ clean_patches(){
   if [ -f "$EXECDIR/.patched" ]; then
     local base="$EXECDIR"
     cd "$EXECDIR"/.. || exit 1
-    git reset --hard "origin/"
+    git reset --hard "origin/$GLUON_REMOTE_BRANCH"
     cd "$EXECDIR" || exit 1
     rm "$EXECDIR/.patched"
   else
@@ -63,7 +63,7 @@ clean_patches(){
 update_patches() {
   local base="$EXECDIR"
   cd "$EXECDIR"/.. || exit 1
-  git format-patch "origin/$GLUON_BRANCH" -o "$EXECDIR/gluon_patches"
+  git format-patch "origin/$GLUON_REMOTE_BRANCH" -o "$EXECDIR/gluon_patches"
   cd "$base" || exit 1
 }
 
@@ -195,7 +195,7 @@ get_target_list(){
 
 
 if ! git -C "$EXECDIR"/.. rev-parse --abbrev-ref HEAD | grep -q "$GLUON_BRANCH"; then
-  echo "no gluon repo found or wrong branch (should be $GLUON_BRANCH). Please clone this git repository into the gluon git repository"
+  echo "no gluon repo found or wrong branch (should be $GLUON_REMOTE_BRANCH). Please clone this git repository into the gluon git repository"
   exit 1
 fi
 
