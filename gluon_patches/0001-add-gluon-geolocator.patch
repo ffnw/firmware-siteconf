@@ -1,7 +1,7 @@
-From 9f696624c92d853ef2717d788f170dd221e6bc84 Mon Sep 17 00:00:00 2001
+From 28944a798cdd929f3b87f18112fcf7b3c2c4c442 Mon Sep 17 00:00:00 2001
 From: runner01 <runner01@ffnw.de>
 Date: Fri, 8 Feb 2019 04:43:50 +0100
-Subject: [PATCH 1/6] add gluon-geolocator
+Subject: [PATCH 1/4] add gluon-geolocator
 
 ---
  package/gluon-geolocator/Makefile             |  14 ++
