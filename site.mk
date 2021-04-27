@@ -22,7 +22,6 @@ GLUON_FEATURES_standard := \
 
 GLUON_SITE_PACKAGES := \
 	ffnw-banner \
-	ffnw-vxlan-switch \
 	iwinfo
 
 GLUON_SITE_PACKAGES_standard := \
