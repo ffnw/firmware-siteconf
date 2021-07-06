@@ -20,11 +20,14 @@ help_print(){
 #  echo "    fastd               Prepare site repo for fastd build"
   echo "    l2tp                prepare site repo for l2tp build"
   echo "    BROKEN              y or n (default n)"
-  echo "  build <command>       <command> can be replaced by targets"
+  echo "  build <target>        targets provided by gluon"
   echo "    target_list         build all gluon targets"
   echo "    all                 build all gluon targets for each VPN"
   echo "    (optional) add \"fast\" as a parameter to build on multicore"
 #  echo "    (optional) add \"silent\" as a parameter to avoid loads of output"
+  echo "  clean <target>        targets provided by gluon"
+  echo "    all                 clean all targets"
+  echo "    (optional) add \"fast\" as a parameter to clean on multicore"
   echo "  create_manifest       create manifest"
   echo
 }
@@ -142,28 +145,67 @@ prepare_sitemk(){
 }
 
 gluon_build(){
+  error_build=0
   if [ "$2" == "fast" ] && [ -a "/proc/cpuinfo" ]; then
       if [ "$3" == "silent" ]; then
         if [ -a "$EXECDIR/.BROKEN" ]; then
-          make --silent -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
+          if ! make --silent -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")";
+          then
+            error_build=1
+          fi
         else
-          make --silent -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
+          if ! make --silent -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")";
+          then
+            error_build=1
+          fi
         fi
       else
         if [ -a "$EXECDIR/.BROKEN" ]; then
-          make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
+          if ! make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")";
+          then
+            error_build=1
+          fi
         else
-          make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
+          if ! make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")";
+          then
+            error_build=1
+          fi
         fi
       fi
   else
     if [ -a "$EXECDIR/.BROKEN" ]; then
-      make -C "$EXECDIR/.." BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
+      if ! make -C "$EXECDIR/.." BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")";
+      then
+        error_build=1
+      fi
     else
-      make -C "$EXECDIR/.." GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")"
+      if ! make -C "$EXECDIR/.." GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")";
+      then
+        error_build=1
+      fi
+    fi
+  fi
+  if [ $error_build -eq 1 ]; then
+    exit 1
+  fi
+}
+
+gluon_clean(){
+  if [ "$2" == "fast" ] && [ -a "/proc/cpuinfo" ]; then
+    if [ -a "$EXECDIR/.BROKEN" ]; then
+      make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")" clean
+    else
+      make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")" clean
+    fi
+  else
+    if [ -a "$EXECDIR/.BROKEN" ]; then
+      make -C "$EXECDIR/.." BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")" clean
+    else
+      make -C "$EXECDIR/.." GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")" clean
     fi
   fi
 }
+
 
 prepare_precondition(){
   if ! [ -s "$EXECDIR/.GLUON_BRANCH" ]; then
@@ -310,6 +352,44 @@ case "$1" in
       ;;
     esac
   ;;
+  "clean")
+    if ! [ -r "$EXECDIR"/.prepare ]; then
+      echo "please run the prepare mode first"
+      exit 1
+    fi
+    get_target_list
+    case "$2" in
+      "all")
+        for targ in "${TARGET_LIST[@]}"; do
+          if [ "$3" == "fast" ]; then
+              gluon_clean "$targ" "fast"
+          else
+            gluon_clean "$targ"
+          fi
+        done
+      ;;
+      *)
+        err="yes"
+        for targ in "${TARGET_LIST[@]}"; do
+          if [ "$targ" == "$2" ]; then
+            err="no"
+            if [ "$3" == "fast" ]; then
+              gluon_clean "$targ" "fast"
+            else
+              gluon_clean "$targ"
+            fi
+          fi
+        done
+        if [ "$err" == "yes" ]; then
+          echo "Please use targets from the following list as parameter:"
+          for targ in "${TARGET_LIST[@]}"; do
+            echo "$targ"
+          done
+        fi
+      ;;
+    esac
+  ;;
+
   "create_manifest")
     if ! [ -r "$EXECDIR"/.prepare ]; then
       echo "please run the prepare mode first"
