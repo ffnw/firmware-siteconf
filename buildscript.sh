@@ -1,6 +1,6 @@
 #!/bin/bash
 
-GLUON_REMOTE_BRANCH="v2020.2.x"
+GLUON_REMOTE_BRANCH="v2021.1.x"
 
 # get location of executed file.
 EXECDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
