@@ -100,16 +100,22 @@ prepare_siteconf(){
     echo "Placeholder %B not found"
   fi
   if grep -q "%C" < "$EXECDIR"/site.conf; then
-    sed -i "/^%C$/c\\\\'http://autoupdate-lede.ffnw/v1/$vpn/testing\\'," "$EXECDIR"/site.conf
-    echo "Set autoupdater testing URL ..."
+    sed -i "/^%C$/c\\\\'http://autoupdate-lede.ffnw/v1/$vpn/rc\\'," "$EXECDIR"/site.conf
+    echo "Set autoupdater rc URL ..."
   else
     echo "Placeholder %C not found"
   fi
   if grep -q "%D" < "$EXECDIR"/site.conf; then
-    sed -i "/^%D$/c\\\\'http://autoupdate-lede.ffnw/v1/$vpn/nightly/master\\'," "$EXECDIR"/site.conf
-    echo "Set autoupdater nightly_master URL ..."
+    sed -i "/^%D$/c\\\\'http://autoupdate-lede.ffnw/v1/$vpn/testing\\'," "$EXECDIR"/site.conf
+    echo "Set autoupdater testing URL ..."
   else
     echo "Placeholder %D not found"
+  fi
+  if grep -q "%E" < "$EXECDIR"/site.conf; then
+    sed -i "/^%E$/c\\\\'http://autoupdate-lede.ffnw/v1/$vpn/nightly/master\\'," "$EXECDIR"/site.conf
+    echo "Set autoupdater nightly_master URL ..."
+  else
+    echo "Placeholder %E not found"
   fi
 }
 
@@ -149,24 +155,24 @@ gluon_build(){
   if [ "$2" == "fast" ] && [ -a "/proc/cpuinfo" ]; then
       if [ "$3" == "silent" ]; then
         if [ -a "$EXECDIR/.BROKEN" ]; then
-          if ! make --silent -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")";
+          if ! make --silent -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) BROKEN=1 GLUON_TARGET="$1" GLUON_AUTOUPDATER_ENABLED=1 GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")";
           then
             error_build=1
           fi
         else
-          if ! make --silent -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")";
+          if ! make --silent -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_TARGET="$1" GLUON_AUTOUPDATER_ENABLED=1 GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")";
           then
             error_build=1
           fi
         fi
       else
         if [ -a "$EXECDIR/.BROKEN" ]; then
-          if ! make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")";
+          if ! make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) BROKEN=1 GLUON_TARGET="$1" GLUON_AUTOUPDATER_ENABLED=1 GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")";
           then
             error_build=1
           fi
         else
-          if ! make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")";
+          if ! make -C "$EXECDIR/.." -j $(($(grep -c processor /proc/cpuinfo)*2)) GLUON_TARGET="$1" GLUON_AUTOUPDATER_ENABLED=1 GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")";
           then
             error_build=1
           fi
@@ -174,12 +180,12 @@ gluon_build(){
       fi
   else
     if [ -a "$EXECDIR/.BROKEN" ]; then
-      if ! make -C "$EXECDIR/.." BROKEN=1 GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")";
+      if ! make -C "$EXECDIR/.." BROKEN=1 GLUON_TARGET="$1" GLUON_AUTOUPDATER_ENABLED=1 GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")";
       then
         error_build=1
       fi
     else
-      if ! make -C "$EXECDIR/.." GLUON_TARGET="$1" GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")";
+      if ! make -C "$EXECDIR/.." GLUON_TARGET="$1" GLUON_AUTOUPDATER_ENABLED=1 GLUON_IMAGEDIR="output/images/$(cat "$EXECDIR/.prepare")/$(cat "$EXECDIR/.GLUON_RELEASE")" GLUON_PACKAGEDIR="output/packages/$(cat "$EXECDIR/.prepare")";
       then
         error_build=1
       fi
