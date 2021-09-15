@@ -2,4 +2,4 @@ GLUON_SITE_FEEDS='ffnw'
 
 PACKAGES_FFNW_REPO=https://git.ffnw.de/ffnw-firmware/packages.git
 PACKAGES_FFNW_BRANCH=master
-PACKAGES_FFNW_COMMIT=e2aae1dfdd82c7e7b11d2664fe246c101dad5e6f
+PACKAGES_FFNW_COMMIT=44d6aeca186e5ff92e8372f0a7e774d5ca443d3e
